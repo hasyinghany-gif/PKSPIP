@@ -345,7 +345,7 @@
             <td class="px-3">${p.kode_parameter}</td>
             <td class="px-3">${p.uraian_parameter}</td>
             <td class="px-3 text-center"><span class="badge rounded-pill ${done?'text-bg-success':'text-bg-warning'}">${done?'Selesai':'Belum Diisi'}</span></td>
-            <td class="px-3 text-center"><button data-param-code="${p.kode_parameter}" class="btn btn-primary btn-sm open-modal-btn">${done?'Edit':'Isi Penilaian'}</button></td>
+            <td class="px-3 text-center"><button data-param-code="${p.kode_parameter}" type="button" data-action="open-modal" class="btn btn-primary btn-sm open-modal-btn">${done?'Edit':'Isi Penilaian'}</button></td>
             <td class="px-3 text-center">${simpulan?`<span class="badge text-bg-${this.gradeBadgeClass(simpulan)}">${simpulan}</span>`:'<span class="text-muted">-</span>'}</td>`;
           tbody.appendChild(tr);
         });
@@ -376,8 +376,14 @@
           this.listenForDataChanges();
         });
 
-        document.getElementById('assessment-table-body').addEventListener('click', async (e)=>{
-          const btn=e.target.closest('.open-modal-btn'); if(btn) await this.openModal(btn.dataset.paramCode);
+        // Delegasi event global agar listener tidak hilang saat tabel di-render ulang
+        document.addEventListener('click', async (e)=>{
+          const btn = e.target.closest('[data-action="open-modal"]');
+          if(!btn) return;
+          e.preventDefault();
+          try { await this.openModal(btn.getAttribute('data-param-code')); }
+          catch(err){ console.error('openModal failed', err); }
+        }); if(btn) await this.openModal(btn.dataset.paramCode);
         });
 
         document.getElementById('assessment-form').addEventListener('submit', async (e)=>{
