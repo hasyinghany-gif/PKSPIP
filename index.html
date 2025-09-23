@@ -21,6 +21,7 @@
     .sticky-toolbar { position: sticky; top: 0; z-index: 1030; }
     .criteria-box { max-height: 180px; overflow-y: auto; }
     .form-hint { font-size:.85rem; color:#6c757d; }
+    .list-file .btn { line-height: 1; }
   </style>
 </head>
 <body>
@@ -56,7 +57,7 @@
         <span class="visually-hidden">Loading...</span>
       </div>
       <p class="mt-2 text-muted">Menghubungkan ke database...</p>
-      <p id="loader-tip" class="small text-muted">Pastikan Anonymous Sign-in aktif & aturan Firestore sesuai.</p>
+      <p id="loader-tip" class="small text-muted">Pastikan Anonymous Sign-in aktif & aturan Firestore/Storage sesuai.</p>
     </div>
 
     <!-- Main -->
@@ -136,7 +137,7 @@
                 <div class="invalid-feedback">Mohon isi uraian AoI.</div>
               </div>
 
-              <!-- === FIELD KHUSUS SESTAMA (muncul hanya saat Unor=Sestama) === -->
+              <!-- === FIELD KHUSUS SESTAMA (editable saat Unor=Sestama) === -->
               <hr class="my-4">
               <div id="sestama-fields" class="d-none">
                 <p class="form-hint mb-2"><i class="bi bi-info-circle"></i> Bidang berikut khusus untuk <strong>Sestama</strong>.</p>
@@ -152,7 +153,6 @@
                       <option value="E">E</option>
                     </select>
                   </div>
-                  <div class="col-md-6"></div>
                   <div class="col-12">
                     <label for="hasil-pengujian-sestama" class="form-label">Uraian Kondisi Detail Hasil Pengujian (Sestama)</label>
                     <textarea id="hasil-pengujian-sestama" rows="3" class="form-control" placeholder="Isikan uraian milik Sestama untuk dijadikan rujukan Unor lain..."></textarea>
@@ -160,7 +160,7 @@
                 </div>
               </div>
 
-              <!-- === RUJUKAN SESTAMA (read-only, saat Unor ≠ Sestama) === -->
+              <!-- === RUJUKAN SESTAMA (read-only saat Unor ≠ Sestama) === -->
               <div id="sestama-reference" class="mt-4 d-none">
                 <div class="card border-0 shadow-sm">
                   <div class="card-body">
@@ -177,7 +177,93 @@
                   </div>
                 </div>
               </div>
-              <!-- === /END KHUSUS SESTAMA === -->
+
+              <!-- === BUKTI DUKUNG (folder per grade A–E) === -->
+              <hr class="my-4">
+              <div class="mt-2">
+                <h3 class="h6 fw-semibold mb-2">Bukti Dukung</h3>
+                <p class="form-hint mb-3">
+                  Unggah dokumen pendukung per grade. Klik dokumen untuk membuka di tab baru. Kamu juga bisa menghapus bila salah unggah.
+                </p>
+
+                <!-- Tabs A–E -->
+                <ul class="nav nav-pills mb-3" id="bd-tab" role="tablist">
+                  <li class="nav-item" role="presentation"><button class="nav-link active" id="tab-A" data-bs-toggle="pill" data-bs-target="#bd-A" type="button" role="tab" aria-controls="bd-A" aria-selected="true">Grade A</button></li>
+                  <li class="nav-item" role="presentation"><button class="nav-link" id="tab-B" data-bs-toggle="pill" data-bs-target="#bd-B" type="button" role="tab" aria-controls="bd-B" aria-selected="false">Grade B</button></li>
+                  <li class="nav-item" role="presentation"><button class="nav-link" id="tab-C" data-bs-toggle="pill" data-bs-target="#bd-C" type="button" role="tab" aria-controls="bd-C" aria-selected="false">Grade C</button></li>
+                  <li class="nav-item" role="presentation"><button class="nav-link" id="tab-D" data-bs-toggle="pill" data-bs-target="#bd-D" type="button" role="tab" aria-controls="bd-D" aria-selected="false">Grade D</button></li>
+                  <li class="nav-item" role="presentation"><button class="nav-link" id="tab-E" data-bs-toggle="pill" data-bs-target="#bd-E" type="button" role="tab" aria-controls="bd-E" aria-selected="false">Grade E</button></li>
+                </ul>
+
+                <div class="tab-content border rounded p-3 bg-light" id="bd-tabContent">
+                  <!-- Template konten tiap tab -->
+                  <div class="tab-pane fade show active" id="bd-A" role="tabpanel" aria-labelledby="tab-A">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                      <label class="btn btn-sm btn-primary mb-0">
+                        <i class="bi bi-upload me-1"></i> Unggah Dokumen
+                        <input type="file" id="upload-A" class="d-none" multiple />
+                      </label>
+                      <button type="button" class="btn btn-sm btn-outline-secondary" id="refresh-A">
+                        <i class="bi bi-arrow-clockwise me-1"></i> Segarkan
+                      </button>
+                    </div>
+                    <div id="list-A" class="list-group list-file small"></div>
+                  </div>
+
+                  <div class="tab-pane fade" id="bd-B" role="tabpanel" aria-labelledby="tab-B">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                      <label class="btn btn-sm btn-primary mb-0">
+                        <i class="bi bi-upload me-1"></i> Unggah Dokumen
+                        <input type="file" id="upload-B" class="d-none" multiple />
+                      </label>
+                      <button type="button" class="btn btn-sm btn-outline-secondary" id="refresh-B">
+                        <i class="bi bi-arrow-clockwise me-1"></i> Segarkan
+                      </button>
+                    </div>
+                    <div id="list-B" class="list-group list-file small"></div>
+                  </div>
+
+                  <div class="tab-pane fade" id="bd-C" role="tabpanel" aria-labelledby="tab-C">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                      <label class="btn btn-sm btn-primary mb-0">
+                        <i class="bi bi-upload me-1"></i> Unggah Dokumen
+                        <input type="file" id="upload-C" class="d-none" multiple />
+                      </label>
+                      <button type="button" class="btn btn-sm btn-outline-secondary" id="refresh-C">
+                        <i class="bi bi-arrow-clockwise me-1"></i> Segarkan
+                      </button>
+                    </div>
+                    <div id="list-C" class="list-group list-file small"></div>
+                  </div>
+
+                  <div class="tab-pane fade" id="bd-D" role="tabpanel" aria-labelledby="tab-D">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                      <label class="btn btn-sm btn-primary mb-0">
+                        <i class="bi bi-upload me-1"></i> Unggah Dokumen
+                        <input type="file" id="upload-D" class="d-none" multiple />
+                      </label>
+                      <button type="button" class="btn btn-sm btn-outline-secondary" id="refresh-D">
+                        <i class="bi bi-arrow-clockwise me-1"></i> Segarkan
+                      </button>
+                    </div>
+                    <div id="list-D" class="list-group list-file small"></div>
+                  </div>
+
+                  <div class="tab-pane fade" id="bd-E" role="tabpanel" aria-labelledby="tab-E">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                      <label class="btn btn-sm btn-primary mb-0">
+                        <i class="bi bi-upload me-1"></i> Unggah Dokumen
+                        <input type="file" id="upload-E" class="d-none" multiple />
+                      </label>
+                      <button type="button" class="btn btn-sm btn-outline-secondary" id="refresh-E">
+                        <i class="bi bi-arrow-clockwise me-1"></i> Segarkan
+                      </button>
+                    </div>
+                    <div id="list-E" class="list-group list-file small"></div>
+                  </div>
+                </div>
+              </div>
+              <!-- === /BUKTI DUKUNG === -->
 
             </form>
           </div>
@@ -215,8 +301,11 @@
     import {
       getFirestore, doc, onSnapshot, setDoc, getDoc, enableIndexedDbPersistence
     } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    import {
+      getStorage, ref as sRef, uploadBytes, getDownloadURL, listAll, deleteObject
+    } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
 
-    // Data (tooltips per grade bisa disesuaikan, disingkat di sini)
+    // Data contoh (tooltips per grade bisa disesuaikan)
     const SATKER_LIST = ['Inspektorat', 'Pusdatin', 'Sestama', 'D1', 'D3', 'Puslat', 'D4'];
     const ASSESSMENT_STRUCTURE = [
       {
@@ -226,11 +315,11 @@
         uraian_parameter: "K/L/D menegakkan integritas dan nilai etika dalam melaksanakan tugas dan fungsi organisasi",
         kode_parameter: "1.1.1",
         grades: [
-          { grade: 'A', kriteria: 'Penegakan integritas dan nilai etika telah diperbaiki secara berkelanjutan sehingga tercipta suasana kerja organisasi yang kondusif yang dapat mendorong kinerja para pegawai secara optimal.', tooltip: '- Setiap individu dalam organisasi dapat mendorong penerapan nilai-nilai organisasi - Setiap individu mendukung pencapaian kinerja organisasi - Keberhasilan pencapaian kinerja organisasi dapat dihubungkan dengan integritas dan perilaku individu serta mempengaruhi remunerasi individu' },
-          { grade: 'B', kriteria: 'Kebijakan dan implementasi organisasi telah dievaluasi untuk meningkatkan integritas dan nilai etika para pegawai.', tooltip: 'Kebijakan dan implementasi telah dievaluasi dengan ketentuan: - Berkala - Terdokumentasi - Dilakukan untuk menangani residual risk - Hasil evaluasi telah ditindak lanjuti  - Perbaikan telah menghasilkan kinerja yang lebih baik' },
-          { grade: 'C', kriteria: 'Penegakan integritas dan nilai etika telah dilaksanakan oleh pegawai dalam pelaksanaan tugas dan fungsinya dalam organisasi.', tooltip: '- Terdapat wujud keteladanan dari pimpinan atas nilai organisasi  - Terdapat praktik pembangunan integritas dan nilai etika - Terdapat praktik penegakan nilai etika  - Terdapat bukti penegakan disiplin - Terdapat pemberian punishment bagi pegawai yang melanggar dan reward bagi pegawai yang menegakan integritas dan nilai etika  - Proses tersebut di atas dilaksanakan melalui struktur dan mekanisme yang ditetapkan' },
-          { grade: 'D', kriteria: 'Kebijakan penegakan integritas dan nilai etika organisasi telah dipahami oleh seluruh pegawai.', tooltip: 'Kebijakan telah dikomunikasikan dan dipahami oleh: - Pimpinan (struktural) - Penanggungjawab penegakan integritas dan nilai etika - Pegawai.' },
-          { grade: 'E', kriteria: 'Terdapat kebijakan penegakan integritas dan nilai etika untuk seluruh pegawai dalam organisasi.', tooltip: 'Kebijakan telah mengatur: - Keteladanan pimpinan - Upaya pembangunan integritas - Nilai etika  - Penegakan disiplin - Pemberian reward and punishment  - Penetapan struktur dan mekanisme penanganan penegakan integritas dan nilai etika' }
+          { grade: 'A', kriteria: 'Penegakan integritas dan nilai etika telah diperbaiki secara berkelanjutan sehingga tercipta suasana kerja organisasi yang kondusif yang dapat mendorong kinerja para pegawai secara optimal.', tooltip: 'Lampiran 1.1.1-A' },
+          { grade: 'B', kriteria: 'Kebijakan dan implementasi organisasi telah dievaluasi untuk meningkatkan integritas dan nilai etika para pegawai.', tooltip: 'Lampiran 1.1.1-B' },
+          { grade: 'C', kriteria: 'Penegakan integritas dan nilai etika telah dilaksanakan oleh pegawai dalam pelaksanaan tugas dan fungsinya dalam organisasi.', tooltip: 'Lampiran 1.1.1-C' },
+          { grade: 'D', kriteria: 'Kebijakan penegakan integritas dan nilai etika organisasi telah dipahami oleh seluruh pegawai.', tooltip: 'Lampiran 1.1.1-D' },
+          { grade: 'E', kriteria: 'Terdapat kebijakan penegakan integritas dan nilai etika untuk seluruh pegawai dalam organisasi.', tooltip: 'Lampiran 1.1.1-E' }
         ]
       },
       {
@@ -240,11 +329,11 @@
         uraian_parameter: "Tugas dan jabatan dalam organisasi dilaksanakan dan diisi oleh SDM yang kompeten.",
         kode_parameter: "1.2.1",
         grades: [
-          { grade: 'A', kriteria: 'Pengelolaan kompetensi SDM telah diperbaiki secara berkelanjutan dan secara optimal mampu mendukung pencapaian tujuan organisasi.', tooltip: 'Lampiran 1.2.1-A · Rencana pengembangan & bukti peningkatan kinerja.' },
-          { grade: 'B', kriteria: 'Standar kompetensi organisasi dan implementasi/pemanfaatannya telah dievaluasi untuk mengetahui efektivitasnya.', tooltip: 'Lampiran 1.2.1-B · Hasil evaluasi standar kompetensi & rekomendasi.' },
-          { grade: 'C', kriteria: 'Standar kompetensi telah diimplementasikan/dimanfaatkan dalam pengelolaan/pembinaan SDM organisasi.', tooltip: 'Lampiran 1.2.1-C · Peta jabatan vs standar & rekam pelatihan.' },
-          { grade: 'D', kriteria: 'Standar kompetensi telah dikomunikasikan dan dipahami oleh seluruh pegawai organisasi.', tooltip: 'Lampiran 1.2.1-D · Bukti sosialisasi/edaran/portal kompetensi.' },
-          { grade: 'E', kriteria: 'Terdapat standar kompetensi yang jelas untuk seluruh jabatan dan posisi dalam organisasi.', tooltip: 'Lampiran 1.2.1-E · Dokumen standar kompetensi yang disahkan.' }
+          { grade: 'A', kriteria: 'Pengelolaan kompetensi SDM telah diperbaiki secara berkelanjutan dan secara optimal mampu mendukung pencapaian tujuan organisasi.', tooltip: 'Lampiran 1.2.1-A' },
+          { grade: 'B', kriteria: 'Standar kompetensi organisasi dan implementasi/pemanfaatannya telah dievaluasi untuk mengetahui efektivitasnya.', tooltip: 'Lampiran 1.2.1-B' },
+          { grade: 'C', kriteria: 'Standar kompetensi telah diimplementasikan/dimanfaatkan dalam pengelolaan/pembinaan SDM organisasi.', tooltip: 'Lampiran 1.2.1-C' },
+          { grade: 'D', kriteria: 'Standar kompetensi telah dikomunikasikan dan dipahami oleh seluruh pegawai organisasi.', tooltip: 'Lampiran 1.2.1-D' },
+          { grade: 'E', kriteria: 'Terdapat standar kompetensi yang jelas untuk seluruh jabatan dan posisi dalam organisasi.', tooltip: 'Lampiran 1.2.1-E' }
         ]
       },
       {
@@ -254,21 +343,22 @@
         uraian_parameter: "Pimpinan K/L/D menciptakan lingkungan kerja yang kondusif untuk pencapaian tujuan organisasi.",
         kode_parameter: "1.3.1",
         grades: [
-          { grade: 'A', kriteria: 'Penerapan manajemen kinerja, pengelolaan keuangan, manajemen SDM, serta manajemen risiko dapat meningkatkan efektivitas dan efisiensi kinerja seluruh level pimpinan dan pegawai.', tooltip: 'Lampiran 1.3.1-A · Bukti integrasi sistem manajemen & peningkatan kinerja.' },
-          { grade: 'B', kriteria: 'Pimpinan organisasi melaksanakan evaluasi berkala atas kebijakan pengendalian intern dan berupaya mengatasi permasalahan yang berkaitan dengan lingkungan pengendalian yang kondusif.', tooltip: 'Lampiran 1.3.1-B · Laporan evaluasi berkala & tindakan korektif.' },
-          { grade: 'C', kriteria: 'Pimpinan organisasi melaksanakan kebijakan dan didukung dengan SDM yang bekerja sesuai dengan kebijakan yang ditetapkan.', tooltip: 'Lampiran 1.3.1-C · Bukti pelaksanaan kebijakan & kepatuhan unit.' },
-          { grade: 'D', kriteria: 'Pimpinan organisasi terlibat dalam penyusunan dan penetapkan kebijakan yang mendukung penciptaan lingkungan kerja yang kondusif untuk pencapaian tujuan organisasi serta memahami substansi kebijakan pengendalian intern dan mendorong penerapan kebijakan dalam berbagai interaksi kepada jajaran di bawahnya.', tooltip: 'Lampiran 1.3.1-D · Notulen/keputusan pimpinan & komunikasi kebijakan.' },
-          { grade: 'E', kriteria: 'Pimpinan organisasi terlibat dalam penyusunan dan penetapkan kebijakan yang mendukung penciptaan lingkungan kerja yang kondusif untuk pencapaian tujuan organisasi.', tooltip: 'Lampiran 1.3.1-E · Dokumen kebijakan/penetapan yang relevan.' }
+          { grade: 'A', kriteria: 'Penerapan manajemen kinerja, pengelolaan keuangan, manajemen SDM, serta manajemen risiko dapat meningkatkan efektivitas dan efisiensi kinerja seluruh level pimpinan dan pegawai.', tooltip: 'Lampiran 1.3.1-A' },
+          { grade: 'B', kriteria: 'Pimpinan organisasi melaksanakan evaluasi berkala atas kebijakan pengendalian intern dan berupaya mengatasi permasalahan yang berkaitan dengan lingkungan pengendalian yang kondusif.', tooltip: 'Lampiran 1.3.1-B' },
+          { grade: 'C', kriteria: 'Pimpinan organisasi melaksanakan kebijakan dan didukung dengan SDM yang bekerja sesuai dengan kebijakan yang ditetapkan.', tooltip: 'Lampiran 1.3.1-C' },
+          { grade: 'D', kriteria: 'Pimpinan organisasi terlibat dalam penyusunan dan penetapkan kebijakan yang mendukung penciptaan lingkungan kerja yang kondusif untuk pencapaian tujuan organisasi serta memahami substansi kebijakan pengendalian intern dan mendorong penerapan kebijakan dalam berbagai interaksi kepada jajaran di bawahnya.', tooltip: 'Lampiran 1.3.1-D' },
+          { grade: 'E', kriteria: 'Pimpinan organisasi terlibat dalam penyusunan dan penetapkan kebijakan yang mendukung penciptaan lingkungan kerja yang kondusif untuk pencapaian tujuan organisasi.', tooltip: 'Lampiran 1.3.1-E' }
         ]
       }
     ];
 
-
     // Helpers
-    const $ = (sel) => document.querySelector(sel);
+    const $  = (sel) => document.querySelector(sel);
+    const fmtTime = (ts) => new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(ts));
 
     const App = {
       db: null,
+      storage: null,
       auth: null,
       userId: null,
       currentSatker: localStorage.getItem('spip.currentSatker') || SATKER_LIST[0],
@@ -280,6 +370,7 @@
         try {
           const app = initializeApp(firebaseConfig);
           this.db = getFirestore(app);
+          this.storage = getStorage(app);
           enableIndexedDbPersistence(this.db).catch(() => {});
           this.auth = getAuth(app);
           this.handleAuthentication();
@@ -379,7 +470,7 @@
         }, (err) => {
           console.error('onSnapshot error:', err);
           $('#loader').style.display = 'block';
-          $('#loader').innerHTML = `<div class="alert alert-danger" role="alert">Gagal mengambil data. Periksa aturan keamanan Firestore Anda.</div>`;
+          $('#loader').innerHTML = `<div class="alert alert-danger" role="alert">Gagal mengambil data. Periksa aturan keamanan Firestore/Storage Anda.</div>`;
         });
       },
 
@@ -403,6 +494,131 @@
             return;
           }
           await this.saveAssessment();
+        });
+      },
+
+      // ===== Bukti Dukung helpers =====
+      storageFolder(paramCode, grade) {
+        return `bukti_dukung/${this.currentSatker}/${paramCode}/${grade}`;
+      },
+
+      async uploadBukti(paramCode, grade, fileList) {
+        const files = Array.from(fileList || []);
+        if (!files.length) return;
+
+        const now = new Date().toISOString();
+        const metaToAdd = [];
+
+        for (const f of files) {
+          const safeName = `${Date.now()}-${f.name}`;
+          const path = `${this.storageFolder(paramCode, grade)}/${safeName}`;
+          const fileRef = sRef(this.storage, path);
+          await uploadBytes(fileRef, f);
+          const url = await getDownloadURL(fileRef);
+          metaToAdd.push({ name: f.name, url, path, ts: now });
+        }
+
+        // Merge ke Firestore
+        const existing = this.assessmentData[paramCode] || {};
+        const bd = existing.bukti_dukung || {};
+        const curr = Array.isArray(bd[grade]) ? bd[grade] : [];
+        const updated = { ...bd, [grade]: [...curr, ...metaToAdd] };
+
+        await setDoc(
+          doc(this.db, 'assessments', this.currentSatker),
+          { parameters: { [paramCode]: { ...existing, bukti_dukung: updated } }, updated_at: now },
+          { merge: true }
+        );
+
+        // Tampilkan ulang list
+        this.renderBuktiList(paramCode, grade);
+      },
+
+      async renderBuktiList(paramCode, grade) {
+        const el = document.getElementById(`list-${grade}`);
+        if (!el) return;
+        el.innerHTML = '<div class="text-muted small">Memuat...</div>';
+
+        // Ambil dari Firestore; jika kosong, fallback listAll dari Storage (opsional)
+        const data = this.assessmentData[paramCode]?.bukti_dukung || {};
+        let list = Array.isArray(data[grade]) ? data[grade] : [];
+
+        if (!list.length) {
+          // fallback listAll agar tetap bisa melihat file yg sudah ada
+          try {
+            const folderRef = sRef(this.storage, this.storageFolder(paramCode, grade));
+            const res = await listAll(folderRef);
+            list = await Promise.all(res.items.map(async (itemRef) => {
+              const url = await getDownloadURL(itemRef);
+              return { name: itemRef.name.replace(/^[0-9]+-/, ''), url, path: itemRef.fullPath, ts: new Date().toISOString() };
+            }));
+          } catch (_) { /* ignore if folder not exists */ }
+        }
+
+        if (!list.length) {
+          el.innerHTML = '<div class="text-muted small">Belum ada dokumen.</div>';
+          return;
+        }
+
+        el.innerHTML = '';
+        list.forEach((f) => {
+          const a = document.createElement('a');
+          a.href = f.url;
+          a.target = "_blank";
+          a.rel = "noopener";
+          a.className = "list-group-item list-group-item-action d-flex justify-content-between align-items-center";
+          a.innerHTML = `
+            <span class="text-truncate"><i class="bi bi-file-earmark-text me-1"></i> ${f.name}</span>
+            <span class="d-flex align-items-center gap-2">
+              <small class="text-muted">${f.ts ? fmtTime(f.ts) : ''}</small>
+              <button class="btn btn-sm btn-outline-danger" data-action="delete" data-path="${f.path}" title="Hapus"><i class="bi bi-trash"></i></button>
+            </span>
+          `;
+          el.appendChild(a);
+        });
+
+        // Delegasi delete
+        el.addEventListener('click', async (ev) => {
+          const btn = ev.target.closest('button[data-action="delete"]');
+          if (!btn) return;
+          ev.preventDefault();
+          const path = btn.getAttribute('data-path');
+          if (!confirm('Hapus dokumen ini?')) return;
+          try {
+            await deleteObject(sRef(this.storage, path));
+          } catch (err) {
+            console.error('Delete storage error', err);
+          }
+          // Hapus dari Firestore metadata
+          const existing = this.assessmentData[paramCode] || {};
+          const bd = existing.bukti_dukung || {};
+          const curr = Array.isArray(bd[grade]) ? bd[grade] : [];
+          const filtered = curr.filter((x) => x.path !== path);
+          const updated = { ...bd, [grade]: filtered };
+
+          await setDoc(
+            doc(this.db, 'assessments', this.currentSatker),
+            { parameters: { [paramCode]: { ...existing, bukti_dukung: updated } }, updated_at: new Date().toISOString() },
+            { merge: true }
+          );
+          // refresh tampilan
+          this.renderBuktiList(paramCode, grade);
+        }, { once: true }); // pasang sekali per render
+      },
+
+      attachBuktiHandlers(paramCode) {
+        // Upload events
+        ['A','B','C','D','E'].forEach((g) => {
+          const up = document.getElementById(`upload-${g}`);
+          const rf = document.getElementById(`refresh-${g}`);
+          if (up) {
+            up.onchange = (e) => this.uploadBukti(paramCode, g, e.target.files);
+          }
+          if (rf) {
+            rf.onclick = () => this.renderBuktiList(paramCode, g);
+          }
+          // Render awal
+          this.renderBuktiList(paramCode, g);
         });
       },
 
@@ -440,23 +656,19 @@
         document.getElementById('hasil-pengujian').value = existing.hasil_pengujian || '';
         document.getElementById('uraian-aoi').value = existing.uraian_aoi || '';
 
-        // Tampilkan bidang khusus Sestama / rujukan Sestama
+        // Sestama sections
         const isSestama = this.currentSatker === 'Sestama';
         const sestamaFields = document.getElementById('sestama-fields');
         const refCard = document.getElementById('sestama-reference');
 
         if (isSestama) {
-          // tampilkan field editable Sestama
           sestamaFields.classList.remove('d-none');
           refCard.classList.add('d-none');
-
           document.getElementById('simpulan-sestama').value = existing.simpulan_sestama || '';
           document.getElementById('hasil-pengujian-sestama').value = existing.hasil_pengujian_sestama || '';
         } else {
-          // sembunyikan field Sestama, tampilkan rujukan dari dokumen Sestama
           sestamaFields.classList.add('d-none');
           refCard.classList.remove('d-none');
-
           try {
             const sestamaDoc = await getDoc(doc(this.db, 'assessments', 'Sestama'));
             const refData = sestamaDoc.exists() ? (sestamaDoc.data().parameters?.[paramCode] || {}) : {};
@@ -472,6 +684,9 @@
           }
         }
 
+        // Pasang handler bukti & render list per grade
+        this.attachBuktiHandlers(paramCode);
+
         this.bootstrapModal.show();
       },
 
@@ -484,7 +699,6 @@
           uraian_aoi: document.getElementById('uraian-aoi').value.trim()
         };
 
-        // Tambahkan field khusus bila Unor = Sestama
         if (this.currentSatker === 'Sestama') {
           payload.simpulan_sestama = document.getElementById('simpulan-sestama').value || '';
           payload.hasil_pengujian_sestama = document.getElementById('hasil-pengujian-sestama').value.trim();
@@ -517,10 +731,8 @@
       updateLastSaved(ts) {
         const el = document.getElementById('last-saved');
         if (!ts) { el.textContent = 'Belum ada penyimpanan'; return; }
-        try {
-          const fmt = new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(ts));
-          el.textContent = `Terakhir disimpan: ${fmt}`;
-        } catch { el.textContent = 'Terakhir disimpan: —'; }
+        try { el.textContent = `Terakhir disimpan: ${fmtTime(ts)}`; }
+        catch { el.textContent = 'Terakhir disimpan: —'; }
       }
     };
 
@@ -528,4 +740,3 @@
   </script>
 </body>
 </html>
-
