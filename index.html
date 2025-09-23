@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
@@ -9,6 +10,9 @@
           rel="stylesheet" 
           integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" 
           crossorigin="anonymous">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" 
@@ -333,6 +337,7 @@
                 });
             },
 
+            // Fungsi openModal dengan tooltip
             openModal(paramCode) {
                 const param = ASSESSMENT_STRUCTURE.find(p => p.kode_parameter === paramCode);
                 if (!param) return;
@@ -341,41 +346,9 @@
                 document.getElementById('modal-parameter-title').textContent = `${param.kode_parameter} - ${param.uraian_parameter}`;
 
                 const criteriaContainer = document.getElementById('modal-criteria-container');
-                criteriaContainer.innerHTML = param.grades.map(g =>
-                    `<p class="mb-1 small"><strong class="fw-semibold text-body-secondary">Grade ${g.grade}:</strong> ${g.kriteria}</p>`
-                ).join('');
 
-                const existingData = this.assessmentData[paramCode] || {};
-                document.getElementById('metode-penilaian').value = existingData.metode_penilaian || 'Wawancara';
-                document.getElementById('simpulan').value = existingData.simpulan || 'A';
-                document.getElementById('hasil-pengujian').value = existingData.hasil_pengujian || '';
-                document.getElementById('uraian-aoi').value = existingData.uraian_aoi || '';
-
-                this.bootstrapModal.show();
-            },
-
-            async saveAssessment() {
-                const paramCode = document.getElementById('current-parameter-code').value;
-                const dataToSave = {
-                    metode_penilaian: document.getElementById('metode-penilaian').value,
-                    simpulan: document.getElementById('simpulan').value,
-                    hasil_pengujian: document.getElementById('hasil-pengujian').value,
-                    uraian_aoi: document.getElementById('uraian-aoi').value,
-                };
-
-                const docRef = doc(this.db, 'assessments', this.currentSatker);
-
-                try {
-                    await setDoc(docRef, { parameters: { [paramCode]: dataToSave } }, { merge: true });
-                    this.bootstrapModal.hide();
-                } catch (error) {
-                    console.error("Error saving document: ", error);
-                    alert("Gagal menyimpan data. Silakan coba lagi.");
-                }
-            }
-        };
-
-        App.init();
-    </script>
-</body>
-</html>
+                // Menambahkan tooltip di samping masing-masing grade
+                criteriaContainer.innerHTML = param.grades.map(g => `
+                    <p class="mb-2 small d-flex align-items-start">
+                        <strong class="fw-semibold text-body-secondary me-1">Grade ${g.grade}:</strong> 
+                        <span
