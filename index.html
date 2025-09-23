@@ -68,6 +68,7 @@
                                     <th scope="col" class="px-3">Uraian Parameter</th>
                                     <th scope="col" class="px-3 text-center">Status</th>
                                     <th scope="col" class="px-3 text-center">Aksi</th>
+                                    <th scope="col" class="px-3 text-center">Grade</th>
                                 </tr>
                             </thead>
                             <tbody id="assessment-table-body" class="align-middle">
@@ -279,6 +280,10 @@
                             <button data-param-code="${param.kode_parameter}" class="btn btn-primary btn-sm open-modal-btn">
                                 ${isCompleted ? 'Edit' : 'Isi Penilaian'}
                             </button>
+                         <td class="px-3 text-center">
+                            <span class="badge rounded-pill ${isCompleted ? 'text-bg-success' : 'text-bg-warning'}">
+                                ${isCompleted ? 'A' : 'B'}
+                            </span>   
                         </td>
                     `;
                 });
@@ -358,4 +363,5 @@
     </script>
 </body>
 </html>
+
 
