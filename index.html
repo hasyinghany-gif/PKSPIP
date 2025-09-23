@@ -223,12 +223,12 @@
 
   <!-- Firebase + App Script -->
   <script type="module">
-    // === Firebase Config (PERBAIKAN storageBucket) ===
+    // === Firebase Config (storageBucket diperbaiki) ===
     const firebaseConfig = {
       apiKey: "AIzaSyCYwuJHeL_YlyW7zPNRGSXe_NB8r_Ql_t0",
       authDomain: "spip-8e5e9.firebaseapp.com",
       projectId: "spip-8e5e9",
-      storageBucket: "spip-8e5e9.appspot.com",   // <<— FIX DI SINI
+      storageBucket: "spip-8e5e9.appspot.com",
       messagingSenderId: "448004404076",
       appId: "1:448004404076:web:6aa65c8de90439285db949",
       measurementId: "G-J44L941K89"
@@ -481,5 +481,99 @@
 
       resetGradeTabs(active){
         document.querySelectorAll('#grade-tabs [data-grade]').forEach(btn=>{
-          btn.classList.toggle('btn-primary', btn.dataset.grade===active);
-          btn
+          const isActive = btn.dataset.grade===active;
+          btn.classList.toggle('btn-primary', isActive);
+          btn.classList.toggle('btn-outline-primary', !isActive);
+        });
+      },
+
+      switchGrade(grade){
+        this.currentGrade = grade;
+        this.resetGradeTabs(grade);
+        this.refreshFiles();
+      },
+
+      async refreshFiles(){
+        const listEl = document.getElementById('file-list');
+        listEl.innerHTML = '<div class="text-muted px-2 py-1">Memuat…</div>';
+        const path = this.gradePath(this.currentGrade);
+        try{
+          const res = await listAll(sRef(this.storage, path));
+          if(!res.items.length){
+            listEl.innerHTML = '<div class="text-muted px-2 py-1">Belum ada dokumen.</div>';
+            return;
+          }
+          listEl.innerHTML = '';
+          for (const item of res.items){
+            const url = await getDownloadURL(item);
+            const name = item.name;
+            const row = document.createElement('div');
+            row.className = 'list-group-item d-flex align-items-center justify-content-between list-file-item';
+            row.innerHTML = `
+              <a href="${url}" target="_blank" rel="noopener" class="truncate text-decoration-none">${name}</a>
+              <button class="btn btn-sm btn-link text-danger" data-action="delete" data-path="${item.fullPath}"><i class="bi bi-trash"></i></button>`;
+            listEl.appendChild(row);
+          }
+        }catch(err){
+          console.error(err);
+          listEl.innerHTML = '<div class="text-danger px-2 py-1">Gagal memuat daftar dokumen. Periksa aturan Storage.</div>';
+        }
+      },
+
+      async uploadFiles(fileList){
+        if(!fileList || !fileList.length) return;
+        const status = document.getElementById('upload-status');
+        const basePath = this.gradePath(this.currentGrade);
+        try{
+          for (const f of fileList){
+            status.textContent = `Mengunggah: ${f.name}…`;
+            const filename = `${Date.now()}_${f.name}`;
+            await uploadBytes(sRef(this.storage, basePath + filename), f);
+          }
+          status.textContent = 'Unggah selesai.';
+          await this.refreshFiles();
+          document.getElementById('file-input').value = '';
+        }catch(err){
+          console.error('upload error', err);
+          status.textContent = 'Gagal unggah. Cek aturan Storage.';
+        }finally{
+          setTimeout(()=> status.textContent='', 2500);
+        }
+      },
+
+      async deleteFile(path){
+        if(!confirm('Hapus dokumen ini?')) return;
+        try{
+          await deleteObject(sRef(this.storage, path));
+          await this.refreshFiles();
+        }catch(err){
+          console.error('delete error', err);
+          alert('Gagal menghapus. Periksa aturan Storage.');
+        }
+      },
+
+      updateProgress(){
+        const total = ASSESSMENT_STRUCTURE.length;
+        const done = Object.values(this.assessmentData||{}).filter(v=>v && v.simpulan).length;
+        const pct = Math.round((done/Math.max(1,total))*100);
+        const bar = document.getElementById('progress-bar');
+        bar.style.width = pct + '%';
+        bar.textContent = pct + '%';
+        bar.setAttribute('aria-valuenow', pct);
+      },
+
+      updateLastSaved(ts){
+        const el = document.getElementById('last-saved');
+        if(!ts){ el.textContent = '—'; return; }
+        try{
+          const dt = new Date(ts);
+          el.textContent = `Terakhir disimpan: ${dt.toLocaleString()}`;
+        }catch{ el.textContent='—'; }
+      }
+    };
+
+    // Start app
+    window.addEventListener('DOMContentLoaded', ()=> App.init());
+  </script>
+</body>
+</html>
