@@ -1,343 +1,381 @@
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Aplikasi Penilaian Mandiri Maturitas SPIP</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplikasi Penilaian Mandiri Maturitas SPIP</title>
 
-  <!-- Bootstrap CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" 
-        rel="stylesheet" 
-        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" 
-        crossorigin="anonymous">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" 
+          rel="stylesheet" 
+          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" 
+          crossorigin="anonymous">
 
-  <!-- Bootstrap JS -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" 
-          integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" 
-          crossorigin="anonymous"></script>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" 
+            integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" 
+            crossorigin="anonymous"></script>
 
-  <!-- Google Font -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-  <style>
-    body {
-      font-family: 'Inter', sans-serif;
-      background-color: #f8f9fa;
-    }
-    header h1 {
-      color: #0d6efd;
-    }
-    .table-hover tbody tr:hover {
-      background-color: #f1f5ff;
-    }
-    .modal-body {
-      max-height: 70vh;
-      overflow-y: auto;
-    }
-  </style>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9fa;
+        }
+    </style>
 </head>
 <body>
-<div id="app" class="container my-4 my-md-5">
+    <div id="app" class="container my-4 my-md-5">
+        
+        <!-- Header -->
+        <header class="card shadow-sm mb-4">
+            <div class="card-body p-4">
+                <h1 class="h3 fw-bold text-primary">Penilaian Mandiri Maturitas Penyelenggaraan SPIP</h1>
+                <p class="text-muted mb-1">Periode Penilaian: 01 Juli 2024 s.d. 30 Juni 2025</p>
+                <p class="text-muted small mb-0">KK 3.1 - Penilaian Struktur dan Proses Efektivitas dan Efisiensi</p>
+            </div>
+        </header>
 
-  <!-- Header -->
-  <header class="card shadow-sm mb-4">
-    <div class="card-body p-4">
-      <h1 class="h3 fw-bold">Penilaian Mandiri Maturitas Penyelenggaraan SPIP</h1>
-      <p class="text-muted mb-1">Periode Penilaian: 01 Juli 2024 s.d. 30 Juni 2025</p>
-      <p class="text-muted small mb-0">KK 3.1 - Penilaian Struktur dan Proses Efektivitas dan Efisiensi</p>
-    </div>
-  </header>
-
-  <!-- Loading Indicator -->
-  <div id="loader" class="text-center p-5">
-    <div class="spinner-border text-primary" role="status">
-      <span class="visually-hidden">Loading...</span>
-    </div>
-    <p class="mt-2 text-muted">Menghubungkan ke database...</p>
-  </div>
-
-  <!-- Main Content -->
-  <main id="main-content" class="d-none">
-    <!-- Satker Selector -->
-    <div class="card shadow-sm mb-4">
-      <div class="card-body d-flex flex-column flex-md-row align-items-md-center gap-3">
-        <label for="satker-select" class="form-label fw-semibold mb-0">Pilih Satuan Kerja (Satker):</label>
-        <select id="satker-select" class="form-select flex-grow-1"></select>
-      </div>
-    </div>
-
-    <!-- Assessment Table -->
-    <div class="card shadow-sm">
-      <div class="card-body p-0">
-        <div class="table-responsive">
-          <table class="table table-striped table-hover mb-0">
-            <thead class="table-light">
-              <tr>
-                <th scope="col" class="px-3">Kode</th>
-                <th scope="col" class="px-3">Uraian Parameter</th>
-                <th scope="col" class="px-3 text-center">Status</th>
-                <th scope="col" class="px-3 text-center">Aksi</th>
-                <th scope="col" class="px-3 text-center">Grade</th>
-              </tr>
-            </thead>
-            <tbody id="assessment-table-body" class="align-middle"></tbody>
-          </table>
+        <!-- Loading Indicator -->
+        <div id="loader" class="text-center p-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2 text-muted">Menghubungkan ke database...</p>
         </div>
-      </div>
-    </div>
-  </main>
 
-  <!-- Assessment Modal -->
-  <div class="modal fade" id="assessment-modal" tabindex="-1" aria-labelledby="modalTitle" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
-      <div class="modal-content">
-        <div class="modal-header">
-          <div>
-            <h1 class="modal-title h5" id="modalTitle">Formulir Penilaian</h1>
-            <p id="modal-parameter-title" class="text-muted small mb-0"></p>
-          </div>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <form id="assessment-form">
-            <input type="hidden" id="current-parameter-code">
-
-            <div class="mb-4">
-              <h3 class="h6 fw-semibold mb-2">Kriteria Penilaian</h3>
-              <div id="modal-criteria-container" class="p-3 bg-light border rounded" style="max-height: 150px; overflow-y: auto;"></div>
+        <!-- Main Content -->
+        <main id="main-content" class="d-none">
+            <!-- Satker Selector -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-body d-flex flex-column flex-md-row align-items-md-center gap-3">
+                    <label for="satker-select" class="form-label fw-semibold mb-0">Pilih Satuan Kerja (Satker):</label>
+                    <select id="satker-select" class="form-select flex-grow-1">
+                        <!-- Options akan dimuat lewat JS -->
+                    </select>
+                </div>
             </div>
 
-            <div class="row g-3">
-              <div class="col-md-6">
-                <label for="metode-penilaian" class="form-label">Metode Penilaian</label>
-                <select id="metode-penilaian" class="form-select">
-                  <option>Wawancara</option>
-                  <option>Analisis Dokumen</option>
-                  <option>Observasi</option>
-                </select>
-              </div>
-              <div class="col-md-6">
-                <label for="simpulan" class="form-label">Simpulan Hasil Pengujian</label>
-                <select id="simpulan" class="form-select">
-                  <option>A</option>
-                  <option>B</option>
-                  <option>C</option>
-                  <option>D</option>
-                  <option>E</option>
-                </select>
-              </div>
+            <!-- Assessment Table -->
+            <div class="card shadow-sm">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th scope="col" class="px-3">Kode</th>
+                                    <th scope="col" class="px-3">Uraian Parameter</th>
+                                    <th scope="col" class="px-3 text-center">Status</th>
+                                    <th scope="col" class="px-3 text-center">Aksi</th>
+                                    <th scope="col" class="px-3 text-center">Grade</th>
+                                </tr>
+                            </thead>
+                            <tbody id="assessment-table-body" class="align-middle">
+                                <!-- Data dimuat lewat JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
+        </main>
 
-            <div class="mt-3">
-              <label for="hasil-pengujian" class="form-label">Uraian Kondisi Detail Hasil Pengujian</label>
-              <textarea id="hasil-pengujian" rows="4" class="form-control" placeholder="Jelaskan kondisi detail hasil pengujian..."></textarea>
+        <!-- Assessment Modal -->
+        <div class="modal fade" id="assessment-modal" tabindex="-1" aria-labelledby="modalTitle" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <div>
+                            <h1 class="modal-title h5" id="modalTitle">Formulir Penilaian</h1>
+                            <p id="modal-parameter-title" class="text-muted small mb-0"></p>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="assessment-form">
+                            <input type="hidden" id="current-parameter-code">
+                            
+                            <div class="mb-4">
+                                <h3 class="h6 fw-semibold mb-2">Kriteria Penilaian</h3>
+                                <div id="modal-criteria-container" class="p-3 bg-light border rounded" style="max-height: 150px; overflow-y: auto;">
+                                    <!-- Kriteria akan dimuat lewat JS -->
+                                </div>
+                            </div>
+                            
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="metode-penilaian" class="form-label">Metode Penilaian</label>
+                                    <select id="metode-penilaian" class="form-select">
+                                        <option>Wawancara</option>
+                                        <option>Analisis Dokumen</option>
+                                        <option>Observasi</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="simpulan" class="form-label">Simpulan Hasil Pengujian</label>
+                                    <select id="simpulan" class="form-select">
+                                        <option>A</option>
+                                        <option>B</option>
+                                        <option>C</option>
+                                        <option>D</option>
+                                        <option>E</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="mt-3">
+                                <label for="hasil-pengujian" class="form-label">Uraian Kondisi Detail Hasil Pengujian</label>
+                                <textarea id="hasil-pengujian" rows="4" class="form-control" placeholder="Jelaskan kondisi detail hasil pengujian..."></textarea>
+                            </div>
+                            <div class="mt-3">
+                                <label for="uraian-aoi" class="form-label">Uraian AoI (Area of Improvement)</label>
+                                <textarea id="uraian-aoi" rows="3" class="form-control" placeholder="Jelaskan area yang perlu perbaikan..."></textarea>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" id="cancel-btn" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" form="assessment-form" class="btn btn-primary">Simpan</button>
+                    </div>
+                </div>
             </div>
-            <div class="mt-3">
-              <label for="uraian-aoi" class="form-label">Uraian AoI (Area of Improvement)</label>
-              <textarea id="uraian-aoi" rows="3" class="form-control" placeholder="Jelaskan area yang perlu perbaikan..."></textarea>
-            </div>
-          </form>
         </div>
-        <div class="modal-footer">
-          <button type="button" id="cancel-btn" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-          <button type="submit" form="assessment-form" class="btn btn-primary">Simpan</button>
-        </div>
-      </div>
     </div>
-  </div>
-</div>
 
-<!-- Firebase Script -->
-<script type="module">
-  const firebaseConfig = {
-    apiKey: "AIzaSyCYwuJHeL_YlyW7zPNRGSXe_NB8r_Ql_t0", 
-    authDomain: "spip-8e5e9.firebaseapp.com",
-    projectId: "spip-8e5e9",
-    storageBucket: "spip-8e5e9.firebasestorage.app",
-    messagingSenderId: "448004404076",
-    appId: "1:448004404076:web:6aa65c8de90439285db949",
-    measurementId: "G-J44L941K89"
-  };
+    <!-- Firebase Script -->
+    <script type="module">
+        // Konfigurasi Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyCYwuJHeL_YlyW7zPNRGSXe_NB8r_Ql_t0", 
+            authDomain: "spip-8e5e9.firebaseapp.com",
+            projectId: "spip-8e5e9",
+            storageBucket: "spip-8e5e9.firebasestorage.app",
+            messagingSenderId: "448004404076",
+            appId: "1:448004404076:web:6aa65c8de90439285db949",
+            measurementId: "G-J44L941K89"
+        };
 
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-  import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-  import { getFirestore, doc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        // Import Firebase modules
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-  const SATKER_LIST = ['Inspektorat', 'Pusdatin', 'Sestama', 'D1', 'D3', 'Puslat', 'D4'];
+        // Data satker dan struktur assessment
+        const SATKER_LIST = ['Inspektorat', 'Pusdatin', 'Sestama', 'D1', 'D3', 'Puslat', 'D4'];
+        const ASSESSMENT_STRUCTURE = [
+            {
+                kode: "1.1.1",
+                uraian_subunsur: "Penegakan Integritas dan Nilai Etika",
+                no: "1",
+                uraian_parameter: "K/L/D menegakkan integritas dan nilai etika dalam melaksanakan tugas dan fungsi organisasi",
+                kode_parameter: "1.1.1",
+                grades: [
+                    { grade: 'A', kriteria: 'Penegakan integritas dan nilai etika telah diperbaiki secara berkelanjutan sehingga tercipta suasana kerja organisasi yang kondusif yang dapat mendorong kinerja para pegawai secara optimal.' },
+                    { grade: 'B', kriteria: 'Kebijakan dan implementasi organisasi telah dievaluasi untuk meningkatkan integritas dan nilai etika para pegawai.' },
+                    { grade: 'C', kriteria: 'Penegakan integritas dan nilai etika telah dilaksanakan oleh pegawai dalam pelaksanaan tugas dan fungsinya dalam organisasi.' },
+                    { grade: 'D', kriteria: 'Kebijakan penegakan integritas dan nilai etika organisasi telah dipahami oleh seluruh pegawai.' },
+                    { grade: 'E', kriteria: 'Terdapat kebijakan penegakan integritas dan nilai etika untuk seluruh pegawai dalam organisasi.' },
+                ]
+            },
+            {
+                kode: "1.2.1",
+                uraian_subunsur: "Komitmen terhadap Kompetensi",
+                no: "2",
+                uraian_parameter: "Tugas dan jabatan dalam organisasi dilaksanakan dan diisi oleh SDM yang kompeten.",
+                kode_parameter: "1.2.1",
+                grades: [
+                    { grade: 'A', kriteria: 'Pengelolaan kompetensi SDM telah diperbaiki secara berkelanjutan dan secara optimal mampu mendukung pencapaian tujuan organisasi.' },
+                    { grade: 'B', kriteria: 'Standar kompetensi organisasi dan implementasi/pemanfaatannya telah dievaluasi untuk mengetahui efektivitasnya.' },
+                    { grade: 'C', kriteria: 'Standar kompetensi telah diimplementasikan/dimanfaatkan dalam pengelolaan/pembinaan SDM organisasi.' },
+                    { grade: 'D', kriteria: 'Standar kompetensi telah dikomunikasikan dan dipahami oleh seluruh pegawai organisasi.' },
+                    { grade: 'E', kriteria: 'Terdapat standar kompetensi yang jelas untuk seluruh jabatan dan posisi dalam organisasi.' },
+                ]
+            },
+            {
+                kode: "1.3.1",
+                uraian_subunsur: "Kepemimpinan yang Kondusif",
+                no: "1",
+                uraian_parameter: "Pimpinan K/L/D menciptakan lingkungan kerja yang kondusif untuk pencapaian tujuan organisasi.",
+                kode_parameter: "1.3.1",
+                grades: [
+                    { grade: 'A', kriteria: 'Penerapan manajemen kinerja, pengelolaan keuangan, manajemen SDM, serta manajemen risiko dapat meningkatkan efektivitas dan efisiensi kinerja seluruh level pimpinan dan pegawai.' },
+                    { grade: 'B', kriteria: 'Pimpinan organisasi melaksanakan evaluasi berkala atas kebijakan pengendalian intern dan berupaya mengatasi permasalahan yang berkaitan dengan lingkungan pengendalian yang kondusif.' },
+                    { grade: 'C', kriteria: 'Pimpinan organisasi melaksanakan kebijakan dan didukung dengan SDM yang bekerja sesuai dengan kebijakan yang ditetapkan.' },
+                    { grade: 'D', kriteria: 'Pimpinan organisasi terlibat dalam penyusunan dan penetapkan kebijakan yang mendukung penciptaan lingkungan kerja yang kondusif untuk pencapaian tujuan organisasi serta memahami substansi kebijakan pengendalian intern dan mendorong penerapan kebijakan dalam berbagai interaksi kepada jajaran di bawahnya.' },
+                    { grade: 'E', kriteria: 'Pimpinan organisasi terlibat dalam penyusunan dan penetapkan kebijakan yang mendukung penciptaan lingkungan kerja yang kondusif untuk pencapaian tujuan organisasi.' },
+                ]
+            },
+        ];
 
-  const ASSESSMENT_STRUCTURE = [
-    {
-      kode_parameter: "1.1.1",
-      uraian_parameter: "K/L/D menegakkan integritas dan nilai etika dalam melaksanakan tugas dan fungsi organisasi",
-      grades: [
-        { grade: 'A', kriteria: 'Penegakan integritas dan nilai etika telah diperbaiki secara berkelanjutan...' },
-        { grade: 'B', kriteria: 'Kebijakan dan implementasi organisasi telah dievaluasi...' },
-        { grade: 'C', kriteria: 'Penegakan integritas dan nilai etika telah dilaksanakan...' },
-        { grade: 'D', kriteria: 'Kebijakan penegakan integritas dan nilai etika dipahami seluruh pegawai.' },
-        { grade: 'E', kriteria: 'Terdapat kebijakan penegakan integritas dan nilai etika.' }
-      ]
-    },
-    {
-      kode_parameter: "1.2.1",
-      uraian_parameter: "Tugas dan jabatan dalam organisasi dilaksanakan oleh SDM yang kompeten.",
-      grades: [
-        { grade: 'A', kriteria: 'Pengelolaan kompetensi SDM telah diperbaiki secara berkelanjutan...' },
-        { grade: 'B', kriteria: 'Standar kompetensi organisasi telah dievaluasi...' },
-        { grade: 'C', kriteria: 'Standar kompetensi telah diimplementasikan.' },
-        { grade: 'D', kriteria: 'Standar kompetensi telah dikomunikasikan.' },
-        { grade: 'E', kriteria: 'Terdapat standar kompetensi yang jelas.' }
-      ]
-    }
-  ];
+        const App = {
+            db: null,
+            auth: null,
+            userId: null,
+            currentSatker: SATKER_LIST[0],
+            assessmentData: {},
+            unsubscribe: null,
+            bootstrapModal: null,
 
-  const App = {
-    db: null,
-    auth: null,
-    userId: null,
-    currentSatker: SATKER_LIST[0],
-    assessmentData: {},
-    unsubscribe: null,
-    bootstrapModal: null,
+            init() {
+                try {
+                    const app = initializeApp(firebaseConfig);
+                    this.db = getFirestore(app);
+                    this.auth = getAuth(app);
+                    this.handleAuthentication();
+                } catch (error) {
+                    console.error("Firebase initialization failed:", error);
+                    document.getElementById('loader').innerText = "Kunci Firebase salah. Mohon periksa kembali.";
+                }
+                this.populateSatkerSelect();
+                this.setupEventListeners();
+                this.bootstrapModal = new bootstrap.Modal(document.getElementById('assessment-modal'));
+            },
 
-    init() {
-      const app = initializeApp(firebaseConfig);
-      this.db = getFirestore(app);
-      this.auth = getAuth(app);
-      this.handleAuthentication();
-      this.populateSatkerSelect();
-      this.setupEventListeners();
-      this.bootstrapModal = new bootstrap.Modal(document.getElementById('assessment-modal'));
-    },
+            async handleAuthentication() {
+                onAuthStateChanged(this.auth, async (user) => {
+                    if (user) {
+                        this.userId = user.uid;
+                        this.loadInitialData();
+                    } else {
+                        try {
+                            await signInAnonymously(this.auth);
+                        } catch (error) {
+                            console.error("Authentication failed:", error);
+                            document.getElementById('loader').innerText = "Gagal otentikasi. Aktifkan login anonim di Firebase.";
+                        }
+                    }
+                });
+            },
 
-    async handleAuthentication() {
-      onAuthStateChanged(this.auth, async (user) => {
-        if (user) {
-          this.userId = user.uid;
-          this.loadInitialData();
-        } else {
-          await signInAnonymously(this.auth);
-        }
-      });
-    },
+            loadInitialData() {
+                document.getElementById('loader').style.display = 'none';
+                document.getElementById('main-content').classList.remove('d-none');
+                this.renderTable();
+                this.listenForDataChanges();
+            },
 
-    loadInitialData() {
-      document.getElementById('loader').style.display = 'none';
-      document.getElementById('main-content').classList.remove('d-none');
-      this.renderTable();
-      this.listenForDataChanges();
-    },
+            populateSatkerSelect() {
+                const select = document.getElementById('satker-select');
+                SATKER_LIST.forEach(satker => {
+                    const option = new Option(satker, satker);
+                    select.add(option);
+                });
+            },
 
-    populateSatkerSelect() {
-      const select = document.getElementById('satker-select');
-      SATKER_LIST.forEach(satker => {
-        const option = new Option(satker, satker);
-        select.add(option);
-      });
-    },
+            renderTable() {
+                const tableBody = document.getElementById('assessment-table-body');
+                tableBody.innerHTML = '';
 
-    renderTable() {
-      const tableBody = document.getElementById('assessment-table-body');
-      tableBody.innerHTML = '';
+                ASSESSMENT_STRUCTURE.forEach(param => {
+                    const paramData = this.assessmentData[param.kode_parameter];
+                    const isCompleted = paramData && paramData.simpulan;
 
-      ASSESSMENT_STRUCTURE.forEach(param => {
-        const paramData = this.assessmentData[param.kode_parameter];
-        const isCompleted = paramData && paramData.simpulan;
+                    // Ambil nilai simpulan (grade)
+                    const simpulan = isCompleted ? paramData.simpulan : null;
+            
+                    // Tentukan warna badge berdasarkan grade
+                    let gradeClass = 'secondary'; // default
+                    if (simpulan === 'A') gradeClass = 'success';
+                    else if (simpulan === 'B') gradeClass = 'primary';
+                    else if (simpulan === 'C') gradeClass = 'info';
+                    else if (simpulan === 'D') gradeClass = 'warning';
+                    else if (simpulan === 'E') gradeClass = 'danger';
+            
+                    const row = tableBody.insertRow();
+                    row.innerHTML = `
+                        <td class="px-3">${param.kode_parameter}</td>
+                        <td class="px-3">${param.uraian_parameter}</td>
+                        <td class="px-3 text-center">
+                            <span class="badge rounded-pill ${isCompleted ? 'text-bg-success' : 'text-bg-warning'}">
+                                ${isCompleted ? 'Selesai' : 'Belum Diisi'}
+                            </span>
+                        </td>
+                        <td class="px-3 text-center">
+                            <button data-param-code="${param.kode_parameter}" class="btn btn-primary btn-sm open-modal-btn">
+                                ${isCompleted ? 'Edit' : 'Isi Penilaian'}
+                            </button>
+                        </td>
+                        <td class="px-3 text-center">
+                            ${simpulan 
+                                ? `<span class="badge text-bg-${gradeClass}">${simpulan}</span>`
+                                : `<span class="text-muted">-</span>`
+                            }
+                        </td>
+                    `;
+                });
+            },
 
-        const simpulan = isCompleted ? paramData.simpulan : null;
-        let gradeClass = 'secondary';
-        if (simpulan === 'A') gradeClass = 'success';
-        else if (simpulan === 'B') gradeClass = 'primary';
-        else if (simpulan === 'C') gradeClass = 'info';
-        else if (simpulan === 'D') gradeClass = 'warning';
-        else if (simpulan === 'E') gradeClass = 'danger';
+            listenForDataChanges() {
+                if (this.unsubscribe) this.unsubscribe();
+                const docRef = doc(this.db, 'assessments', this.currentSatker);
+                this.unsubscribe = onSnapshot(docRef, (docSnap) => {
+                    this.assessmentData = docSnap.exists() ? docSnap.data().parameters || {} : {};
+                    this.renderTable();
+                });
+            },
 
-        const row = tableBody.insertRow();
-        row.innerHTML = `
-          <td class="px-3">${param.kode_parameter}</td>
-          <td class="px-3">${param.uraian_parameter}</td>
-          <td class="px-3 text-center">
-            <span class="badge rounded-pill ${isCompleted ? 'text-bg-success' : 'text-bg-warning'}">
-              ${isCompleted ? 'Selesai' : 'Belum Diisi'}
-            </span>
-          </td>
-          <td class="px-3 text-center">
-            <button data-param-code="${param.kode_parameter}" class="btn btn-primary btn-sm open-modal-btn">
-              ${isCompleted ? 'Edit' : 'Isi Penilaian'}
-            </button>
-          </td>
-          <td class="px-3 text-center">
-            ${simpulan 
-              ? `<span class="badge text-bg-${gradeClass}">${simpulan}</span>`
-              : `<span class="text-muted">-</span>`}
-          </td>
-        `;
-      });
-    },
+            setupEventListeners() {
+                document.getElementById('satker-select').addEventListener('change', (e) => {
+                    this.currentSatker = e.target.value;
+                    this.listenForDataChanges();
+                });
 
-    listenForDataChanges() {
-      if (this.unsubscribe) this.unsubscribe();
-      const docRef = doc(this.db, 'assessments', this.currentSatker);
-      this.unsubscribe = onSnapshot(docRef, (docSnap) => {
-        this.assessmentData = docSnap.exists() ? docSnap.data().parameters || {} : {};
-        this.renderTable();
-      });
-    },
+                document.getElementById('assessment-table-body').addEventListener('click', (e) => {
+                    const button = e.target.closest('.open-modal-btn');
+                    if (button) {
+                        this.openModal(button.dataset.paramCode);
+                    }
+                });
 
-    setupEventListeners() {
-      document.getElementById('satker-select').addEventListener('change', (e) => {
-        this.currentSatker = e.target.value;
-        this.listenForDataChanges();
-      });
+                document.getElementById('assessment-form').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.saveAssessment();
+                });
+            },
 
-      document.getElementById('assessment-table-body').addEventListener('click', (e) => {
-        const button = e.target.closest('.open-modal-btn');
-        if (button) {
-          this.openModal(button.dataset.paramCode);
-        }
-      });
+            openModal(paramCode) {
+                const param = ASSESSMENT_STRUCTURE.find(p => p.kode_parameter === paramCode);
+                if (!param) return;
 
-      document.getElementById('assessment-form').addEventListener('submit', (e) => {
-        e.preventDefault();
-        this.saveAssessment();
-      });
-    },
+                document.getElementById('current-parameter-code').value = paramCode;
+                document.getElementById('modal-parameter-title').textContent = `${param.kode_parameter} - ${param.uraian_parameter}`;
 
-    openModal(paramCode) {
-      const param = ASSESSMENT_STRUCTURE.find(p => p.kode_parameter === paramCode);
-      if (!param) return;
+                const criteriaContainer = document.getElementById('modal-criteria-container');
+                criteriaContainer.innerHTML = param.grades.map(g =>
+                    `<p class="mb-1 small"><strong class="fw-semibold text-body-secondary">Grade ${g.grade}:</strong> ${g.kriteria}</p>`
+                ).join('');
 
-      document.getElementById('current-parameter-code').value = paramCode;
-      document.getElementById('modal-parameter-title').textContent = `${param.kode_parameter} - ${param.uraian_parameter}`;
+                const existingData = this.assessmentData[paramCode] || {};
+                document.getElementById('metode-penilaian').value = existingData.metode_penilaian || 'Wawancara';
+                document.getElementById('simpulan').value = existingData.simpulan || 'A';
+                document.getElementById('hasil-pengujian').value = existingData.hasil_pengujian || '';
+                document.getElementById('uraian-aoi').value = existingData.uraian_aoi || '';
 
-      const criteriaContainer = document.getElementById('modal-criteria-container');
-      criteriaContainer.innerHTML = param.grades.map(g =>
-        `<p class="mb-1 small"><strong>Grade ${g.grade}:</strong> ${g.kriteria}</p>`
-      ).join('');
+                this.bootstrapModal.show();
+            },
 
-      const existingData = this.assessmentData[paramCode] || {};
-      document.getElementById('metode-penilaian').value = existingData.metode_penilaian || 'Wawancara';
-      document.getElementById('simpulan').value = existingData.simpulan || 'A';
-      document.getElementById('hasil-pengujian').value = existingData.hasil_pengujian || '';
-      document.getElementById('uraian-aoi').value = existingData.uraian_aoi || '';
+            async saveAssessment() {
+                const paramCode = document.getElementById('current-parameter-code').value;
+                const dataToSave = {
+                    metode_penilaian: document.getElementById('metode-penilaian').value,
+                    simpulan: document.getElementById('simpulan').value,
+                    hasil_pengujian: document.getElementById('hasil-pengujian').value,
+                    uraian_aoi: document.getElementById('uraian-aoi').value,
+                };
 
-      this.bootstrapModal.show();
-    },
+                const docRef = doc(this.db, 'assessments', this.currentSatker);
 
-    async saveAssessment() {
-      const paramCode = document.getElementById('current-parameter-code').value;
-      const dataToSave = {
-        metode_penilaian: document.getElementById('metode-penilaian').value,
-        simpulan: document.getElementById('simpulan').value,
-        hasil_pengujian: document.getElementById('hasil-pengujian').value,
-        uraian_aoi: document.getElementById('uraian-aoi').value,
-      };
+                try {
+                    await setDoc(docRef, { parameters: { [paramCode]: dataToSave } }, { merge: true });
+                    this.bootstrapModal.hide();
+                } catch (error) {
+                    console.error("Error saving document: ", error);
+                    alert("Gagal menyimpan data. Silakan coba lagi.");
+                }
+            }
+        };
 
-      const docRef = doc(this.db, 'assessments', this.currentSatker);
-      await setDoc(docRef, { parameters: { [paramCode]: dataToSave } }, { merge: true });
-      this.bootstrapModal.hide();
-    }
-  };
-
-  App.init();
-</script>
+        App.init();
+    </script>
 </body>
 </html>
