@@ -168,7 +168,7 @@
     import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
     import { getFirestore, doc, onSnapshot, setDoc, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-    // Data
+    // Data: sekarang tiap grade punya tooltip spesifik (bisa Anda ganti kapan pun)
     const SATKER_LIST = ['Inspektorat', 'Pusdatin', 'Sestama', 'D1', 'D3', 'Puslat', 'D4'];
     const ASSESSMENT_STRUCTURE = [
       {
@@ -178,11 +178,11 @@
         uraian_parameter: "K/L/D menegakkan integritas dan nilai etika dalam melaksanakan tugas dan fungsi organisasi",
         kode_parameter: "1.1.1",
         grades: [
-          { grade: 'A', kriteria: 'Penegakan integritas dan nilai etika telah diperbaiki secara berkelanjutan sehingga tercipta suasana kerja organisasi yang kondusif yang dapat mendorong kinerja para pegawai secara optimal.' },
-          { grade: 'B', kriteria: 'Kebijakan dan implementasi organisasi telah dievaluasi untuk meningkatkan integritas dan nilai etika para pegawai.' },
-          { grade: 'C', kriteria: 'Penegakan integritas dan nilai etika telah dilaksanakan oleh pegawai dalam pelaksanaan tugas dan fungsinya dalam organisasi.' },
-          { grade: 'D', kriteria: 'Kebijakan penegakan integritas dan nilai etika organisasi telah dipahami oleh seluruh pegawai.' },
-          { grade: 'E', kriteria: 'Terdapat kebijakan penegakan integritas dan nilai etika untuk seluruh pegawai dalam organisasi.' }
+          { grade: 'A', kriteria: 'Penegakan integritas dan nilai etika telah diperbaiki secara berkelanjutan sehingga tercipta suasana kerja organisasi yang kondusif yang dapat mendorong kinerja para pegawai secara optimal.', tooltip: '- Setiap individu dalam organisasi dapat mendorong penerapan nilai-nilai organisasi - Setiap individu mendukung pencapaian kinerja organisasi - Keberhasilan pencapaian kinerja organisasi dapat dihubungkan dengan integritas dan perilaku individu serta mempengaruhi remunerasi individu' },
+          { grade: 'B', kriteria: 'Kebijakan dan implementasi organisasi telah dievaluasi untuk meningkatkan integritas dan nilai etika para pegawai.', tooltip: 'Kebijakan dan implementasi telah dievaluasi dengan ketentuan: - Berkala - Terdokumentasi - Dilakukan untuk menangani residual risk - Hasil evaluasi telah ditindak lanjuti  - Perbaikan telah menghasilkan kinerja yang lebih baik' },
+          { grade: 'C', kriteria: 'Penegakan integritas dan nilai etika telah dilaksanakan oleh pegawai dalam pelaksanaan tugas dan fungsinya dalam organisasi.', tooltip: '- Terdapat wujud keteladanan dari pimpinan atas nilai organisasi  - Terdapat praktik pembangunan integritas dan nilai etika - Terdapat praktik penegakan nilai etika  - Terdapat bukti penegakan disiplin - Terdapat pemberian punishment bagi pegawai yang melanggar dan reward bagi pegawai yang menegakan integritas dan nilai etika  - Proses tersebut di atas dilaksanakan melalui struktur dan mekanisme yang ditetapkan' },
+          { grade: 'D', kriteria: 'Kebijakan penegakan integritas dan nilai etika organisasi telah dipahami oleh seluruh pegawai.', tooltip: 'Kebijakan telah dikomunikasikan dan dipahami oleh: - Pimpinan (struktural) - Penanggungjawab penegakan integritas dan nilai etika - Pegawai.' },
+          { grade: 'E', kriteria: 'Terdapat kebijakan penegakan integritas dan nilai etika untuk seluruh pegawai dalam organisasi.', tooltip: 'Kebijakan telah mengatur: - Keteladanan pimpinan - Upaya pembangunan integritas - Nilai etika  - Penegakan disiplin - Pemberian reward and punishment  - Penetapan struktur dan mekanisme penanganan penegakan integritas dan nilai etika' }
         ]
       },
       {
@@ -192,11 +192,11 @@
         uraian_parameter: "Tugas dan jabatan dalam organisasi dilaksanakan dan diisi oleh SDM yang kompeten.",
         kode_parameter: "1.2.1",
         grades: [
-          { grade: 'A', kriteria: 'Pengelolaan kompetensi SDM telah diperbaiki secara berkelanjutan dan secara optimal mampu mendukung pencapaian tujuan organisasi.' },
-          { grade: 'B', kriteria: 'Standar kompetensi organisasi dan implementasi/pemanfaatannya telah dievaluasi untuk mengetahui efektivitasnya.' },
-          { grade: 'C', kriteria: 'Standar kompetensi telah diimplementasikan/dimanfaatkan dalam pengelolaan/pembinaan SDM organisasi.' },
-          { grade: 'D', kriteria: 'Standar kompetensi telah dikomunikasikan dan dipahami oleh seluruh pegawai organisasi.' },
-          { grade: 'E', kriteria: 'Terdapat standar kompetensi yang jelas untuk seluruh jabatan dan posisi dalam organisasi.' }
+          { grade: 'A', kriteria: 'Pengelolaan kompetensi SDM telah diperbaiki secara berkelanjutan dan secara optimal mampu mendukung pencapaian tujuan organisasi.', tooltip: 'Lampiran 1.2.1-A · Rencana pengembangan & bukti peningkatan kinerja.' },
+          { grade: 'B', kriteria: 'Standar kompetensi organisasi dan implementasi/pemanfaatannya telah dievaluasi untuk mengetahui efektivitasnya.', tooltip: 'Lampiran 1.2.1-B · Hasil evaluasi standar kompetensi & rekomendasi.' },
+          { grade: 'C', kriteria: 'Standar kompetensi telah diimplementasikan/dimanfaatkan dalam pengelolaan/pembinaan SDM organisasi.', tooltip: 'Lampiran 1.2.1-C · Peta jabatan vs standar & rekam pelatihan.' },
+          { grade: 'D', kriteria: 'Standar kompetensi telah dikomunikasikan dan dipahami oleh seluruh pegawai organisasi.', tooltip: 'Lampiran 1.2.1-D · Bukti sosialisasi/edaran/portal kompetensi.' },
+          { grade: 'E', kriteria: 'Terdapat standar kompetensi yang jelas untuk seluruh jabatan dan posisi dalam organisasi.', tooltip: 'Lampiran 1.2.1-E · Dokumen standar kompetensi yang disahkan.' }
         ]
       },
       {
@@ -206,11 +206,11 @@
         uraian_parameter: "Pimpinan K/L/D menciptakan lingkungan kerja yang kondusif untuk pencapaian tujuan organisasi.",
         kode_parameter: "1.3.1",
         grades: [
-          { grade: 'A', kriteria: 'Penerapan manajemen kinerja, pengelolaan keuangan, manajemen SDM, serta manajemen risiko dapat meningkatkan efektivitas dan efisiensi kinerja seluruh level pimpinan dan pegawai.' },
-          { grade: 'B', kriteria: 'Pimpinan organisasi melaksanakan evaluasi berkala atas kebijakan pengendalian intern dan berupaya mengatasi permasalahan yang berkaitan dengan lingkungan pengendalian yang kondusif.' },
-          { grade: 'C', kriteria: 'Pimpinan organisasi melaksanakan kebijakan dan didukung dengan SDM yang bekerja sesuai dengan kebijakan yang ditetapkan.' },
-          { grade: 'D', kriteria: 'Pimpinan organisasi terlibat dalam penyusunan dan penetapkan kebijakan yang mendukung penciptaan lingkungan kerja yang kondusif untuk pencapaian tujuan organisasi serta memahami substansi kebijakan pengendalian intern dan mendorong penerapan kebijakan dalam berbagai interaksi kepada jajaran di bawahnya.' },
-          { grade: 'E', kriteria: 'Pimpinan organisasi terlibat dalam penyusunan dan penetapkan kebijakan yang mendukung penciptaan lingkungan kerja yang kondusif untuk pencapaian tujuan organisasi.' }
+          { grade: 'A', kriteria: 'Penerapan manajemen kinerja, pengelolaan keuangan, manajemen SDM, serta manajemen risiko dapat meningkatkan efektivitas dan efisiensi kinerja seluruh level pimpinan dan pegawai.', tooltip: 'Lampiran 1.3.1-A · Bukti integrasi sistem manajemen & peningkatan kinerja.' },
+          { grade: 'B', kriteria: 'Pimpinan organisasi melaksanakan evaluasi berkala atas kebijakan pengendalian intern dan berupaya mengatasi permasalahan yang berkaitan dengan lingkungan pengendalian yang kondusif.', tooltip: 'Lampiran 1.3.1-B · Laporan evaluasi berkala & tindakan korektif.' },
+          { grade: 'C', kriteria: 'Pimpinan organisasi melaksanakan kebijakan dan didukung dengan SDM yang bekerja sesuai dengan kebijakan yang ditetapkan.', tooltip: 'Lampiran 1.3.1-C · Bukti pelaksanaan kebijakan & kepatuhan unit.' },
+          { grade: 'D', kriteria: 'Pimpinan organisasi terlibat dalam penyusunan dan penetapkan kebijakan yang mendukung penciptaan lingkungan kerja yang kondusif untuk pencapaian tujuan organisasi serta memahami substansi kebijakan pengendalian intern dan mendorong penerapan kebijakan dalam berbagai interaksi kepada jajaran di bawahnya.', tooltip: 'Lampiran 1.3.1-D · Notulen/keputusan pimpinan & komunikasi kebijakan.' },
+          { grade: 'E', kriteria: 'Pimpinan organisasi terlibat dalam penyusunan dan penetapkan kebijakan yang mendukung penciptaan lingkungan kerja yang kondusif untuk pencapaian tujuan organisasi.', tooltip: 'Lampiran 1.3.1-E · Dokumen kebijakan/penetapan yang relevan.' }
         ]
       }
     ];
@@ -373,7 +373,7 @@
                     class="btn btn-link btn-sm p-0 align-baseline ms-1"
                     data-bs-toggle="tooltip"
                     data-bs-placement="top"
-                    title="yang terlampir sebagai berikut"
+                    title="${g.tooltip || 'yang terlampir sebagai berikut'}"
                     aria-label="Info kriteria grade ${g.grade}">
               <i class="bi bi-info-circle"></i>
             </button>
@@ -440,5 +440,3 @@
   </script>
 </body>
 </html>
-
-
