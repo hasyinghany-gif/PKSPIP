@@ -265,9 +265,22 @@
             renderTable() {
                 const tableBody = document.getElementById('assessment-table-body');
                 tableBody.innerHTML = '';
+
                 ASSESSMENT_STRUCTURE.forEach(param => {
                     const paramData = this.assessmentData[param.kode_parameter];
                     const isCompleted = paramData && paramData.simpulan;
+
+                    // Ambil nilai simpulan (grade)
+                    const simpulan = isCompleted ? paramData.simpulan : null;
+            
+                    // Tentukan warna badge berdasarkan grade
+                    let gradeClass = 'secondary'; // default
+                    if (simpulan === 'A') gradeClass = 'success';
+                    else if (simpulan === 'B') gradeClass = 'primary';
+                    else if (simpulan === 'C') gradeClass = 'info';
+                    else if (simpulan === 'D') gradeClass = 'warning';
+                    else if (simpulan === 'E') gradeClass = 'danger';
+            
                     const row = tableBody.insertRow();
                     row.innerHTML = `
                         <td class="px-3">${param.kode_parameter}</td>
@@ -281,10 +294,12 @@
                             <button data-param-code="${param.kode_parameter}" class="btn btn-primary btn-sm open-modal-btn">
                                 ${isCompleted ? 'Edit' : 'Isi Penilaian'}
                             </button>
+                        </td>
                         <td class="px-3 text-center">
-                ${simpulan 
-                    ? `<span class="badge text-bg-${gradeClass}">${simpulan}</span>`
-                    : `<span class="text-muted">-</span>`
+                            ${simpulan 
+                                ? `<span class="badge text-bg-${gradeClass}">${simpulan}</span>`
+                                : `<span class="text-muted">-</span>`
+                            }
                         </td>
                     `;
                 });
@@ -364,6 +379,7 @@
     </script>
 </body>
 </html>
+
 
 
 
