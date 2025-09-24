@@ -16,38 +16,38 @@
   <link rel="preconnect" href="https://drive.google.com" crossorigin>
 
   <style>
-    :root {
-      --brand: #0d6efd;
-      /* palet gradasi grade A–E: hijau → merah */
-      --grade-a: #2ecc71;  /* hijau */
-      --grade-b: #a3e635;  /* hijau kekuningan */
-      --grade-c: #facc15;  /* kuning */
-      --grade-d: #f97316;  /* oranye */
-      --grade-e: #ef4444;  /* merah */
+    :root{
+      --brand:#0d6efd;
+      /* gradasi grade A→E: hijau → merah */
+      --grade-a:#2ecc71; /* A */
+      --grade-b:#a3e635; /* B */
+      --grade-c:#facc15; /* C */
+      --grade-d:#f97316; /* D */
+      --grade-e:#ef4444; /* E */
     }
 
-    html, body { height: 100%; }
-    body {
-      font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans";
+    html,body{height:100%}
+    body{
+      font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial,"Noto Sans";
       background:#f8f9fa;
     }
-    .sticky-toolbar { position: sticky; top: 0; z-index: 1030; }
-    .criteria-box { max-height: 180px; overflow-y: auto; }
-    .form-hint { font-size:.85rem; color:#6c757d; }
+    .sticky-toolbar{position:sticky;top:0;z-index:1030}
+    .criteria-box{max-height:180px;overflow-y:auto}
+    .form-hint{font-size:.85rem;color:#6c757d}
 
-    /* === Badge Grade Kustom (gradasi A→E) === */
+    /* === Badge Grade Kustom (pakai data-grade) === */
     .badge[data-grade]{
-      border-radius: 999px;
-      padding: .45rem .75rem;
-      font-weight: 600;
-      min-width: 2.25rem;
-      display: inline-block;
+      border-radius:999px;
+      padding:.45rem .75rem;
+      font-weight:600;
+      min-width:2.25rem;
+      display:inline-block;
     }
-    .badge[data-grade="A"]{ background: var(--grade-a) !important; color:#fff !important; }
-    .badge[data-grade="B"]{ background: var(--grade-b) !important; color:#111 !important; }
-    .badge[data-grade="C"]{ background: var(--grade-c) !important; color:#111 !important; }
-    .badge[data-grade="D"]{ background: var(--grade-d) !important; color:#fff !important; }
-    .badge[data-grade="E"]{ background: var(--grade-e) !important; color:#fff !important; }
+    .badge[data-grade="A"]{ background:var(--grade-a) !important; color:#fff !important; }
+    .badge[data-grade="B"]{ background:var(--grade-b) !important; color:#111 !important; }
+    .badge[data-grade="C"]{ background:var(--grade-c) !important; color:#111 !important; }
+    .badge[data-grade="D"]{ background:var(--grade-d) !important; color:#fff !important; }
+    .badge[data-grade="E"]{ background:var(--grade-e) !important; color:#fff !important; }
     
   </style>
 </head>
@@ -2440,7 +2440,7 @@ c. Memberikan rekomendasi yang relevan.`
                 ${done?'Edit':'Isi Penilaian'}
               </button>
             </td>
-            <td class="px-3 text-center">${simpulan?`<span class="badge text-bg-${this.gradeBadgeClass(simpulan)}">${simpulan}</span>`:'<span class="text-muted">-</span>'}</td>`;
+            <td class="px-3 text-center">${simpulan?`<span class="badge" data-grade="${simpulan}">${simpulan}</span>`:'<span class="text-muted">-</span>'}</td>`;
           frag.appendChild(tr);
         });
         tbody.appendChild(frag);
@@ -2684,3 +2684,4 @@ c. Memberikan rekomendasi yang relevan.`
   </script>
 </body>
 </html>
+
