@@ -2440,10 +2440,21 @@ c. Memberikan rekomendasi yang relevan.`
                 ${done?'Edit':'Isi Penilaian'}
               </button>
             </td>
-            <td class="px-3 text-center">${simpulan?`<span class="badge" data-grade="${simpulan}">${simpulan}</span>`:'<span class="text-muted">-</span>'}</td>`;
+            <td class="px-3 text-center">${simpulan?`<span class="badge" data-grade="${simpulan}"{ (simpulan === 'D' || simpulan === 'E')
+                            ? 'data-bs-toggle="tooltip" title="Perlu diperhatikan untuk peningkatan grading"'
+                            : '' }>
+                        ${simpulan}
+                     </span>`
+                  : '<span class="text-muted">-</span>'
           frag.appendChild(tr);
         });
         tbody.appendChild(frag);
+      },
+
+      /* Aktifkan tooltip pada setiap render */
+        document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => {
+          new bootstrap.Tooltip(el);
+        });
       },
 
       listenForDataChanges(){
@@ -2684,4 +2695,5 @@ c. Memberikan rekomendasi yang relevan.`
   </script>
 </body>
 </html>
+
 
