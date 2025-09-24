@@ -2430,6 +2430,12 @@ c. Memberikan rekomendasi yang relevan.`
           const data = this.assessmentData[p.kode_parameter];
           const done = Boolean(data && data.simpulan);
           const simpulan = done ? data.simpulan : null;
+          
+          // siapkan atribut tooltip hanya untuk D/E
+          const tooltipAttr = (simpulan === 'D' || simpulan === 'E')
+            ? ' data-bs-toggle="tooltip" title="Perlu diperhatikan untuk peningkatan grading"'
+            : '';
+        
           const tr=document.createElement('tr');
           tr.innerHTML=`
             <td class="px-3">${p.kode_parameter}</td>
@@ -2705,6 +2711,7 @@ c. Memberikan rekomendasi yang relevan.`
   </script>
 </body>
 </html>
+
 
 
 
