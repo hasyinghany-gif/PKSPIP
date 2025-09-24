@@ -56,7 +56,7 @@
         <span class="visually-hidden">Loading...</span>
       </div>
       <p class="mt-2 text-muted">Menghubungkan ke database...</p>
-      <p id="loader-tip" class="small text-muted">Pastikan Anonymous Sign-in aktif & aturan Firestore/Storage sesuai.</p>
+      <p id="loader-tip" class="small text-muted">Pastikan Anonymous Sign-in aktif & aturan Firestore sesuai.</p>
     </div>
 
     <!-- Main -->
@@ -173,10 +173,10 @@
                 </div>
               </div>
 
-              <!-- === BUKTI DUKUNG (Firebase Storage) === -->
+              <!-- === BUKTI DUKUNG (VIEW dari Google Drive) === -->
               <div class="mt-4">
                 <h3 class="h6 fw-semibold mb-2">Bukti Dukung</h3>
-                <p class="text-muted small mb-3">Unggah dokumen pendukung per grade. Klik nama dokumen untuk membuka di tab baru.</p>
+                <p class="text-muted small mb-3">Dokumen per grade ditarik dari Google Drive (tanpa unggah di aplikasi ini).</p>
                 <div class="nav nav-pill-grade gap-2 mb-3" id="grade-tabs">
                   <button type="button" class="btn btn-primary btn-sm" data-grade="A">Grade A</button>
                   <button type="button" class="btn btn-outline-primary btn-sm" data-grade="B">Grade B</button>
@@ -188,31 +188,14 @@
                 <div class="card">
                   <div class="card-body">
                     <div class="d-flex align-items-center gap-2 mb-2">
-                      <input id="file-input" type="file" class="d-none" multiple />
-                      <button type="button" id="btn-upload" class="btn btn-primary btn-sm">
-                        <i class="bi bi-upload me-1"></i> Unggah Dokumen
+                      <button type="button" id="btn-open-drive-folder" class="btn btn-outline-secondary btn-sm">
+                        <i class="bi bi-google me-1"></i> Buka Folder Drive
                       </button>
-                      <button type="button" id="btn-refresh" class="btn btn-outline-secondary btn-sm">
-                        <i class="bi bi-arrow-repeat me-1"></i> Segarkan
-                      </button>
-                      <div id="upload-status" class="small text-muted ms-auto"></div>
                     </div>
-                    <div id="file-list" class="list-group list-group-flush small" style="min-height:3rem">
-                      <div class="text-muted px-2 py-1">Belum ada dokumen.</div>
-                    </div>
-
-                    <!-- === Tambahan: Daftar dokumen dari Google Drive (view langsung) === -->
-                    <hr class="my-3">
-                    <div class="d-flex align-items-center gap-2 mb-2">
-                      <i class="bi bi-google"></i><strong> Dokumen Google Drive</strong>
-                      <span class="small text-muted"> (Sestama & Inspektorat)</span>
-                      <button type="button" id="btn-open-drive-folder" class="btn btn-outline-secondary btn-sm ms-auto">Buka Folder Drive</button>
-                    </div>
+                    <!-- HANYA VIEW LIST DARI DRIVE -->
                     <div id="drive-file-list" class="list-group list-group-flush small" style="min-height:3rem">
-                      <div class="text-muted px-2 py-1">Dokumen dari Google Drive akan muncul di sini.</div>
+                      <div class="text-muted px-2 py-1">Pilih grade untuk memuat dokumen dari Google Drive.</div>
                     </div>
-                    <!-- === /Tambahan Drive === -->
-
                   </div>
                 </div>
               </div>
@@ -221,7 +204,7 @@
             </form>
           </div>
           <div class="modal-footer">
-            <button type="button" id="cancel-btn" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+            <button type="button" id="cancel-btn" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
             <button type="submit" form="assessment-form" class="btn btn-primary">
               <span class="me-1" aria-hidden="true">💾</span> Simpan
             </button>
@@ -235,27 +218,24 @@
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
 
-  <!-- Firebase + App Script -->
+  <!-- Firebase + App Script (Firestore saja) -->
   <script type="module">
-    // === Firebase Config ===
+    // === Firebase Config (Firestore untuk data penilaian) ===
     const firebaseConfig = {
       apiKey: "AIzaSyCYwuJHeL_YlyW7zPNRGSXe_NB8r_Ql_t0",
       authDomain: "spip-8e5e9.firebaseapp.com",
       projectId: "spip-8e5e9",
-      storageBucket: "spip-8e5e9.appspot.com",
-      messagingSenderId: "448004404076",
       appId: "1:448004404076:web:6aa65c8de90439285db949",
       measurementId: "G-J44L941K89"
     };
 
-    // Firebase modules
+    // Firebase modules (AUTH + FIRESTORE SAJA)
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
     import { getFirestore, doc, onSnapshot, setDoc, getDoc, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-    import { getStorage, ref as sRef, uploadBytes, getDownloadURL, list, deleteObject } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
 
-    // === Google Drive Config (TAMBAHAN) ===
-    const DRIVE_API_KEY = "YOUR_API_KEY_HERE"; // <- ganti
+    // === Google Drive Config ===
+    const DRIVE_API_KEY = "YOUR_API_KEY_HERE"; // ganti
     const DRIVE_FOLDERS = {
       "Sestama": {
         A: "1hTPPL7emavgqqV8_hjEVCSzUQ1gYAXQP",
@@ -271,6 +251,7 @@
         D: "1Bk3cEUtsC3zd7u63eKGvLgh_l9_qcv0B",
         E: "1WYet_SW3uL6m8H5tIxE1b4HqTCmzvjqM"
       }
+      // Tambah unit lain di sini jika sudah siap
     };
     function driveFolderIdFor(unit, grade){ return DRIVE_FOLDERS?.[unit]?.[grade] || null; }
     async function listDriveFolder(folderId) {
@@ -289,7 +270,7 @@
       return `https://drive.google.com/file/d/${file.id}/preview`;
     }
 
-    // Data contoh
+    // Data contoh (struktur tetap)
     const SATKER_LIST = ['Inspektorat', 'Pusdatin', 'Sestama', 'D1', 'D3', 'Puslat', 'D4'];
     const ASSESSMENT_STRUCTURE = [
       { kode:"1.1.1", uraian_subunsur:"Penegakan Integritas dan Nilai Etika", no:"1",
@@ -324,27 +305,21 @@
         ]}
     ];
 
-    // Helpers
     const $ = (sel) => document.querySelector(sel);
 
     const App = {
-      db:null, auth:null, storage:null,
+      db:null, auth:null,
       userId:null,
       currentSatker: localStorage.getItem('spip.currentSatker') || SATKER_LIST[0],
       assessmentData:{}, unsubscribe:null, bootstrapModal:null,
       currentGrade:'A',
-
-      // caches
-      filesCache: new Map(),
-      sestamaCache: new Map(),
-      isListing:false,
+      sestamaCache:new Map(),
 
       init() {
         try {
           const app = initializeApp(firebaseConfig);
           this.db = getFirestore(app);
           enableIndexedDbPersistence(this.db).catch(()=>{});
-          this.storage = getStorage(app);
           this.auth = getAuth(app);
           this.handleAuthentication();
         } catch (e) {
@@ -451,23 +426,13 @@
           this.saveAssessment().catch(err=>console.error('save error',err));
         });
 
-        // Bukti Dukung (Firebase Storage original)
-        document.getElementById('btn-upload').addEventListener('click', ()=> document.getElementById('file-input').click());
-        document.getElementById('file-input').addEventListener('change', (e)=> this.uploadFiles(e.target.files));
-        document.getElementById('btn-refresh').addEventListener('click', ()=>{
-          this.refreshFiles(true);     // segarkan storage
-          this.refreshDriveFiles();    // segarkan drive (tambahan)
-        });
+        // Grade tabs
         document.getElementById('grade-tabs').addEventListener('click', (e)=>{
           const btn=e.target.closest('button[data-grade]'); if(!btn) return;
           this.switchGrade(btn.dataset.grade);
         });
-        document.getElementById('file-list').addEventListener('click', async (e)=>{
-          const del=e.target.closest('[data-action="delete"][data-path]'); if(!del) return;
-          await this.deleteFile(del.dataset.path);
-        });
 
-        // tombol buka folder drive (tambahan) — opsional
+        // Tombol buka folder drive
         document.getElementById('btn-open-drive-folder').addEventListener('click', ()=>{
           const fid = driveFolderIdFor(this.currentSatker, this.currentGrade);
           if(!fid){ alert('Folder Google Drive belum dikonfigurasi untuk unit/grade ini.'); return; }
@@ -522,11 +487,10 @@
           }
         }
 
-        // Bukti Dukung
+        // Bukti Dukung: set Grade A & load Drive list
         this.resetGradeTabs('A');
         this.currentGrade='A';
-        await this.refreshFiles();      // Storage lama
-        await this.refreshDriveFiles(); // Drive tambahan
+        await this.refreshDriveFiles();
 
         if (!this.bootstrapModal) this.bootstrapModal = new bootstrap.Modal($('#assessment-modal'));
         this.bootstrapModal.show();
@@ -549,12 +513,7 @@
         if (this.bootstrapModal) this.bootstrapModal.hide();
       },
 
-      // ====== BUKTI DUKUNG (Storage – original) ======
-      gradePath(grade){
-        const code=document.getElementById('current-parameter-code').value;
-        return `attachments/${this.currentSatker}/${code}/${grade}/`;
-      },
-
+      // ====== Bukti Dukung (Google Drive VIEW) ======
       resetGradeTabs(active){
         document.querySelectorAll('#grade-tabs [data-grade]').forEach(btn=>{
           const isActive = btn.dataset.grade===active;
@@ -566,114 +525,9 @@
       switchGrade(grade){
         this.currentGrade = grade;
         this.resetGradeTabs(grade);
-        this.refreshFiles();      // storage
-        this.refreshDriveFiles(); // drive
+        this.refreshDriveFiles();
       },
 
-      async listFilesOnce(path, pageToken=null){
-        const opt = pageToken ? { maxResults: 50, pageToken } : { maxResults: 50 };
-        return await list(sRef(this.storage, path), opt);
-      },
-
-      async refreshFiles(force=false){
-        const listEl = document.getElementById('file-list');
-        const path = this.gradePath(this.currentGrade);
-        if (!force && this.filesCache.has(path)) {
-          this.renderFiles(this.filesCache.get(path));
-          return;
-        }
-        if (this.isListing) return;
-        this.isListing = true;
-        listEl.innerHTML = '<div class="muted px-2 py-1">Memuat…</div>';
-        try{
-          let items = [];
-          let token = null;
-          do {
-            const res = await this.listFilesOnce(path, token);
-            items = items.concat(res.items || []);
-            token = res.nextPageToken || null;
-          } while (token);
-
-          if(!items.length){
-            this.filesCache.set(path, []);
-            listEl.innerHTML = '<div class="muted px-2 py-1">Belum ada dokumen.</div>';
-            return;
-          }
-
-          const withUrl = await Promise.all(items.map(async (item) => {
-            const url = await getDownloadURL(item);
-            return { name: item.name, url, fullPath: item.fullPath };
-          }));
-
-          this.filesCache.set(path, withUrl);
-          this.renderFiles(withUrl);
-        }catch(err){
-          console.error(err);
-          const msg = (code=>{
-            if(code==='storage/unauthorized') return 'Ditolak oleh aturan Storage. Pastikan request.auth != null di rules.';
-            if(code==='storage/object-not-found') return 'Folder belum ada. Unggah dokumen pertama Anda.';
-            return 'Gagal memuat daftar dokumen. Periksa aturan Storage atau koneksi.';
-          })(err?.code);
-          listEl.innerHTML = `<div class="text-danger px-2 py-1">${msg}</div>`;
-        }finally{
-          this.isListing = false;
-        }
-      },
-
-      renderFiles(list){
-        const listEl = document.getElementById('file-list');
-        listEl.innerHTML = '';
-        list.forEach(f=>{
-          const row = document.createElement('div');
-          row.className = 'list-group-item d-flex align-items-center justify-content-between list-file-item';
-          row.innerHTML = `
-            <a href="${f.url}" target="_blank" rel="noopener" class="truncate text-decoration-none">${f.name}</a>
-            <button class="btn btn-sm btn-link text-danger" data-action="delete" data-path="${f.fullPath}">
-              <i class="bi bi-trash"></i>
-            </button>`;
-          listEl.appendChild(row);
-        });
-      },
-
-      async uploadFiles(fileList){
-        if(!fileList || !fileList.length) return;
-        const status = document.getElementById('upload-status');
-        const basePath = this.gradePath(this.currentGrade);
-        try{
-          for (const f of fileList){
-            status.textContent = `Mengunggah: ${f.name}…`;
-            const filename = `${Date.now()}_${f.name}`;
-            const full = basePath + filename;
-            await uploadBytes(sRef(this.storage, full), f);
-            const url = await getDownloadURL(sRef(this.storage, full));
-            const arr = this.filesCache.get(basePath) || [];
-            arr.unshift({ name: filename, url, fullPath: full });
-            this.filesCache.set(basePath, arr);
-          }
-          status.textContent = 'Unggah selesai.';
-          this.renderFiles(this.filesCache.get(basePath) || []);
-          document.getElementById('file-input').value = '';
-        }catch(err){
-          console.error('upload error', err);
-          const msg = err?.code==='storage/unauthorized'
-            ? 'Upload ditolak oleh aturan Storage. Pastikan rules mengizinkan akun anon.'
-            : 'Gagal unggah. Cek aturan Storage/koneksi.';
-          status.textContent = msg;
-        }finally{
-          setTimeout(()=> status.textContent='', 2500);
-        }
-      },
-
-      async deleteFile(path){
-        if(!confirm('Hapus dokumen ini?')) return;
-        await deleteObject(sRef(this.storage, path));
-        const basePath = this.gradePath(this.currentGrade);
-        const arr = (this.filesCache.get(basePath) || []).filter(x=>x.fullPath!==path);
-        this.filesCache.set(basePath, arr);
-        this.renderFiles(arr);
-      },
-
-      // ====== Bukti Dukung (Google Drive – TAMBAHAN) ======
       async refreshDriveFiles(){
         const listEl = document.getElementById('drive-file-list');
         const folderId = driveFolderIdFor(this.currentSatker, this.currentGrade);
