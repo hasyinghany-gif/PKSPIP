@@ -17,15 +17,36 @@
 
   <style>
     :root { --brand: #0d6efd; }
+    /* palet gradasi grade A–E: hijau → merah */
+      --grade-a: #2ecc71;  /* hijau */
+      --grade-b: #a3e635;  /* hijau kekuningan */
+      --grade-c: #facc15;  /* kuning */
+      --grade-d: #f97316;  /* oranye */
+      --grade-e: #ef4444;  /* merah */
+    }
+
     html, body { height: 100%; }
-    body { font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans"; background:#f8f9fa; }
+    body {
+      font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans";
+      background:#f8f9fa;
+    }
     .sticky-toolbar { position: sticky; top: 0; z-index: 1030; }
     .criteria-box { max-height: 180px; overflow-y: auto; }
     .form-hint { font-size:.85rem; color:#6c757d; }
-    .nav-pill-grade .btn { border-radius: 999px; }
-    .list-file-item:hover { background: #f8f9fb; }
-    .truncate { max-width: 100%; display:inline-block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; vertical-align:bottom; }
-    .muted { color:#6c757d; }
+
+    /* === Badge Grade Kustom (gradasi A→E) === */
+    .badge-grade{
+      border-radius: 999px;
+      padding: .45rem .75rem;
+      font-weight: 600;
+      min-width: 2.25rem;
+      display: inline-block;
+    }
+    .grade-A{ background: var(--grade-a); color:#fff; }
+    .grade-B{ background: var(--grade-b); color:#111; }
+    .grade-C{ background: var(--grade-c); color:#111; }
+    .grade-D{ background: var(--grade-d); color:#fff; }
+    .grade-E{ background: var(--grade-e); color:#fff; }
   </style>
 </head>
 <body>
@@ -2661,4 +2682,5 @@ c. Memberikan rekomendasi yang relevan.`
   </script>
 </body>
 </html>
+
 
