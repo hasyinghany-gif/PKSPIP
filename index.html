@@ -16,8 +16,9 @@
   <link rel="preconnect" href="https://drive.google.com" crossorigin>
 
   <style>
-    :root { --brand: #0d6efd; }
-    /* palet gradasi grade A–E: hijau → merah */
+    :root {
+      --brand: #0d6efd;
+      /* palet gradasi grade A–E: hijau → merah */
       --grade-a: #2ecc71;  /* hijau */
       --grade-b: #a3e635;  /* hijau kekuningan */
       --grade-c: #facc15;  /* kuning */
@@ -35,18 +36,19 @@
     .form-hint { font-size:.85rem; color:#6c757d; }
 
     /* === Badge Grade Kustom (gradasi A→E) === */
-    .badge-grade{
+    .badge[data-grade]{
       border-radius: 999px;
       padding: .45rem .75rem;
       font-weight: 600;
       min-width: 2.25rem;
       display: inline-block;
     }
-    .grade-A{ background: var(--grade-a); color:#fff; }
-    .grade-B{ background: var(--grade-b); color:#111; }
-    .grade-C{ background: var(--grade-c); color:#111; }
-    .grade-D{ background: var(--grade-d); color:#fff; }
-    .grade-E{ background: var(--grade-e); color:#fff; }
+    .badge[data-grade="A"]{ background: var(--grade-a) !important; color:#fff !important; }
+    .badge[data-grade="B"]{ background: var(--grade-b) !important; color:#111 !important; }
+    .badge[data-grade="C"]{ background: var(--grade-c) !important; color:#111 !important; }
+    .badge[data-grade="D"]{ background: var(--grade-d) !important; color:#fff !important; }
+    .badge[data-grade="E"]{ background: var(--grade-e) !important; color:#fff !important; }
+    
   </style>
 </head>
 <body>
@@ -2682,5 +2684,6 @@ c. Memberikan rekomendasi yang relevan.`
   </script>
 </body>
 </html>
+
 
 
