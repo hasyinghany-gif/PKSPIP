@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="utf-8" />
@@ -20,6 +21,7 @@
     .nav-pill-grade .btn { border-radius: 999px; }
     .list-file-item:hover { background: #f8f9fb; }
     .truncate { max-width: 100%; display:inline-block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; vertical-align:bottom; }
+    .muted { color:#6c757d; }
   </style>
 </head>
 <body>
@@ -238,7 +240,7 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
     import { getFirestore, doc, onSnapshot, setDoc, getDoc, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-    import { getStorage, ref as sRef, uploadBytes, getDownloadURL, listAll, deleteObject } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
+    import { getStorage, ref as sRef, uploadBytes, getDownloadURL, list, deleteObject } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
 
     // Data contoh
     const SATKER_LIST = ['Inspektorat', 'Pusdatin', 'Sestama', 'D1', 'D3', 'Puslat', 'D4'];
@@ -284,6 +286,11 @@
       currentSatker: localStorage.getItem('spip.currentSatker') || SATKER_LIST[0],
       assessmentData:{}, unsubscribe:null, bootstrapModal:null,
       currentGrade:'A',
+
+      // caches
+      filesCache: new Map(),         // key: path -> [{name, url, fullPath}]
+      sestamaCache: new Map(),       // key: paramCode -> {simpulan_sestama, hasil_pengujian_sestama}
+      isListing:false,               // guard agar tidak dobel panggilan list()
 
       init() {
         try {
@@ -336,6 +343,7 @@
 
       renderTable(){
         const tbody=$('#assessment-table-body'); tbody.innerHTML='';
+        const frag=document.createDocumentFragment();
         ASSESSMENT_STRUCTURE.forEach(p=>{
           const data = this.assessmentData[p.kode_parameter];
           const done = Boolean(data && data.simpulan);
@@ -351,8 +359,9 @@
               </button>
             </td>
             <td class="px-3 text-center">${simpulan?`<span class="badge text-bg-${this.gradeBadgeClass(simpulan)}">${simpulan}</span>`:'<span class="text-muted">-</span>'}</td>`;
-          tbody.appendChild(tr);
+          frag.appendChild(tr);
         });
+        tbody.appendChild(frag);
       },
 
       listenForDataChanges(){
@@ -380,7 +389,7 @@
           this.listenForDataChanges();
         });
 
-        // Delegasi global: tidak pakai await di luar async (hindari reserved word)
+        // Delegasi global sederhana
         document.addEventListener('click', (e)=>{
           const btn=e.target.closest('[data-action="open-modal"]');
           if(!btn) return;
@@ -399,7 +408,7 @@
         // Bukti Dukung
         document.getElementById('btn-upload').addEventListener('click', ()=> document.getElementById('file-input').click());
         document.getElementById('file-input').addEventListener('change', (e)=> this.uploadFiles(e.target.files));
-        document.getElementById('btn-refresh').addEventListener('click', ()=> this.refreshFiles());
+        document.getElementById('btn-refresh').addEventListener('click', ()=> this.refreshFiles(true)); // true = force from server
         document.getElementById('grade-tabs').addEventListener('click', (e)=>{
           const btn=e.target.closest('button[data-grade]'); if(!btn) return;
           this.switchGrade(btn.dataset.grade);
@@ -434,7 +443,7 @@
         document.getElementById('hasil-pengujian').value = exist.hasil_pengujian || '';
         document.getElementById('uraian-aoi').value = exist.uraian_aoi || '';
 
-        // Sestama fields / reference
+        // Sestama: pakai cache jika ada
         const isSestama = this.currentSatker === 'Sestama';
         const sestamaFields = document.getElementById('sestama-fields');
         const refCard = document.getElementById('sestama-reference');
@@ -445,8 +454,12 @@
         } else {
           sestamaFields.classList.add('d-none'); refCard.classList.remove('d-none');
           try {
-            const sDoc = await getDoc(doc(this.db,'assessments','Sestama'));
-            const ref = sDoc.exists() ? (sDoc.data().parameters?.[paramCode] || {}) : {};
+            let ref = this.sestamaCache.get(paramCode);
+            if (!ref) {
+              const sDoc = await getDoc(doc(this.db,'assessments','Sestama'));
+              ref = sDoc.exists() ? (sDoc.data().parameters?.[paramCode] || {}) : {};
+              this.sestamaCache.set(paramCode, ref);
+            }
             document.getElementById('ref-simpulan-sestama').textContent = ref.simpulan_sestama || ref.simpulan || '—';
             document.getElementById('ref-uraian-sestama').textContent = ref.hasil_pengujian_sestama || ref.hasil_pengujian || 'Tidak ada rujukan';
           } catch(err){
@@ -459,7 +472,7 @@
         // Bukti Dukung
         this.resetGradeTabs('A');
         this.currentGrade='A';
-        await this.refreshFiles();
+        await this.refreshFiles(); // pakai cache bila ada
 
         if (!this.bootstrapModal) this.bootstrapModal = new bootstrap.Modal($('#assessment-modal'));
         this.bootstrapModal.show();
@@ -499,36 +512,75 @@
       switchGrade(grade){
         this.currentGrade = grade;
         this.resetGradeTabs(grade);
-        this.refreshFiles();
+        this.refreshFiles(); // gunakan cache jika tersedia
       },
 
-      async refreshFiles(){
+      // List files using paginated `list()` (faster than listAll)
+      async listFilesOnce(path, pageToken=null){
+        const opt = pageToken ? { maxResults: 50, pageToken } : { maxResults: 50 };
+        return await list(sRef(this.storage, path), opt);
+      },
+
+      async refreshFiles(force=false){
         const listEl = document.getElementById('file-list');
-        listEl.innerHTML = '<div class="text-muted px-2 py-1">Memuat…</div>';
         const path = this.gradePath(this.currentGrade);
+        if (!force && this.filesCache.has(path)) {
+          // render dari cache
+          this.renderFiles(this.filesCache.get(path));
+          return;
+        }
+        if (this.isListing) return; // cegah duplikasi
+        this.isListing = true;
+        listEl.innerHTML = '<div class="muted px-2 py-1">Memuat…</div>';
         try{
-          const res = await listAll(sRef(this.storage, path));
-          if(!res.items.length){
-            listEl.innerHTML = '<div class="text-muted px-2 py-1">Belum ada dokumen.</div>';
+          let items = [];
+          let token = null;
+          do {
+            const res = await this.listFilesOnce(path, token);
+            items = items.concat(res.items || []);
+            token = res.nextPageToken || null;
+          } while (token);
+
+          if(!items.length){
+            this.filesCache.set(path, []); // cache kosong
+            listEl.innerHTML = '<div class="muted px-2 py-1">Belum ada dokumen.</div>';
             return;
           }
-          listEl.innerHTML = '';
-          for (const item of res.items){
+
+          // Ambil URL paralel
+          const withUrl = await Promise.all(items.map(async (item) => {
             const url = await getDownloadURL(item);
-            const name = item.name;
-            const row = document.createElement('div');
-            row.className = 'list-group-item d-flex align-items-center justify-content-between list-file-item';
-            row.innerHTML = `
-              <a href="${url}" target="_blank" rel="noopener" class="truncate text-decoration-none">${name}</a>
-              <button class="btn btn-sm btn-link text-danger" data-action="delete" data-path="${item.fullPath}">
-                <i class="bi bi-trash"></i>
-              </button>`;
-            listEl.appendChild(row);
-          }
+            return { name: item.name, url, fullPath: item.fullPath };
+          }));
+
+          this.filesCache.set(path, withUrl);
+          this.renderFiles(withUrl);
         }catch(err){
           console.error(err);
-          listEl.innerHTML = '<div class="text-danger px-2 py-1">Gagal memuat daftar dokumen. Periksa aturan Storage.</div>';
+          const msg = (code=>{
+            if(code==='storage/unauthorized') return 'Ditolak oleh aturan Storage. Pastikan request.auth != null di rules.';
+            if(code==='storage/object-not-found') return 'Folder belum ada. Unggah dokumen pertama Anda.';
+            return 'Gagal memuat daftar dokumen. Periksa aturan Storage atau koneksi.';
+          })(err?.code);
+          listEl.innerHTML = `<div class="text-danger px-2 py-1">${msg}</div>`;
+        }finally{
+          this.isListing = false;
         }
+      },
+
+      renderFiles(list){
+        const listEl = document.getElementById('file-list');
+        listEl.innerHTML = '';
+        list.forEach(f=>{
+          const row = document.createElement('div');
+          row.className = 'list-group-item d-flex align-items-center justify-content-between list-file-item';
+          row.innerHTML = `
+            <a href="${f.url}" target="_blank" rel="noopener" class="truncate text-decoration-none">${f.name}</a>
+            <button class="btn btn-sm btn-link text-danger" data-action="delete" data-path="${f.fullPath}">
+              <i class="bi bi-trash"></i>
+            </button>`;
+          listEl.appendChild(row);
+        });
       },
 
       async uploadFiles(fileList){
@@ -539,14 +591,23 @@
           for (const f of fileList){
             status.textContent = `Mengunggah: ${f.name}…`;
             const filename = `${Date.now()}_${f.name}`;
-            await uploadBytes(sRef(this.storage, basePath + filename), f);
+            const full = basePath + filename;
+            await uploadBytes(sRef(this.storage, full), f);
+            // update cache cepat
+            const url = await getDownloadURL(sRef(this.storage, full));
+            const arr = this.filesCache.get(basePath) || [];
+            arr.unshift({ name: filename, url, fullPath: full });
+            this.filesCache.set(basePath, arr);
           }
           status.textContent = 'Unggah selesai.';
-          await this.refreshFiles();
+          this.renderFiles(this.filesCache.get(basePath) || []);
           document.getElementById('file-input').value = '';
         }catch(err){
           console.error('upload error', err);
-          status.textContent = 'Gagal unggah. Cek aturan Storage.';
+          const msg = err?.code==='storage/unauthorized'
+            ? 'Upload ditolak oleh aturan Storage. Pastikan rules mengizinkan akun anon.'
+            : 'Gagal unggah. Cek aturan Storage/koneksi.';
+          status.textContent = msg;
         }finally{
           setTimeout(()=> status.textContent='', 2500);
         }
@@ -555,7 +616,11 @@
       async deleteFile(path){
         if(!confirm('Hapus dokumen ini?')) return;
         await deleteObject(sRef(this.storage, path));
-        await this.refreshFiles();
+        // hapus dari cache & render ulang
+        const basePath = this.gradePath(this.currentGrade);
+        const arr = (this.filesCache.get(basePath) || []).filter(x=>x.fullPath!==path);
+        this.filesCache.set(basePath, arr);
+        this.renderFiles(arr);
       },
 
       updateProgress(){
