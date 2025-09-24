@@ -2434,18 +2434,28 @@ c. Memberikan rekomendasi yang relevan.`
           tr.innerHTML=`
             <td class="px-3">${p.kode_parameter}</td>
             <td class="px-3">${p.uraian_parameter}</td>
-            <td class="px-3 text-center"><span class="badge rounded-pill ${done?'text-bg-success':'text-bg-warning'}">${done?'Selesai':'Belum Diisi'}</span></td>
             <td class="px-3 text-center">
-              <button type="button" class="btn btn-primary btn-sm open-modal-btn" data-action="open-modal" data-param-code="${p.kode_parameter}">
-                ${done?'Edit':'Isi Penilaian'}
+              <span class="badge rounded-pill ${done ? 'text-bg-success' : 'text-bg-warning'}">
+                ${done ? 'Selesai' : 'Belum Diisi'}
+              </span>
+            </td>
+            <td class="px-3 text-center">
+              <button type="button"
+                      class="btn btn-primary btn-sm open-modal-btn"
+                      data-action="open-modal"
+                      data-param-code="${p.kode_parameter}">
+                ${done ? 'Edit' : 'Isi Penilaian'}
               </button>
             </td>
-            <td class="px-3 text-center">${simpulan?`<span class="badge" data-grade="${simpulan}"{ (simpulan === 'D' || simpulan === 'E')
-                            ? 'data-bs-toggle="tooltip" title="Perlu diperhatikan untuk peningkatan grading"'
-                            : '' }>
-                        ${simpulan}
-                     </span>`
+            <td class="px-3 text-center">
+              ${
+                simpulan
+                  ? `<span class="badge" data-grade="${simpulan}"${tooltipAttr}>${simpulan}</span>`
                   : '<span class="text-muted">-</span>'
+              }
+            </td>
+          `;
+          
           frag.appendChild(tr);
         });
         tbody.appendChild(frag);
@@ -2695,5 +2705,6 @@ c. Memberikan rekomendasi yang relevan.`
   </script>
 </body>
 </html>
+
 
 
