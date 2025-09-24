@@ -10,6 +10,11 @@
   <!-- Google Font -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
+  <!-- Preconnect untuk percepat akses Drive -->
+  <link rel="preconnect" href="https://www.googleapis.com" crossorigin>
+  <link rel="preconnect" href="https://docs.google.com" crossorigin>
+  <link rel="preconnect" href="https://drive.google.com" crossorigin>
+
   <style>
     :root { --brand: #0d6efd; }
     html, body { height: 100%; }
@@ -215,6 +220,21 @@
 
   </div>
 
+  <!-- Modal Preview Global (reusable, smooth) -->
+  <div class="modal fade" id="preview-modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="preview-modal-title">Preview Dokumen</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body p-0" style="height:80vh">
+          <iframe id="preview-iframe" src="" style="border:0;width:100%;height:100%"></iframe>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
 
@@ -257,15 +277,10 @@
       "Puslat":   { A:"4aA", B:"4aB", C:"4aC", D:"4aD", E:"4aE" },
       "D4":       { A:"5aA", B:"5aB", C:"5aC", D:"5aD", E:"5aE" }
     };
+
     function driveFolderIdFor(unit, grade){ return DRIVE_FOLDERS?.[unit]?.[grade] || null; }
-    async function listDriveFolder(folderId) {
-      const q = encodeURIComponent(`'${folderId}' in parents and trashed = false`);
-      const fields = encodeURIComponent("files(id,name,mimeType,modifiedTime,webViewLink)");
-      const url = `https://www.googleapis.com/drive/v3/files?q=${q}&fields=${fields}&key=${DRIVE_API_KEY}`;
-      const res = await fetch(url);
-      if (!res.ok) throw new Error("Drive API error " + res.status);
-      const data = await res.json(); return data.files || [];
-    }
+
+    // ——— Drive API helpers ———
     function drivePreviewUrl(file) {
       const mt = file.mimeType || "";
       if (mt.includes("document"))    return `https://docs.google.com/document/d/${file.id}/preview`;
@@ -273,6 +288,29 @@
       if (mt.includes("presentation"))return `https://docs.google.com/presentation/d/${file.id}/preview`;
       return `https://drive.google.com/file/d/${file.id}/preview`;
     }
+
+    async function listDriveFolder(folderId, signal) {
+      const q = encodeURIComponent(`'${folderId}' in parents and trashed = false`);
+      const fields = encodeURIComponent("files(id,name,mimeType,modifiedTime,webViewLink)");
+      const url = `https://www.googleapis.com/drive/v3/files?q=${q}&fields=${fields}&key=${DRIVE_API_KEY}`;
+      const res = await fetch(url, { signal });
+      if (!res.ok) throw new Error("Drive API error " + res.status);
+      const data = await res.json(); 
+      return data.files || [];
+    }
+
+    // ——— Optimasi render ———
+    function shallowEqual(a, b){
+      const ka = Object.keys(a||{}), kb = Object.keys(b||{});
+      if (ka.length !== kb.length) return false;
+      for (const k of ka){ if (a[k]?.simpulan !== b[k]?.simpulan) return false; }
+      return true;
+    }
+
+    // ——— Global cache & abort ———
+    const driveCache = new Map();     // key: `${unit}_${grade}` -> files[]
+    let driveFetchCtrl = null;
+    let previewModal = null;
 
     // Data (struktur tetap)
     const SATKER_LIST = ['Inspektorat', 'Pusdatin', 'Sestama', 'D1', 'D3', 'Puslat', 'D4'];
@@ -334,6 +372,12 @@
         this.populateSatkerSelect();
         this.setupEventListeners();
         this.bootstrapModal = new bootstrap.Modal($('#assessment-modal'));
+
+        // inisialisasi modal preview global + kosongkan iframe saat ditutup
+        previewModal = new bootstrap.Modal(document.getElementById('preview-modal'));
+        document.getElementById('preview-modal').addEventListener('hidden.bs.modal', ()=>{
+          document.getElementById('preview-iframe').src = '';
+        });
       },
 
       handleAuthentication() {
@@ -396,12 +440,21 @@
         this.unsubscribe = onSnapshot(docRef,(snap)=>{
           if(snap.exists()){
             const raw=snap.data();
-            this.assessmentData = raw?.parameters || {};
+            const next = raw?.parameters || {};
+            if (!shallowEqual(this.assessmentData, next)) {
+              this.assessmentData = next;
+              this.renderTable(); 
+              this.updateProgress();
+            }
             this.updateLastSaved(raw?.updated_at || null);
           }else{
-            this.assessmentData={}; this.updateLastSaved(null);
+            if (!shallowEqual(this.assessmentData, {})) {
+              this.assessmentData={}; 
+              this.renderTable(); 
+              this.updateProgress();
+            }
+            this.updateLastSaved(null);
           }
-          this.renderTable(); this.updateProgress();
         },(err)=>{
           console.error('onSnapshot error:',err);
           $('#loader').style.display='block';
@@ -430,6 +483,7 @@
           this.saveAssessment().catch(err=>console.error('save error',err));
         });
 
+        // Bukti Dukung
         document.getElementById('grade-tabs').addEventListener('click', (e)=>{
           const btn=e.target.closest('button[data-grade]'); if(!btn) return;
           this.switchGrade(btn.dataset.grade);
@@ -447,6 +501,7 @@
         document.getElementById('current-parameter-code').value=paramCode;
         document.getElementById('modal-parameter-title').textContent=`${param.kode_parameter} — ${param.uraian_parameter}`;
 
+        // Kriteria + tooltip
         const html = param.grades.map(g=>`
           <p class="mb-1 small">
             <strong class="fw-semibold text-body-secondary">Grade ${g.grade}:</strong>
@@ -458,12 +513,14 @@
         document.getElementById('modal-criteria-container').innerHTML=html;
         document.querySelectorAll('#assessment-modal [data-bs-toggle="tooltip"]').forEach(el => new bootstrap.Tooltip(el));
 
+        // Prefill
         const exist = this.assessmentData[paramCode] || {};
         document.getElementById('metode-penilaian').value = exist.metode_penilaian || 'Wawancara';
         document.getElementById('simpulan').value = exist.simpulan || 'A';
         document.getElementById('hasil-pengujian').value = exist.hasil_pengujian || '';
         document.getElementById('uraian-aoi').value = exist.uraian_aoi || '';
 
+        // Sestama fields / reference
         const isSestama = this.currentSatker === 'Sestama';
         const sestamaFields = document.getElementById('sestama-fields');
         const refCard = document.getElementById('sestama-reference');
@@ -532,47 +589,62 @@
 
       async refreshDriveFiles(){
         const listEl = document.getElementById('drive-file-list');
+        const key = `${this.currentSatker}_${this.currentGrade}`;
         const folderId = driveFolderIdFor(this.currentSatker, this.currentGrade);
+
         if (!folderId) {
           listEl.innerHTML = '<div class="text-danger px-2 py-1">Folder Google Drive belum dikonfigurasi untuk unit/grade ini.</div>';
           return;
         }
-        listEl.innerHTML = '<div class="muted px-2 py-1">Memuat dari Google Drive…</div>';
+
+        // tampilkan skeleton singkat
+        listEl.innerHTML = `
+          <div class="px-2 py-1 muted">Memuat dokumen…</div>
+          <div class="list-group-item placeholder-glow"><span class="placeholder col-8"></span></div>
+          <div class="list-group-item placeholder-glow"><span class="placeholder col-6"></span></div>
+        `;
+
+        // render dari cache jika ada (instan)
+        if (driveCache.has(key)) {
+          this.renderDriveFiles(driveCache.get(key));
+        }
+
+        // batalkan fetch sebelumnya jika ada
+        if (driveFetchCtrl) driveFetchCtrl.abort();
+        driveFetchCtrl = new AbortController();
+
         try{
-          const files = await listDriveFolder(folderId);
-          if(!files.length){ listEl.innerHTML = '<div class="muted px-2 py-1">Belum ada dokumen di Google Drive.</div>'; return; }
-          listEl.innerHTML = '';
-          files.forEach(file=>{
-            const row = document.createElement('div');
-            row.className = 'list-group-item d-flex justify-content-between align-items-center';
-            row.innerHTML = `
-              <a href="${file.webViewLink}" target="_blank" rel="noopener" class="truncate">${file.name}</a>
-              <button class="btn btn-sm btn-outline-primary">Preview</button>`;
-            row.querySelector('button').addEventListener('click', ()=>{
-              const url = drivePreviewUrl(file);
-              const html = `
-                <div class="modal fade" id="preview-modal" tabindex="-1">
-                  <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
-                    <div class="modal-content">
-                      <div class="modal-header">
-                        <h5 class="modal-title">${file.name}</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                      </div>
-                      <div class="modal-body p-0" style="height:80vh">
-                        <iframe src="${url}" style="border:0;width:100%;height:100%"></iframe>
-                      </div>
-                    </div>
-                  </div>
-                </div>`;
-              document.body.insertAdjacentHTML('beforeend', html);
-              new bootstrap.Modal(document.getElementById('preview-modal')).show();
-            });
-            listEl.appendChild(row);
-          });
+          const files = await listDriveFolder(folderId, driveFetchCtrl.signal);
+          driveCache.set(key, files);
+          this.renderDriveFiles(files);
         }catch(err){
+          if (err.name === 'AbortError') return;
           console.error(err);
           listEl.innerHTML = '<div class="text-danger px-2 py-1">Gagal memuat dari Google Drive. Cek API Key & izin folder.</div>';
         }
+      },
+
+      renderDriveFiles(files){
+        const listEl = document.getElementById('drive-file-list');
+        if(!files || !files.length){
+          listEl.innerHTML = '<div class="muted px-2 py-1">Belum ada dokumen di Google Drive.</div>';
+          return;
+        }
+        listEl.innerHTML = '';
+        files.forEach(file=>{
+          const row = document.createElement('div');
+          row.className = 'list-group-item d-flex justify-content-between align-items-center';
+          row.innerHTML = `
+            <a href="${file.webViewLink}" target="_blank" rel="noopener" class="truncate">${file.name}</a>
+            <button class="btn btn-sm btn-outline-primary">Preview</button>
+          `;
+          row.querySelector('button').addEventListener('click', ()=>{
+            document.getElementById('preview-modal-title').textContent = file.name;
+            document.getElementById('preview-iframe').src = drivePreviewUrl(file);
+            previewModal?.show();
+          });
+          listEl.appendChild(row);
+        });
       },
 
       updateProgress(){
