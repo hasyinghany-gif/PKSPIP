@@ -235,7 +235,7 @@
     import { getFirestore, doc, onSnapshot, setDoc, getDoc, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
     // === Google Drive Config ===
-    const DRIVE_API_KEY = "YOUR_API_KEY_HERE"; // ganti
+    const DRIVE_API_KEY = "AIzaSyAukkICkUg5NsFaGy0K8F-GDeOXWCWml4s"; // <- API Key kamu
     const DRIVE_FOLDERS = {
       "Sestama": {
         A: "1hTPPL7emavgqqV8_hjEVCSzUQ1gYAXQP",
@@ -250,8 +250,12 @@
         C: "1Mh0ZiUDkZ2rfmZlifCHUKwiSW-eXLsVG",
         D: "1Bk3cEUtsC3zd7u63eKGvLgh_l9_qcv0B",
         E: "1WYet_SW3uL6m8H5tIxE1b4HqTCmzvjqM"
-      }
-      // Tambah unit lain di sini jika sudah siap
+      },
+      "Pusdatin": { A:"1qA", B:"1qB", C:"1qC", D:"1qD", E:"1qE" },  // placeholder contoh
+      "D1":       { A:"2aA", B:"2aB", C:"2aC", D:"2aD", E:"2aE" },
+      "D3":       { A:"3aA", B:"3aB", C:"3aC", D:"3aD", E:"3aE" },
+      "Puslat":   { A:"4aA", B:"4aB", C:"4aC", D:"4aD", E:"4aE" },
+      "D4":       { A:"5aA", B:"5aB", C:"5aC", D:"5aD", E:"5aE" }
     };
     function driveFolderIdFor(unit, grade){ return DRIVE_FOLDERS?.[unit]?.[grade] || null; }
     async function listDriveFolder(folderId) {
@@ -270,7 +274,7 @@
       return `https://drive.google.com/file/d/${file.id}/preview`;
     }
 
-    // Data contoh (struktur tetap)
+    // Data (struktur tetap)
     const SATKER_LIST = ['Inspektorat', 'Pusdatin', 'Sestama', 'D1', 'D3', 'Puslat', 'D4'];
     const ASSESSMENT_STRUCTURE = [
       { kode:"1.1.1", uraian_subunsur:"Penegakan Integritas dan Nilai Etika", no:"1",
@@ -426,13 +430,11 @@
           this.saveAssessment().catch(err=>console.error('save error',err));
         });
 
-        // Grade tabs
         document.getElementById('grade-tabs').addEventListener('click', (e)=>{
           const btn=e.target.closest('button[data-grade]'); if(!btn) return;
           this.switchGrade(btn.dataset.grade);
         });
 
-        // Tombol buka folder drive
         document.getElementById('btn-open-drive-folder').addEventListener('click', ()=>{
           const fid = driveFolderIdFor(this.currentSatker, this.currentGrade);
           if(!fid){ alert('Folder Google Drive belum dikonfigurasi untuk unit/grade ini.'); return; }
@@ -487,7 +489,7 @@
           }
         }
 
-        // Bukti Dukung: set Grade A & load Drive list
+        // Bukti Dukung: Grade A default
         this.resetGradeTabs('A');
         this.currentGrade='A';
         await this.refreshDriveFiles();
