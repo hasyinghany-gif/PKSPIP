@@ -2440,7 +2440,7 @@ c. Memberikan rekomendasi yang relevan.`
                 ${done?'Edit':'Isi Penilaian'}
               </button>
             </td>
-            <td class="px-3 text-center">${simpulan?`<span class="badge text-bg-${gradeClass}">${simpulan)}">${simpulan}</span>`:'<span class="text-muted">-</span>'}</td>`;
+            <td class="px-3 text-center">${simpulan?`<span class="badge text-bg-${this.gradeBadgeClass(simpulan)}">${simpulan}</span>`:'<span class="text-muted">-</span>'}</td>`;
           frag.appendChild(tr);
         });
         tbody.appendChild(frag);
@@ -2684,8 +2684,3 @@ c. Memberikan rekomendasi yang relevan.`
   </script>
 </body>
 </html>
-
-
-
-
-
