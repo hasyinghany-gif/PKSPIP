@@ -326,7 +326,7 @@
 
     function driveFolderIdFor(unit, grade){ return DRIVE_FOLDERS?.[unit]?.[grade] || null; }
 
-    // ——— Drive API helpers ———
+    // --- Drive API helpers ---
     function drivePreviewUrl(file) {
       const mt = file.mimeType || "";
       if (mt.includes("document"))    return `https://docs.google.com/document/d/${file.id}/preview`;
@@ -345,7 +345,7 @@
       return data.files || [];
     }
 
-    // ——— Optimasi render ———
+    // --- Optimasi render ---
     function shallowEqual(a, b){
       const ka = Object.keys(a||{}), kb = Object.keys(b||{});
       if (ka.length !== kb.length) return false;
@@ -353,7 +353,7 @@
       return true;
     }
 
-    // ——— Global cache & abort ———
+    // --- Global cache & abort ---
     const driveCache = new Map();     // key: `${unit}_${grade}` -> files[]
     let driveFetchCtrl = null;
     let previewModal = null;
@@ -2572,7 +2572,7 @@ c. Memberikan rekomendasi yang relevan.`
       async openModal(paramCode){
         const param = ASSESSMENT_STRUCTURE.find(p=>p.kode_parameter===paramCode); if(!param) return;
         document.getElementById('current-parameter-code').value=paramCode;
-        document.getElementById('modal-parameter-title').textContent=`${param.kode_parameter} — ${param.uraian_parameter}`;
+        document.getElementById('modal-parameter-title').textContent=`${param.kode_parameter} - ${param.uraian_parameter}`;
 
         // Kriteria + tooltip
         const html = param.grades.map(g=>`
@@ -2610,10 +2610,10 @@ c. Memberikan rekomendasi yang relevan.`
               ref = sDoc.exists() ? (sDoc.data().parameters?.[paramCode] || {}) : {};
               this.sestamaCache.set(paramCode, ref);
             }
-            document.getElementById('ref-simpulan-sestama').textContent = ref.simpulan_sestama || ref.simpulan || '—';
+            document.getElementById('ref-simpulan-sestama').textContent = ref.simpulan_sestama || ref.simpulan || '-';
             document.getElementById('ref-uraian-sestama').textContent = ref.hasil_pengujian_sestama || ref.hasil_pengujian || 'Tidak ada rujukan';
           } catch(err){
-            document.getElementById('ref-simpulan-sestama').textContent='—';
+            document.getElementById('ref-simpulan-sestama').textContent='-';
             document.getElementById('ref-uraian-sestama').innerHTML='<span class="text-danger">Gagal memuat rujukan Sestama</span>';
             console.error(err);
           }
@@ -2732,11 +2732,11 @@ c. Memberikan rekomendasi yang relevan.`
 
       updateLastSaved(ts){
         const el = document.getElementById('last-saved');
-        if(!ts){ el.textContent = '—'; return; }
+        if(!ts){ el.textContent = '-'; return; }
         try{
           const dt = new Date(ts);
           el.textContent = `Terakhir disimpan: ${dt.toLocaleString()}`;
-        }catch{ el.textContent='—'; }
+        }catch{ el.textContent='-'; }
       }
     };
 
@@ -2749,10 +2749,10 @@ window.openTocModal = function(kodeParam, unit){
   const param = ASSESSMENT_STRUCTURE.find(p=>p.kode_parameter===kodeParam);
   $('#toc-parameter-code').value = kodeParam;
   $('#toc-unit').value = unit;
-  $('#toc-parameter-title').textContent = `${kodeParam} — ${param?.uraian_parameter||''}`;
+  $('#toc-parameter-title').textContent = `${kodeParam} - ${param?.uraian_parameter||''}`;
   $('#toc-grade').value = 'C';
   $('#toc-criteria').innerHTML = `<div class="text-muted">Pilih grade untuk memuat kriteria…</div>`;
-  $('#toc-drive-files').innerHTML = `<div class="text-muted px-2 py-1">Klik “Muat Dokumen Drive”.</div>`;
+  $('#toc-drive-files').innerHTML = `<div class="text-muted px-2 py-1">Klik "Muat Dokumen Drive".</div>`;
   $('#toc-notes').value = '';
   $('#toc-score').textContent = '0';
   const b = $('#toc-suggest-badge'); b.setAttribute('data-grade','E'); b.textContent='E';
@@ -2905,7 +2905,7 @@ $('#toc-save')?.addEventListener('click', async ()=>{
 
 
   <script>
-    // === Collector untuk Dashboard (rekap A–E per unit) ===
+    // === Collector untuk Dashboard (rekap A-E per unit) ===
     (function(){
       function collect(){
         try{
@@ -3027,4 +3027,3 @@ $('#toc-save')?.addEventListener('click', async ()=>{
 </div>
 </body>
 </html>
-
