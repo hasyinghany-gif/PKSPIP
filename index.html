@@ -1018,6 +1018,235 @@ window.getParamGradeFolderId = function(unit, kodeParam, grade){
 };
 </script>
 <!-- ===== END: Tambahan Drive folders per Parameter Sub Unsur ===== -->
+
+<!-- ===== START: TOC (Test of Control) Add-on — kolom + modal + pre-assessment ===== -->
+<script>
+(function(){
+  // Ganti dengan URL Web App (Apps Script) kamu
+  const TOC_WEB_APP_URL = "PASTE_YOUR_APPS_SCRIPT_WEB_APP_URL";
+  const GRADES = ["A","B","C","D","E"];
+
+  function getActiveUnit(){
+    const s = document.querySelector("#satker-select");
+    return s ? s.value : "Sestama";
+  }
+  function getParamCodeFromRow(tr){
+    // kolom pertama = kode parameter
+    return tr && tr.cells && tr.cells[0] ? tr.cells[0].textContent.trim() : "";
+  }
+  function getFolders(unit, kode){
+    const out = {};
+    for(const g of GRADES){
+      const id = (window.getParamGradeFolderId ? window.getParamGradeFolderId(unit, kode, g) : null);
+      if (id) out[g] = id;
+    }
+    return out;
+  }
+  function criteriaFor(kode){
+    // Ambil seluruh "kriteria" dari ASSESSMENT_STRUCTURE untuk kode ini → jadi satu string
+    try{
+      const p = (window.ASSESSMENT_STRUCTURE||[]).find(x=>x.kode_parameter===kode);
+      if(!p) return "";
+      return (p.grades||[]).map(g=>String(g.kriteria||"")).join(" | ");
+    }catch{ return ""; }
+  }
+
+  // Sisipkan kolom "TOC" setelah "Status"
+  function injectTocColumn(){
+    const table = document.querySelector("#assessment-table-body")?.closest("table");
+    if(!table) return;
+    const headRow = table.querySelector("thead tr");
+    if(!headRow) return;
+
+    // cari index kolom "Status"
+    let statusIdx = -1;
+    [...headRow.children].forEach((th,i)=>{
+      const t=(th.textContent||"").trim().toLowerCase();
+      if(t==="status") statusIdx = i;
+    });
+    if(statusIdx<0) return;
+
+    // TH TOC bila belum ada
+    const hasToc = [...headRow.children].some(th => (th.textContent||"").trim()==="TOC");
+    if(!hasToc){
+      const th = document.createElement("th");
+      th.textContent = "TOC";
+      th.className = "px-3 text-center";
+      headRow.insertBefore(th, headRow.children[statusIdx+1] || null);
+    }
+    // Tambahkan tombol TOC di setiap baris
+    document.querySelectorAll("#assessment-table-body tr").forEach(tr=>{
+      const cells = tr.children;
+      // Jika sudah ada TOC di posisi tsb, skip
+      if(cells.length>statusIdx+1 && cells[statusIdx+1].querySelector?.('[data-action="open-toc"]')) return;
+      const td = document.createElement("td");
+      td.className = "px-3 text-center";
+      td.innerHTML = `<button class="btn btn-outline-primary btn-sm" data-action="open-toc"><i class="bi bi-robot me-1"></i>TOC</button>`;
+      tr.insertBefore(td, cells[statusIdx+1] || null);
+    });
+  }
+
+  // Modal TOC dibuat via JS agar tak perlu edit HTML utama
+  function ensureTocModal(){
+    if(document.querySelector("#tocModal")) return;
+    const html = `
+    <div class="modal fade" id="tocModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+          <div class="modal-header">
+            <div>
+              <h5 class="modal-title fw-bold">Test of Control (TOC) · Pre-Assessment</h5>
+              <div id="tocSubTitle" class="text-muted small"></div>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <div id="tocLoading" class="alert alert-info d-flex align-items-center gap-2">
+              <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+              <div>Analisis bukti dukung Google Drive sedang diproses…</div>
+            </div>
+            <div id="tocError" class="alert alert-danger d-none"></div>
+            <div id="tocResult" class="d-none">
+              <div class="row g-3">
+                <div class="col-md-4">
+                  <div class="card h-100"><div class="card-body">
+                    <div class="text-muted small mb-1">Saran Grade</div>
+                    <div id="tocGrade" style="font-size:2rem"></div>
+                    <div class="text-muted small" id="tocScore"></div>
+                    <div class="mt-3">
+                      <div class="text-muted small">Skor per Grade</div>
+                      <div id="tocPerGrade" class="mt-1 small"></div>
+                    </div>
+                  </div></div>
+                </div>
+                <div class="col-md-8">
+                  <div class="card h-100"><div class="card-body">
+                    <div class="text-muted small mb-1">Ringkasan Analisa</div>
+                    <div id="tocAnalisa" class="mb-2"></div>
+                    <div class="text-muted small mb-1">Kriteria Teridentifikasi</div>
+                    <div id="tocKriteria" class="small"></div>
+                  </div></div>
+                </div>
+              </div>
+              <div class="card mt-3"><div class="card-body">
+                <div class="text-muted small mb-1">Lampiran Bukti Dukung</div>
+                <div id="tocLampiran" class="small"></div>
+              </div></div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+            <button class="btn btn-primary" id="tocApplyBtn"><i class="bi bi-check2-circle me-1"></i>Terapkan Grade</button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+    document.body.insertAdjacentHTML("beforeend", html);
+  }
+
+  // Render hasil TOC ke modal
+  function renderTOC(data){
+    const GR = data.perGradeScores || {};
+    const g = data.grade || "E";
+    document.querySelector("#tocGrade").innerHTML = `<span class="badge bg-primary-subtle border text-primary fs-4 px-3 py-1">${g}</span>`;
+    document.querySelector("#tocScore").textContent = "Skor total: " + (data.score ?? "-") + " / 100";
+    document.querySelector("#tocPerGrade").innerHTML = GRADES.map(x=>`<div>Grade ${x}: <strong>${GR[x]??0}</strong></div>`).join("");
+    const chips = (data.kriteriaTerpenuhi||[]).map(k=>`<span class="badge text-bg-light me-1 mb-1">${k}</span>`).join("");
+    document.querySelector("#tocAnalisa").textContent = data.message || "Analisa selesai.";
+    document.querySelector("#tocKriteria").innerHTML = chips || "-";
+    const ev = (data.evidence||[]).map(e=>{
+      const url = e.url || `https://drive.google.com/file/d/${e.id}/view`;
+      const tag = e.grade ? `<span class="badge text-bg-secondary ms-2">G${e.grade}</span>` : "";
+      return `<div>• <a href="${url}" target="_blank" rel="noopener">${e.name||e.id}</a> <span class="text-muted">(${e.mime||"-"})</span>${tag}</div>`;
+    }).join("");
+    document.querySelector("#tocLampiran").innerHTML = ev || "-";
+    document.querySelector("#tocResult").classList.remove("d-none");
+  }
+
+  // Event: klik tombol TOC
+  let __tocRow = null, __lastTOC=null, __tocModal=null;
+  document.addEventListener("click", async (e)=>{
+    const btn = e.target.closest('[data-action="open-toc"]');
+    if(!btn) return;
+
+    ensureTocModal(); injectTocColumn();
+    __tocModal = __tocModal || (typeof bootstrap!=="undefined" ? new bootstrap.Modal("#tocModal") : null);
+
+    __tocRow = btn.closest("tr");
+    const unit = getActiveUnit();
+    const kode = getParamCodeFromRow(__tocRow);
+
+    document.querySelector("#tocSubTitle").textContent = `${unit} · ${kode}`;
+    document.querySelector("#tocError").classList.add("d-none");
+    document.querySelector("#tocResult").classList.add("d-none");
+    document.querySelector("#tocLoading").classList.remove("d-none");
+    document.querySelector("#tocApplyBtn").disabled = true;
+    __lastTOC = null;
+
+    __tocModal && __tocModal.show();
+
+    try{
+      const payload = {
+        unit, kode,
+        folders: getFolders(unit, kode),
+        criteria: criteriaFor(kode)
+      };
+      if(!TOC_WEB_APP_URL || TOC_WEB_APP_URL.startsWith("PASTE_")){
+        throw new Error("TOC_WEB_APP_URL belum diisi di HTML.");
+      }
+      const res = await fetch(TOC_WEB_APP_URL, {
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body: JSON.stringify(payload)
+      });
+      if(!res.ok) throw new Error(res.status+" "+res.statusText);
+      const data = await res.json();
+      __lastTOC = data;
+      renderTOC(data);
+      document.querySelector("#tocApplyBtn").disabled = false;
+    }catch(err){
+      const box = document.querySelector("#tocError");
+      box.textContent = "Gagal memuat TOC: " + err;
+      box.classList.remove("d-none");
+    }finally{
+      document.querySelector("#tocLoading").classList.add("d-none");
+    }
+  });
+
+  // Terapkan grade ke kolom "Grade" baris aktif
+  document.addEventListener("click",(e)=>{
+    if(e.target.id!=="tocApplyBtn") return;
+    if(!__tocRow || !__lastTOC) return;
+
+    const table = __tocRow.closest("table");
+    const heads = [...table.querySelectorAll("thead th")].map(th => (th.textContent||"").trim().toLowerCase());
+    const gradeIdx = heads.indexOf("grade");
+    if(gradeIdx>=0){
+      const cell = __tocRow.children[gradeIdx];
+      let badge = cell.querySelector(".badge[data-grade]");
+      if(!badge){
+        cell.innerHTML = `<span class="badge" data-grade="${__lastTOC.grade||'E'}">${__lastTOC.grade||'E'}</span>`;
+      }else{
+        badge.setAttribute("data-grade", __lastTOC.grade||"E");
+        badge.textContent = __lastTOC.grade||"E";
+      }
+    }
+    const m = bootstrap && bootstrap.Modal.getInstance(document.querySelector("#tocModal"));
+    m && m.hide();
+  });
+
+  // Pastikan kolom TOC tetap ada saat tabel di-render ulang
+  document.addEventListener("DOMContentLoaded", ()=>{
+    injectTocColumn();
+    const tbody = document.querySelector("#assessment-table-body");
+    if(tbody){
+      const mo = new MutationObserver(()=> injectTocColumn());
+      mo.observe(tbody, { childList:true, subtree:false });
+    }
+  });
+})();
+</script>
+<!-- ===== END: TOC Add-on ===== -->
+
 </body>
 </html>
-
