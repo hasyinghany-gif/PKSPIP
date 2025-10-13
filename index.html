@@ -115,7 +115,7 @@
                   <th scope="col" class="px-3">Kode</th>
                   <th scope="col" class="px-3">Uraian Parameter</th>
                   <th scope="col" class="px-3 text-center">Status</th>
-                  <th scope="col" class="px-3 text-center">TOC</th><!-- kolom TOC akan diisi ulang oleh script -->
+                  <th scope="col" class="px-3 text-center">TOC</th>
                   <th scope="col" class="px-3 text-center">Aksi</th>
                   <th scope="col" class="px-3 text-center">Grade</th>
                 </tr>
@@ -319,18 +319,192 @@
 
     const SATKER_LIST = ['Inspektorat', 'Pusdatin', 'Sestama', 'D1', 'D3', 'Puslat', 'D4'];
 
-    /* ====== ASSESSMENT_STRUCTURE (dipangkas sesuai file Anda; isi lengkap dari versi Anda) ====== */
+    /* ====== ASSESSMENT_STRUCTURE LENGKAP ====== */
     const ASSESSMENT_STRUCTURE = [
-      /* --- gunakan struktur yang sudah Anda tempel sebelumnya; berikut contoh 1.1.1 s/d 1.3.3 --- */
-      /* …………… (SALIN dari file Anda; saya singkat di sini demi kepadatan jawaban) …………… */
-      /* Pastikan kodenya sama persis dengan yang sudah berjalan pada versi Anda */
+      {
+        kode: `1.1.1`,
+        uraian_subunsur: `Penegakan Integritas dan Nilai Etika`,
+        no: ``,
+        uraian_parameter: `K/L/D menegakkan integritas dan nilai etika dalam melaksanakan tugas dan fungsi organisasi`,
+        kode_parameter: `1.1.1`,
+        grades: [
+          { grade: 'A',
+            kriteria: `Penegakan integritas dan nilai etika telah diperbaiki secara berkelanjutan sehingga tercipta suasana kerja organisasi yang kondusif yang dapat mendorong kinerja para pegawai secara optimal`,
+            tooltip: `- Setiap individu dalam organisasi dapat mendorong penerapan nilai-nilai organisasi
+- Setiap individu mendukung pencapaian kinerja organisasi
+- Keberhasilan pencapaian kinerja organisasi dapat dihubungkan dengan integritas dan perilaku individu serta mempengaruhi remunerasi individu` },
+          { grade: 'B',
+            kriteria: `Kebijakan dan implementasi organisasi telah dievaluasi untuk meningkatkan integritas dan nilai etika para pegawai`,
+            tooltip: `Kebijakan dan implementasi telah dievaluasi dengan ketentuan:
+- Berkala
+- Terdokumentasi
+- Dilakukan untuk menangani residual risk
+- Hasil evaluasi telah ditindak lanjuti 
+- Perbaikan telah menghasilkan kinerja yang lebih baik` },
+          { grade: 'C',
+            kriteria: `Penegakan integritas dan nilai etika telah dilaksanakan oleh pegawai dalam pelaksanaan tugas dan fungsinya dalam organisasi`,
+            tooltip: `- Terdapat wujud keteladanan dari pimpinan atas nilai organisasi 
+- Terdapat praktik pembangunan integritas dan nilai etika
+- Terdapat praktik penegakan nilai etika 
+- Terdapat bukti penegakan disiplin
+- Terdapat pemberian punishment bagi pegawai yang melanggar dan reward bagi pegawai yang menegakan integritas dan nilai etika 
+- Proses tersebut di atas dilaksanakan melalui struktur dan mekanisme yang ditetapkan` },
+          { grade: 'D',
+            kriteria: `Kebijakan penegakan integritas dan nilai etika organisasi telah dipahami oleh seluruh pegawai`,
+            tooltip: `Kebijakan telah dikomunikasikan dan dipahami oleh:
+- Pimpinan (struktural)
+- Penanggungjawab penegakan integritas dan nilai etika
+- Pegawai` },
+          { grade: 'E',
+            kriteria: `Terdapat kebijakan penegakan integritas dan nilai etika untuk seluruh pegawai dalam organisasi`,
+            tooltip: `Kebijakan telah mengatur:
+- Keteladanan pimpinan
+- Upaya pembangunan integritas
+- Nilai etika 
+- Penegakan disiplin
+- Pemberian reward and punishment  
+- Penetapan struktur dan mekanisme penanganan penegakan integritas dan nilai etika` }
+        ]
+      },
+      {
+        kode: `1.2.1`,
+        uraian_subunsur: `Komitmen terhadap Kompetensi`,
+        no: ``,
+        uraian_parameter: `Tugas dan jabatan dalam organisasi dilaksanakan dan diisi oleh SDM yang kompeten`,
+        kode_parameter: `1.2.1`,
+        grades: [
+          { grade: 'A',
+            kriteria: `Pengelolaan kompetensi SDM telah diperbaiki secara berkelanjutan dan secara optimal mampu mendukung pencapaian tujuan organisasi`,
+            tooltip:`- Setiap posisi dalam organisasi telah diisi oleh SDM sesuai dengan standar kompetensinya 
+- Penerapan standar kompetensi telah berhasil meningkatkan kinerja yang memberikan dampak bagi pencapaian tujuan organisasi
+- Keberhasilan pencapaian kinerja organisasi dapat dihubungkan dengan kompetensi SDM-nya` },
+          { grade: 'B',
+            kriteria: `Standar kompetensi organisasi dan implementasi/pemanfaatannya telah dievaluasi untuk mengetahui efektivitasnya`,
+            tooltip:`Standar kompetensi dan implementasi/pemanfaatannya telah dievaluasi dengan ketentuan:
+- Berkala
+- Terdokumentasi
+- Dilakukan untuk menangani residual risk
+- Hasil evaluasi telah ditindak lanjuti 
+- Perbaikan telah menghasilkan kinerja yang lebih baik` },
+          { grade: 'C',
+            kriteria: `Standar kompetensi telah diimplementasikan/dimanfaatkan dalam pengelolaan/pembinaan SDM organisasi`,
+            tooltip:`- Standar kompetensi dimanfaatkan untuk menyusun analisis kompetensi SDM
+- Analisis kompetensi yang disusun berdasarkan standar kompetensi dimanfaatkan untuk perencanaan rekrutmen SDM
+- Analisis kompetensi yang disusun berdasarkan standar kompetensi dimanfaatkan untuk perencanaan pengembangan SDM
+- Standar kompetensi dimanfaatkan sebagai dasar pertimbangan pengisian jabatan (mutasi/ promosi/ seleksi)` },
+          { grade: 'D',
+            kriteria: `Standar kompetensi telah dikomunikasikan dan dipahami oleh seluruh pegawai organisasi`,
+            tooltip:`Standar kompetensi telah dikomunikasikan dan dipahami oleh:
+- Pimpinan (struktural)
+- Penanggungjawab pengelolaan SDM
+- Pegawai
+sesuai tusinya` },
+          { grade: 'E',
+            kriteria: `Terdapat standar kompetensi yang jelas untuk seluruh jabatan dan posisi dalam organisasi`,
+            tooltip:`Terdapat standar kompetensi yang mengatur:
+- Standar kompetensi SDM struktural
+- Standar kompetensi SDM fungsional
+- Standar kompetensi manajerial
+- Standar kompetensi sosio kultural
+- Standar kompetensi teknis` }
+        ]
+      },
+      {
+        kode: `1.3.1`,
+        uraian_subunsur: `Kepemimpinan yang Kondusif`,
+        no: ``,
+        uraian_parameter: `Pimpinan K/L/D menciptakan lingkungan kerja yang kondusif untuk pencapaian tujuan organisasi`,
+        kode_parameter: `1.3.1`,
+        grades: [
+          { grade: 'A',
+            kriteria: `Penerapan manajemen kinerja, pengelolaan keuangan, manajemen SDM, serta manajemen risiko dapat meningkatkan efektivitas dan efisiensi kinerja seluruh level pimpinan dan pegawai`,
+            tooltip: `Sudah Jelas` },
+          { grade: 'B',
+            kriteria: `Pimpinan organisasi melaksanakan evaluasi berkala atas kebijakan pengendalian intern dan berupaya mengatasi permasalahan yang berkaitan dengan lingkungan pengendalian yang kondusif`,
+            tooltip:`a. K/L/D melakukan evaluasi untuk meninjau kembali relevansi kebijakan beserta implementasinya dengan ketentuan sebagai berikut:
+1. Telah dilaksanakan evaluasi berkala; 
+2. Evaluasi dilaksanakan untuk menangani residual risk;
+3. Tindak lanjut atas hasil evaluasi  telah dilaksanakan;
+b. Pimpinan organisasi terbuka atas masukan dari pegawai dan adaptif terhadap perubahan.
+c. Keluhan dari pegawai atas keterbatasan/masalah sumberdaya dukungan pelaksanaan pekerjaan dapat diatasi.` },
+          { grade: 'C',
+            kriteria: `Pimpinan organisasi melaksanakan kebijakan dan didukung dengan SDM yang bekerja sesuai dengan kebijakan yang ditetapkan`,
+            tooltip:`a. Pimpinan organisasi menerapkan manajemen berbasis kinerja dan mempertimbangkan risiko dalam pengambilan keputusan.
+b. Pimpinan organisasi memberikan keteladanan dalam beretika, berintegritas, ketaatan terhadap perundang-undangan, dan berkinerja secara efektif dan efisien.
+c. Pegawai mendukung pimpinan organisasi dengan hadir dan bekerja sesuai dengan ketentuan.` },
+          { grade: 'D',
+            kriteria: `Pimpinan organisasi terlibat dalam penyusunan dan penetapkan kebijakan yang mendukung penciptaan lingkungan kerja yang kondusif untuk pencapaian tujuan organisasi serta memahami substansi kebijakan pengendalian intern dan mendorong penerapan kebijakan dalam berbagai interaksi kepada jajaran di bawahnya`,
+            tooltip:`a. Pimpinan organisasi telah memahami substansi dari kebijakan yang telah ditetapkan.
+b. Pimpinan organisasi mengarahkan pegawai agar dapat bekerja selaras dengan kebijakan, melalui:
+1. Rapat internal.
+2. Upacara/apel pagi.
+3. Forum diskusi/jam pimpinan.
+4. Interaksi informal.` },
+          { grade: 'E',
+            kriteria: `Pimpinan organisasi terlibat dalam penyusunan dan penetapkan kebijakan yang mendukung penciptaan lingkungan kerja yang kondusif untuk pencapaian tujuan organisasi`,
+            tooltip:`Pimpinan organisasi terlibat dalam penyusunan kebijakan yang mendukung penciptaan lingkungan kerja yang kondusif untuk pencapaian tujuan organisasi, antara lain kebijakan terkait manajemen kinerja, manajemen keuangan dan aset, manajemen SDM, serta manajemen risiko.` }
+        ]
+      },
+      {
+        kode: `1.3.2`,
+        uraian_subunsur: `Kepemimpinan yang Kondusif`,
+        no: ``,
+        uraian_parameter: `Pimpinan K/L/D mengalokasikan sumber daya untuk penerapan manajemen risiko`,
+        kode_parameter: `1.3.2`,
+        grades: [
+          { grade: 'A',
+            kriteria: `Sudah mengalokasikan sumber daya secara memadai untuk penerapan manajemen risiko pada tingkat operasional unit kerja, strategis unit kerja, dan strategis K/L/D`,
+            tooltip:`a. Instansi Pemerintah telah menganggarkan dana implementasi manajemen risiko seperti rapat terkait manajemen risiko, identifikasi dan analisis risiko, penyusunan profil risiko, implementasi RTP, kegiatan monitoring dan reviu  dalam rencana kerja/DPA/DIPA  dan dalam implementasi manajemen risiko tidak terkendala kekurangan dana implementasi ditingkat operasional unit kerja, strategis unit kerja, dan strategis K/L/D
+b. Minimal 70% SDM yang menjadi anggota UPR pada tingkat operasional dan strategis unit kerja serta strategis K/L/D diisi oleh orang yang berkompeten dalam bidang manajemen risiko` },
+          { grade: 'B',
+            kriteria: `Sudah mengalokasikan sumber daya secara memadai untuk penerapan manajemen risiko pada tingkat operasional unit kerja dan strategis unit kerja namun pada tingkat srategis K/L/D belum memadai`,
+            tooltip:`a. Instansi Pemerintah telah menganggarkan dana implementasi manajemen risiko seperti rapat terkait manajemen risiko, identifikasi dan analisis risiko, penyusunan profil risiko, implementasi RTP, kegiatan monitoring dan reviu  dalam rencana kerja/DPA/DIPA  dan dalam implementasi manajemen risiko tidak terkendala kekurangan dana implementasi ditingkat operasional dan strategis unit kerja, namun masih terkendala kekurangan dana pada tingkat  strategis K/L/D dan
+b. Minimal 70% SDM yang menjadi anggota UPR pada tingkat operasional dan strategis unit kerja diisi oleh orang yang berkompeten dalam bidang manajemen risiko serta kurang dari 70% SDM yang menjadi anggota UPR pada tingkat Strategis K/L/D diisi oleh orang yang berkompeten dalam bidang manajemen risiko` },
+          { grade: 'C',
+            kriteria: `Sudah mengalokasikan sumber daya secara memadai untuk penerapan manajemen risiko pada tingkat operasional unit kerja dan strategis unit kerja`,
+            tooltip:`a. Instansi Pemerintah telah menganggarkan dana implementasi manajemen risiko seperti rapat terkait manajemen risiko, identifikasi dan analisis risiko, penyusunan profil risiko, implementasi RTP, kegiatan monitoring dan reviu  dalam rencana kerja/DPA/DIPA  dan dalam implementasi manajemen risiko tidak terkendala kekurangan dana implementasi ditingkat operasional dan strategis unit kerja
+b. Minimal 70% SDM yang menjadi anggota UPR pada tingkat operasional dan strategis unit kerja diisi oleh orang yang berkompeten dalam bidang manajemen risiko` },
+          { grade: 'D',
+            kriteria: `Sudah mengalokasikan sumber daya secara memadai untuk penerapan manajemen risiko pada tingkat operasional unit kerja namun pada tingkat strategis unit kerja belum memadai`,
+            tooltip:`a. Instansi Pemerintah telah menganggarkan dana implementasi manajemen risiko pada tingkat operasional unit kerja seperti rapat terkait manajemen risiko, identifikasi dan analisis risiko, penyusunan profil risiko, implementasi RTP, kegiatan monitoring dan reviu  dalam rencana kerja/DPA/DIPA secara memadai, namun belum memadai pada tingkat strategis unit kerja, dan/atau
+b. Kurang dari 70% SDM yang menjadi anggota UPR pada tingkat operasional Unit Kerja diisi oleh orang yang berkompeten dalam bidang manajemen risiko` },
+          { grade: 'E',
+            kriteria: `Sudah mengalokasikan sumber daya untuk penerapan manajemen risiko pada tingkat operasional unit kerja namun belum memadai`,
+            tooltip:`a. Instansi Pemerintah telah menganggarkan dana implementasi manajemen risiko pada tingkat operasional unit kerja seperti rapat terkait manajemen risiko, identifikasi dan analisis risiko, penyusunan profil risiko, implementasi RTP, kegiatan monitoring dan reviu  dalam rencana kerja/DPA/DIPA namun belum memadai, dan/atau
+b. Kurang dari 70% SDM yang menjadi anggota UPR pada tingkat operasional Unit Kerja diisi oleh orang yang berkompeten dalam bidang manajemen risiko` }
+        ]
+      },
+      {
+        kode: `1.3.3`,
+        uraian_subunsur: `Kepemimpinan yang Kondusif`,
+        no: ``,
+        uraian_parameter: `Pimpinan K/L/D menggunakan informasi terkait risiko dalam pengambilan keputusan`,
+        kode_parameter: `1.3.3`,
+        grades: [
+          { grade: 'A',
+            kriteria: `Seluruh pengambilan keputusan strategis K/L/D, strategis unit kerja, dan operasional unit kerja telah mempertimbangkan risiko dan memberikan dampak bagi pencapaian tujuan organisasi`,
+            tooltip:`Seluruh keputusan pimpinan instansi maupun pimpinan unit kerja secara umum menggunakan informasi terkait risiko di tingkat operasional unit kerja, strategis unit kerja, dan strategis K/L/D dan memberikan dampak bagi pencapaian tujuan organisasi` },
+          { grade: 'B',
+            kriteria: `Seluruh pengambilan keputusan strategis K/L/D, strategis unit kerja, dan operasional unit kerja telah mempertimbangkan risiko`,
+            tooltip:`Seluruh keputusan pimpinan instansi maupun pimpinan unit kerja secara umum menggunakan informasi terkait risiko di tingkat operasional unit kerja, strategis unit kerja, dan strategis K/L/D` },
+          { grade: 'C',
+            kriteria: `Seluruh pengambilan keputusan strategis unit kerja dan operasional unit kerja telah mempertimbangkan risiko`,
+            tooltip:`Seluruh keputusan pimpinan instansi maupun pimpinan unit kerja secara umum menggunakan informasi terkait risiko di tingkat operasional dan strategis unit kerja` },
+          { grade: 'D',
+            kriteria: `Seluruh pengambilan keputusan operasional unit kerja telah mempertimbangkan risiko`,
+            tooltip:`Seluruh keputusan pimpinan instansi maupun pimpinan unit kerja secara umum menggunakan informasi terkait risiko di tingkat operasional` },
+          { grade: 'E',
+            kriteria: `Sebagian pengambilan keputusan operasional unit kerja telah mempertimbangkan risiko`,
+            tooltip:`Sebagian keputusan pimpinan instansi maupun pimpinan unit kerja secara umum menggunakan informasi terkait risiko di tingkat operasional` }
+        ]
+      }
     ];
 
     const $ = (sel) => document.querySelector(sel);
 
     const App = {
       db:null, auth:null, userId:null,
-      currentSatker: localStorage.getItem('spip.currentSatker') || SATKER_LIST[2], // default Sestama
+      currentSatker: localStorage.getItem('spip.currentSatker') || SATKER_LIST[0],
       assessmentData:{}, unsubscribe:null, bootstrapModal:null,
       currentGrade:'A', sestamaCache:new Map(),
 
@@ -625,7 +799,7 @@
     // Start app
     window.addEventListener('DOMContentLoaded', ()=> App.init());
 
-    // === helper drive per parameter × grade (mappingmu yang lama) ===
+    // Helper folder mapping
     function driveFolderIdFor(unit, grade){
       const paramCode = document.getElementById('current-parameter-code')?.value || window.__currentParamCode || '';
       return window.DRIVE_FOLDERS_PARAM?.[unit]?.[paramCode]?.[grade] || null;
@@ -634,7 +808,7 @@
       return window.DRIVE_FOLDERS_PARAM?.[unit]?.[kodeParam]?.[grade] || null;
     };
 
-    // === IMPORTANT: expose struktur ke global untuk TOC Add-on ===
+    // EXPOSE struktur ke global utk TOC
     window.ASSESSMENT_STRUCTURE = ASSESSMENT_STRUCTURE;
   </script>
 
@@ -655,14 +829,58 @@
     });
   </script>
 
-  <!-- Mapping contoh per Unit × Parameter × Grade (isi sesuai punyamu) -->
+  <!-- Mapping per Unit × Parameter × Grade (dari kamu) -->
   <script>
     window.DRIVE_FOLDERS_PARAM = {
       "Sestama": {
-        "1.1.1": { A:"1ptHq3fU-BbAGKy5UNvzNhYJ3vo1CsJWI", B:"1lbQ2FydaKVo5BRVaz5n7W_w-LckQvq7L", C:"1J_qAmpTw3jlbfa4bPcpdGpX9vue57fqh", D:"19DEvfcTHMByfbTny1W7L1Ish1LgldhLP", E:"1HRo4VZHa-hUx8sxC4uimnNVdjMtNsU_r" }
-        /* … lengkapi seperti file Anda … */
+        "1.1.1": { A:"1ptHq3fU-BbAGKy5UNvzNhYJ3vo1CsJWI", B:"1lbQ2FydaKVo5BRVaz5n7W_w-LckQvq7L", C:"1J_qAmpTw3jlbfa4bPcpdGpX9vue57fqh", D:"19DEvfcTHMByfbTny1W7L1Ish1LgldhLP", E:"1HRo4VZHa-hUx8sxC4uimnNVdjMtNsU_r" },
+        "1.2.1": { A:"1ptHq3fU-BbAGKy5UNvzNhYJ3vo1CsJWI", B:"1lbQ2FydaKVo5BRVaz5n7W_w-LckQvq7L", C:"1J_qAmpTw3jlbfa4bPcpdGpX9vue57fqh", D:"19DEvfcTHMByfbTny1W7L1Ish1LgldhLP", E:"1HRo4VZHa-hUx8sxC4uimnNVdjMtNsU_r" },
+        "1.3.1": { A:"1ptHq3fU-BbAGKy5UNvzNhYJ3vo1CsJWI", B:"1lbQ2FydaKVo5BRVaz5n7W_w-LckQvq7L", C:"1J_qAmpTw3jlbfa4bPcpdGpX9vue57fqh", D:"19DEvfcTHMByfbTny1W7L1Ish1LgldhLP", E:"1HRo4VZHa-hUx8sxC4uimnNVdjMtNsU_r" },
+        "1.3.2": { A:"1ptHq3fU-BbAGKy5UNvzNhYJ3vo1CsJWI", B:"1lbQ2FydaKVo5BRVaz5n7W_w-LckQvq7L", C:"1J_qAmpTw3jlbfa4bPcpdGpX9vue57fqh", D:"19DEvfcTHMByfbTny1W7L1Ish1LgldhLP", E:"1HRo4VZHa-hUx8sxC4uimnNVdjMtNsU_r" },
+        "1.3.3": { A:"1ptHq3fU-BbAGKy5UNvzNhYJ3vo1CsJWI", B:"1lbQ2FydaKVo5BRVaz5n7W_w-LckQvq7L", C:"1J_qAmpTw3jlbfa4bPcpdGpX9vue57fqh", D:"19DEvfcTHMByfbTny1W7L1Ish1LgldhLP", E:"1HRo4VZHa-hUx8sxC4uimnNVdjMtNsU_r" }
+      },
+      "Inspektorat": {
+        "1.1.1": { A:"1ptHq3fU-BbAGKy5UNvzNhYJ3vo1CsJWI", B:"1lbQ2FydaKVo5BRVaz5n7W_w-LckQvq7L", C:"1J_qAmpTw3jlbfa4bPcpdGpX9vue57fqh", D:"19DEvfcTHMByfbTny1W7L1Ish1LgldhLP", E:"1HRo4VZHa-hUx8sxC4uimnNVdjMtNsU_r" },
+        "1.2.1": { A:"1ptHq3fU-BbAGKy5UNvzNhYJ3vo1CsJWI", B:"1lbQ2FydaKVo5BRVaz5n7W_w-LckQvq7L", C:"1J_qAmpTw3jlbfa4bPcpdGpX9vue57fqh", D:"19DEvfcTHMByfbTny1W7L1Ish1LgldhLP", E:"1HRo4VZHa-hUx8sxC4uimnNVdjMtNsU_r" },
+        "1.3.1": { A:"1ptHq3fU-BbAGKy5UNvzNhYJ3vo1CsJWI", B:"1lbQ2FydaKVo5BRVaz5n7W_w-LckQvq7L", C:"1J_qAmpTw3jlbfa4bPcpdGpX9vue57fqh", D:"19DEvfcTHMByfbTny1W7L1Ish1LgldhLP", E:"1HRo4VZHa-hUx8sxC4uimnNVdjMtNsU_r" },
+        "1.3.2": { A:"1ptHq3fU-BbAGKy5UNvzNhYJ3vo1CsJWI", B:"1lbQ2FydaKVo5BRVaz5n7W_w-LckQvq7L", C:"1J_qAmpTw3jlbfa4bPcpdGpX9vue57fqh", D:"19DEvfcTHMByfbTny1W7L1Ish1LgldhLP", E:"1HRo4VZHa-hUx8sxC4uimnNVdjMtNsU_r" },
+        "1.3.3": { A:"1ptHq3fU-BbAGKy5UNvzNhYJ3vo1CsJWI", B:"1lbQ2FydaKVo5BRVaz5n7W_w-LckQvq7L", C:"1J_qAmpTw3jlbfa4bPcpdGpX9vue57fqh", D:"19DEvfcTHMByfbTny1W7L1Ish1LgldhLP", E:"1HRo4VZHa-hUx8sxC4uimnNVdjMtNsU_r" }
+      },
+      "Pusdatin": {
+        "1.1.1": { A:"1ptHq3fU-BbAGKy5UNvzNhYJ3vo1CsJWI", B:"1lbQ2FydaKVo5BRVaz5n7W_w-LckQvq7L", C:"1J_qAmpTw3jlbfa4bPcpdGpX9vue57fqh", D:"19DEvfcTHMByfbTny1W7L1Ish1LgldhLP", E:"1HRo4VZHa-hUx8sxC4uimnNVdjMtNsU_r" },
+        "1.2.1": { A:"1ptHq3fU-BbAGKy5UNvzNhYJ3vo1CsJWI", B:"1lbQ2FydaKVo5BRVaz5n7W_w-LckQvq7L", C:"1J_qAmpTw3jlbfa4bPcpdGpX9vue57fqh", D:"19DEvfcTHMByfbTny1W7L1Ish1LgldhLP", E:"1HRo4VZHa-hUx8sxC4uimnNVdjMtNsU_r" },
+        "1.3.1": { A:"1ptHq3fU-BbAGKy5UNvzNhYJ3vo1CsJWI", B:"1lbQ2FydaKVo5BRVaz5n7W_w-LckQvq7L", C:"1J_qAmpTw3jlbfa4bPcpdGpX9vue57fqh", D:"19DEvfcTHMByfbTny1W7L1Ish1LgldhLP", E:"1HRo4VZHa-hUx8sxC4uimnNVdjMtNsU_r" },
+        "1.3.2": { A:"1ptHq3fU-BbAGKy5UNvzNhYJ3vo1CsJWI", B:"1lbQ2FydaKVo5BRVaz5n7W_w-LckQvq7L", C:"1J_qAmpTw3jlbfa4bPcpdGpX9vue57fqh", D:"19DEvfcTHMByfbTny1W7L1Ish1LgldhLP", E:"1HRo4VZHa-hUx8sxC4uimnNVdjMtNsU_r" },
+        "1.3.3": { A:"1ptHq3fU-BbAGKy5UNvzNhYJ3vo1CsJWI", B:"1lbQ2FydaKVo5BRVaz5n7W_w-LckQvq7L", C:"1J_qAmpTw3jlbfa4bPcpdGpX9vue57fqh", D:"19DEvfcTHMByfbTny1W7L1Ish1LgldhLP", E:"1HRo4VZHa-hUx8sxC4uimnNVdjMtNsU_r" }
+      },
+      "Puslat": {
+        "1.1.1": { A:"1ptHq3fU-BbAGKy5UNvzNhYJ3vo1CsJWI", B:"1lbQ2FydaKVo5BRVaz5n7W_w-LckQvq7L", C:"1J_qAmpTw3jlbfa4bPcpdGpX9vue57fqh", D:"19DEvfcTHMByfbTny1W7L1Ish1LgldhLP", E:"1HRo4VZHa-hUx8sxC4uimnNVdjMtNsU_r" },
+        "1.2.1": { A:"1ptHq3fU-BbAGKy5UNvzNhYJ3vo1CsJWI", B:"1lbQ2FydaKVo5BRVaz5n7W_w-LckQvq7L", C:"1J_qAmpTw3jlbfa4bPcpdGpX9vue57fqh", D:"19DEvfcTHMByfbTny1W7L1Ish1LgldhLP", E:"1HRo4VZHa-hUx8sxC4uimnNVdjMtNsU_r" },
+        "1.3.1": { A:"1ptHq3fU-BbAGKy5UNvzNhYJ3vo1CsJWI", B:"1lbQ2FydaKVo5BRVaz5n7W_w-LckQvq7L", C:"1J_qAmpTw3jlbfa4bPcpdGpX9vue57fqh", D:"19DEvfcTHMByfbTny1W7L1Ish1LgldhLP", E:"1HRo4VZHa-hUx8sxC4uimnNVdjMtNsU_r" },
+        "1.3.2": { A:"1ptHq3fU-BbAGKy5UNvzNhYJ3vo1CsJWI", B:"1lbQ2FydaKVo5BRVaz5n7W_w-LckQvq7L", C:"1J_qAmpTw3jlbfa4bPcpdGpX9vue57fqh", D:"19DEvfcTHMByfbTny1W7L1Ish1LgldhLP", E:"1HRo4VZHa-hUx8sxC4uimnNVdjMtNsU_r" },
+        "1.3.3": { A:"1ptHq3fU-BbAGKy5UNvzNhYJ3vo1CsJWI", B:"1lbQ2FydaKVo5BRVaz5n7W_w-LckQvq7L", C:"1J_qAmpTw3jlbfa4bPcpdGpX9vue57fqh", D:"19DEvfcTHMByfbTny1W7L1Ish1LgldhLP", E:"1HRo4VZHa-hUx8sxC4uimnNVdjMtNsU_r" }
+      },
+      "D1": {
+        "1.1.1": { A:"1ptHq3fU-BbAGKy5UNvzNhYJ3vo1CsJWI", B:"1lbQ2FydaKVo5BRVaz5n7W_w-LckQvq7L", C:"1J_qAmpTw3jlbfa4bPcpdGpX9vue57fqh", D:"19DEvfcTHMByfbTny1W7L1Ish1LgldhLP", E:"1HRo4VZHa-hUx8sxC4uimnNVdjMtNsU_r" },
+        "1.2.1": { A:"1ptHq3fU-BbAGKy5UNvzNhYJ3vo1CsJWI", B:"1lbQ2FydaKVo5BRVaz5n7W_w-LckQvq7L", C:"1J_qAmpTw3jlbfa4bPcpdGpX9vue57fqh", D:"19DEvfcTHMByfbTny1W7L1Ish1LgldhLP", E:"1HRo4VZHa-hUx8sxC4uimnNVdjMtNsU_r" },
+        "1.3.1": { A:"1ptHq3fU-BbAGKy5UNvzNhYJ3vo1CsJWI", B:"1lbQ2FydaKVo5BRVaz5n7W_w-LckQvq7L", C:"1J_qAmpTw3jlbfa4bPcpdGpX9vue57fqh", D:"19DEvfcTHMByfbTny1W7L1Ish1LgldhLP", E:"1HRo4VZHa-hUx8sxC4uimnNVdjMtNsU_r" },
+        "1.3.2": { A:"1ptHq3fU-BbAGKy5UNvzNhYJ3vo1CsJWI", B:"1lbQ2FydaKVo5BRVaz5n7W_w-LckQvq7L", C:"1J_qAmpTw3jlbfa4bPcpdGpX9vue57fqh", D:"19DEvfcTHMByfbTny1W7L1Ish1LgldhLP", E:"1HRo4VZHa-hUx8sxC4uimnNVdjMtNsU_r" },
+        "1.3.3": { A:"1ptHq3fU-BbAGKy5UNvzNhYJ3vo1CsJWI", B:"1lbQ2FydaKVo5BRVaz5n7W_w-LckQvq7L", C:"1J_qAmpTw3jlbfa4bPcpdGpX9vue57fqh", D:"19DEvfcTHMByfbTny1W7L1Ish1LgldhLP", E:"1HRo4VZHa-hUx8sxC4uimnNVdjMtNsU_r" }
+      },
+      "D3": {
+        "1.1.1": { A:"1ptHq3fU-BbAGKy5UNvzNhYJ3vo1CsJWI", B:"1lbQ2FydaKVo5BRVaz5n7W_w-LckQvq7L", C:"1J_qAmpTw3jlbfa4bPcpdGpX9vue57fqh", D:"19DEvfcTHMByfbTny1W7L1Ish1LgldhLP", E:"1HRo4VZHa-hUx8sxC4uimnNVdjMtNsU_r" },
+        "1.2.1": { A:"1ptHq3fU-BbAGKy5UNvzNhYJ3vo1CsJWI", B:"1lbQ2FydaKVo5BRVaz5n7W_w-LckQvq7L", C:"1J_qAmpTw3jlbfa4bPcpdGpX9vue57fqh", D:"19DEvfcTHMByfbTny1W7L1Ish1LgldhLP", E:"1HRo4VZHa-hUx8sxC4uimnNVdjMtNsU_r" },
+        "1.3.1": { A:"1ptHq3fU-BbAGKy5UNvzNhYJ3vo1CsJWI", B:"1lbQ2FydaKVo5BRVaz5n7W_w-LckQvq7L", C:"1J_qAmpTw3jlbfa4bPcpdGpX9vue57fqh", D:"19DEvfcTHMByfbTny1W7L1Ish1LgldhLP", E:"1HRo4VZHa-hUx8sxC4uimnNVdjMtNsU_r" },
+        "1.3.2": { A:"1ptHq3fU-BbAGKy5UNvzNhYJ3vo1CsJWI", B:"1lbQ2FydaKVo5BRVaz5n7W_w-LckQvq7L", C:"1J_qAmpTw3jlbfa4bPcpdGpX9vue57fqh", D:"19DEvfcTHMByfbTny1W7L1Ish1LgldhLP", E:"1HRo4VZHa-hUx8sxC4uimnNVdjMtNsU_r" },
+        "1.3.3": { A:"1ptHq3fU-BbAGKy5UNvzNhYJ3vo1CsJWI", B:"1lbQ2FydaKVo5BRVaz5n7W_w-LckQvq7L", C:"1J_qAmpTw3jlbfa4bPcpdGpX9vue57fqh", D:"19DEvfcTHMByfbTny1W7L1Ish1LgldhLP", E:"1HRo4VZHa-hUx8sxC4uimnNVdjMtNsU_r" }
+      },
+      "D4": {
+        "1.1.1": { A:"1ptHq3fU-BbAGKy5UNvzNhYJ3vo1CsJWI", B:"1lbQ2FydaKVo5BRVaz5n7W_w-LckQvq7L", C:"1J_qAmpTw3jlbfa4bPcpdGpX9vue57fqh", D:"19DEvfcTHMByfbTny1W7L1Ish1LgldhLP", E:"1HRo4VZHa-hUx8sxC4uimnNVdjMtNsU_r" },
+        "1.2.1": { A:"1ptHq3fU-BbAGKy5UNvzNhYJ3vo1CsJWI", B:"1lbQ2FydaKVo5BRVaz5n7W_w-LckQvq7L", C:"1J_qAmpTw3jlbfa4bPcpdGpX9vue57fqh", D:"19DEvfcTHMByfbTny1W7L1Ish1LgldhLP", E:"1HRo4VZHa-hUx8sxC4uimnNVdjMtNsU_r" },
+        "1.3.1": { A:"1ptHq3fU-BbAGKy5UNvzNhYJ3vo1CsJWI", B:"1lbQ2FydaKVo5BRVaz5n7W_w-LckQvq7L", C:"1J_qAmpTw3jlbfa4bPcpdGpX9vue57fqh", D:"19DEvfcTHMByfbTny1W7L1Ish1LgldhLP", E:"1HRo4VZHa-hUx8sxC4uimnNVdjMtNsU_r" },
+        "1.3.2": { A:"1ptHq3fU-BbAGKy5UNvzNhYJ3vo1CsJWI", B:"1lbQ2FydaKVo5BRVaz5n7W_w-LckQvq7L", C:"1J_qAmpTw3jlbfa4bPcpdGpX9vue57fqh", D:"19DEvfcTHMByfbTny1W7L1Ish1LgldhLP", E:"1HRo4VZHa-hUx8sxC4uimnNVdjMtNsU_r" },
+        "1.3.3": { A:"1ptHq3fU-BbAGKy5UNvzNhYJ3vo1CsJWI", B:"1lbQ2FydaKVo5BRVaz5n7W_w-LckQvq7L", C:"1J_qAmpTw3jlbfa4bPcpdGpX9vue57fqh", D:"19DEvfcTHMByfbTny1W7L1Ish1LgldhLP", E:"1HRo4VZHa-hUx8sxC4uimnNVdjMtNsU_r" }
       }
-      /* … Unit lain … */
     };
   </script>
 
@@ -824,11 +1042,6 @@
       }
       const m = bootstrap && bootstrap.Modal.getInstance(document.querySelector("#tocModal"));
       m && m.hide();
-    });
-
-    document.addEventListener("DOMContentLoaded", ()=>{
-      // tombol TOC sudah disisipkan langsung saat renderTable()
-      // tambahkan observer jika dibutuhkan di masa depan
     });
   })();
   </script>
