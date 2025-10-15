@@ -1,0 +1,1252 @@
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Aplikasi Penjamin Kualitas Maturitas SPIP</title>
+
+  <!-- Bootstrap CSS & Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" />
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Preconnect untuk percepat akses Drive -->
+  <link rel="preconnect" href="https://www.googleapis.com" crossorigin>
+  <link rel="preconnect" href="https://docs.google.com" crossorigin>
+  <link rel="preconnect" href="https://drive.google.com" crossorigin>
+
+  <style>
+    :root{
+      --brand:#0d6efd;
+      /* gradasi grade A→E: hijau → merah */
+      --grade-a:#2ecc71; /* A */
+      --grade-b:#a3e635; /* B */
+      --grade-c:#facc15; /* C */
+      --grade-d:#f97316; /* D */
+      --grade-e:#ef4444; /* E */
+    }
+
+    html,body{height:100%}
+    body{
+      font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial,"Noto Sans";
+      background:#f8f9fa;
+    }
+    .sticky-toolbar{position:sticky;top:0;z-index:1030}
+    .criteria-box{max-height:180px;overflow-y:auto}
+    .form-hint{font-size:.85rem;color:#6c757d}
+
+    /* === Badge Grade Kustom (pakai data-grade) === */
+    .badge[data-grade]{
+      border-radius:999px;
+      padding:.45rem .75rem;
+      font-weight:600;
+      min-width:2.25rem;
+      display:inline-block;
+    }
+    .badge[data-grade="A"]{ background:var(--grade-a) !important; color:#fff !important; }
+    .badge[data-grade="B"]{ background:var(--grade-b) !important; color:#111 !important; }
+    .badge[data-grade="C"]{ background:var(--grade-c) !important; color:#111 !important; }
+    .badge[data-grade="D"]{ background:var(--grade-d) !important; color:#fff !important; }
+    .badge[data-grade="E"]{ background:var(--grade-e) !important; color:#fff !important; }
+    
+  
+  /* ====== PRINT / PDF STYLES ====== */
+  @media print {
+    @page { size: A4 portrait; margin: 14mm; }
+    html, body { background: #fff !important; }
+    .sticky-toolbar, .btn, .modal, .nav, #loader { display: none !important; }
+    .card, .table-responsive { box-shadow: none !important; border: 0 !important; }
+    .table { font-size: 12px; }
+    .table thead th { background: #f1f3f5 !important; color: #000 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .badge[data-grade] { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    a { color: inherit !important; text-decoration: none !important; }
+  }
+
+</style>
+</head>
+<body>
+  <div id="app" class="container my-4 my-md-5">
+
+    <!-- Header -->
+    <header class="card shadow-sm mb-4 border-0">
+      <div class="card-body p-4">
+        <h1 class="h3 fw-bold text-primary mb-1">Penjamin Kualitas Maturitas Penyelenggaraan SPIP</h1>
+        <p class="text-muted mb-1">Periode Penilaian: 01 Juli 2024 s.d. 30 Juni 2025</p>
+        <p class="text-muted small mb-0">KK 3.1 · Penilaian Struktur & Proses Efektivitas dan Efisiensi</p>
+      </div>
+    </header>
+
+    <!-- Toolbar -->
+    <div class="sticky-toolbar card shadow-sm border-0 mb-3">
+      <div class="card-body d-flex flex-column flex-md-row gap-3 align-items-md-center">
+        <div class="d-flex align-items-center gap-2">
+          <i class="bi bi-building text-primary"></i>
+          <label for="satker-select" class="form-label fw-semibold mb-0">Pilih Unit Organisasi (Unor)</label>
+        </div>
+        <select id="satker-select" class="form-select flex-grow-1" aria-label="Pilih Satuan Kerja"></select>
+        <div class="ms-md-auto d-flex align-items-center gap-2">
+  <div class="small text-muted" id="last-saved">—</div>
+  <a href="dashboard_interactive.html" target="_blank" class="btn btn-outline-secondary btn-sm" id="btn-open-dashboard" title="Buka Dashboard" aria-label="Buka Dashboard">
+    <i class="bi bi-speedometer2 me-1"></i> Dashboard
+  </a>
+  <button id="btn-export-pdf" class="btn btn-outline-danger btn-sm" title="Ekspor ke PDF" aria-label="Ekspor ke PDF">
+    <i class="bi bi-filetype-pdf me-1"></i> Export PDF
+  </button>
+</div>
+      </div>
+      <div class="progress rounded-0" role="progressbar" aria-label="Progress penyelesaian" aria-valuemin="0" aria-valuemax="100">
+        <div id="progress-bar" class="progress-bar" style="width:0%">0%</div>
+      </div>
+    </div>
+
+    <!-- Loading -->
+    <div id="loader" class="text-center p-5">
+      <div class="spinner-border text-primary" role="status" aria-live="polite" aria-busy="true">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <p class="mt-2 text-muted">Menghubungkan ke database...</p>
+      <p id="loader-tip" class="small text-muted">Pastikan Anonymous Sign-in aktif & aturan Firestore sesuai.</p>
+    </div>
+
+    <!-- Main -->
+    <main id="main-content" class="d-none">
+      <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-striped table-hover mb-0 align-middle">
+              <thead class="table-light">
+                <tr>
+                  <th scope="col" class="px-3">Kode</th>
+                  <th scope="col" class="px-3">Uraian Parameter</th>
+                  <th scope="col" class="px-3 text-center">Status</th>
+                  <th scope="col" class="px-3 text-center">Aksi</th>
+                  <th scope="col" class="px-3 text-center">Grade</th>
+                </tr>
+              </thead>
+              <tbody id="assessment-table-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Modal -->
+    <div class="modal fade" id="assessment-modal" tabindex="-1" aria-labelledby="modalTitle" aria-hidden="true">
+      <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+          <div class="modal-header">
+            <div>
+              <h1 class="modal-title h5" id="modalTitle">Formulir Penilaian</h1>
+              <p id="modal-parameter-title" class="text-muted small mb-0"></p>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+          </div>
+          <div class="modal-body">
+            <form id="assessment-form" novalidate>
+              <input type="hidden" id="current-parameter-code" />
+
+              <div class="mb-4">
+                <h3 class="h6 fw-semibold mb-2">Kriteria Penilaian</h3>
+                <div id="modal-criteria-container" class="criteria-box p-3 bg-light border rounded" aria-live="polite"></div>
+              </div>
+
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label for="metode-penilaian" class="form-label">Metode Penilaian</label>
+                  <select id="metode-penilaian" class="form-select" required>
+                    <option value="Wawancara">Wawancara</option>
+                    <option value="Analisis Dokumen">Analisis Dokumen</option>
+                    <option value="Observasi">Observasi</option>
+                  </select>
+                  <div class="invalid-feedback">Pilih metode penilaian.</div>
+                </div>
+                <div class="col-md-6">
+                  <label for="simpulan" class="form-label">Simpulan Hasil Pengujian</label>
+                  <select id="simpulan" class="form-select" required>
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="C">C</option>
+                    <option value="D">D</option>
+                    <option value="E">E</option>
+                  </select>
+                  <div class="invalid-feedback">Pilih simpulan.</div>
+                </div>
+              </div>
+
+              <div class="mt-3">
+                <label for="hasil-pengujian" class="form-label">Uraian Kondisi Detail Hasil Pengujian</label>
+                <textarea id="hasil-pengujian" rows="4" class="form-control" placeholder="Jelaskan kondisi detail hasil pengujian..." required></textarea>
+                <div class="invalid-feedback">Mohon isi uraian hasil pengujian.</div>
+              </div>
+
+              <div class="mt-3">
+                <label for="uraian-aoi" class="form-label">Uraian AoI (Area of Improvement)</label>
+                <textarea id="uraian-aoi" rows="3" class="form-control" placeholder="Jelaskan area yang perlu perbaikan..." required></textarea>
+                <div class="invalid-feedback">Mohon isi uraian AoI.</div>
+              </div>
+
+              <!-- === FIELD KHUSUS SESTAMA === -->
+              <hr class="my-4">
+              <div id="sestama-fields" class="d-none">
+                <p class="form-hint mb-2"><i class="bi bi-info-circle"></i> Bidang berikut khusus untuk <strong>Sestama</strong>.</p>
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <label for="simpulan-sestama" class="form-label">Simpulan Hasil Pengujian (Sestama)</label>
+                    <select id="simpulan-sestama" class="form-select">
+                      <option value="">— Pilih —</option>
+                      <option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option>
+                    </select>
+                  </div>
+                  <div class="col-12">
+                    <label for="hasil-pengujian-sestama" class="form-label">Uraian Kondisi Detail Hasil Pengujian (Sestama)</label>
+                    <textarea id="hasil-pengujian-sestama" rows="3" class="form-control" placeholder="Isikan uraian milik Sestama untuk dijadikan rujukan Unor lain..."></textarea>
+                  </div>
+                </div>
+              </div>
+
+              <!-- === RUJUKAN SESTAMA (read-only untuk Unor ≠ Sestama) === -->
+              <div id="sestama-reference" class="mt-4 d-none">
+                <div class="card border-0 shadow-sm">
+                  <div class="card-body">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                      <i class="bi bi-journal-text text-primary"></i>
+                      <strong>Rujukan (Sestama)</strong>
+                    </div>
+                    <dl class="row mb-0">
+                      <dt class="col-sm-4">Simpulan Sestama</dt>
+                      <dd class="col-sm-8" id="ref-simpulan-sestama">—</dd>
+                      <dt class="col-sm-4">Uraian Sestama</dt>
+                      <dd class="col-sm-8" id="ref-uraian-sestama"><span class="text-muted">Tidak ada rujukan</span></dd>
+                    </dl>
+                  </div>
+                </div>
+              </div>
+
+              <!-- === BUKTI DUKUNG (VIEW dari Google Drive) === -->
+              <div class="mt-4">
+                <h3 class="h6 fw-semibold mb-2">Bukti Dukung</h3>
+                <p class="text-muted small mb-3">Dokumen per grade ditarik dari Google Drive (tanpa unggah di aplikasi ini).</p>
+                <div class="nav nav-pill-grade gap-2 mb-3" id="grade-tabs">
+                  <button type="button" class="btn btn-primary btn-sm" data-grade="A">Grade A</button>
+                  <button type="button" class="btn btn-outline-primary btn-sm" data-grade="B">Grade B</button>
+                  <button type="button" class="btn btn-outline-primary btn-sm" data-grade="C">Grade C</button>
+                  <button type="button" class="btn btn-outline-primary btn-sm" data-grade="D">Grade D</button>
+                  <button type="button" class="btn btn-outline-primary btn-sm" data-grade="E">Grade E</button>
+                </div>
+
+                <div class="card">
+                  <div class="card-body">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                      <button type="button" id="btn-open-drive-folder" class="btn btn-outline-secondary btn-sm">
+                        <i class="bi bi-google me-1"></i> Buka Folder Drive
+                      </button>
+                    </div>
+                    <!-- HANYA VIEW LIST DARI DRIVE -->
+                    <div id="drive-file-list" class="list-group list-group-flush small" style="min-height:3rem">
+                      <div class="text-muted px-2 py-1">Pilih grade untuk memuat dokumen dari Google Drive.</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- === /BUKTI DUKUNG === -->
+
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" id="cancel-btn" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+            <button type="submit" form="assessment-form" class="btn btn-primary">
+              <span class="me-1" aria-hidden="true">💾</span> Simpan
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Modal Preview Global (reusable, smooth) -->
+  <div class="modal fade" id="preview-modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="preview-modal-title">Preview Dokumen</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body p-0" style="height:80vh">
+          <iframe id="preview-iframe" src="" style="border:0;width:100%;height:100%"></iframe>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+
+  <!-- Firebase + App Script (Firestore saja) -->
+  <script type="module">
+    // === Firebase Config (Firestore untuk data penilaian) ===
+    const firebaseConfig = {
+      apiKey: "AIzaSyCYwuJHeL_YlyW7zPNRGSXe_NB8r_Ql_t0",
+      authDomain: "spip-8e5e9.firebaseapp.com",
+      projectId: "spip-8e5e9",
+      appId: "1:448004404076:web:6aa65c8de90439285db949",
+      measurementId: "G-J44L941K89"
+    };
+
+    // Firebase modules (AUTH + FIRESTORE SAJA)
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, onSnapshot, setDoc, getDoc, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    // === Google Drive Config ===
+    const DRIVE_API_KEY = "AIzaSyAukkICkUg5NsFaGy0K8F-GDeOXWCWml4s"; // <- API Key kamu
+    // [REMOVED] DRIVE_FOLDERS (Unit×Grade) dihapus — pakai DRIVE_FOLDERS_PARAM per-parameter saja.
+function driveFolderIdFor(unit, grade){
+      const paramCode = document.getElementById('current-parameter-code')?.value || window.__currentParamCode || '';
+      return window.DRIVE_FOLDERS_PARAM?.[unit]?.[paramCode]?.[grade] || null;
+    }
+
+    // ——— Drive API helpers ———
+    function drivePreviewUrl(file) {
+      const mt = file.mimeType || "";
+      if (mt.includes("document"))    return `https://docs.google.com/document/d/${file.id}/preview`;
+      if (mt.includes("spreadsheet")) return `https://docs.google.com/spreadsheets/d/${file.id}/preview`;
+      if (mt.includes("presentation"))return `https://docs.google.com/presentation/d/${file.id}/preview`;
+      return `https://drive.google.com/file/d/${file.id}/preview`;
+    }
+
+    async function listDriveFolder(folderId, signal) {
+      const q = encodeURIComponent(`'${folderId}' in parents and trashed = false`);
+      const fields = encodeURIComponent("files(id,name,mimeType,modifiedTime,webViewLink)");
+      const url = `https://www.googleapis.com/drive/v3/files?q=${q}&fields=${fields}&key=${DRIVE_API_KEY}`;
+      const res = await fetch(url, { signal });
+      if (!res.ok) throw new Error("Drive API error " + res.status);
+      const data = await res.json(); 
+      return data.files || [];
+    }
+
+    // ——— Optimasi render ———
+    function shallowEqual(a, b){
+      const ka = Object.keys(a||{}), kb = Object.keys(b||{});
+      if (ka.length !== kb.length) return false;
+      for (const k of ka){ if (a[k]?.simpulan !== b[k]?.simpulan) return false; }
+      return true;
+    }
+
+    // ——— Global cache & abort ———
+    const driveCache = new Map();     // key: `${unit}_${grade}` -> files[]
+    let driveFetchCtrl = null;
+    let previewModal = null;
+
+    // Data (struktur tetap)
+    const SATKER_LIST = ['Inspektorat', 'Pusdatin', 'Sestama', 'D1', 'D3', 'Puslat', 'D4'];
+    const ASSESSMENT_STRUCTURE = [
+      { kode: `1.1.1`,
+    uraian_subunsur: `Penegakan Integritas dan Nilai Etika`,
+    no: ``,
+    uraian_parameter: `K/L/D menegakkan integritas dan nilai etika dalam melaksanakan tugas dan fungsi organisasi`,
+    kode_parameter: `1.1.1`,
+    grades: [
+      {
+        grade: 'A',
+        kriteria: `Penegakan integritas dan nilai etika telah diperbaiki secara berkelanjutan sehingga tercipta suasana kerja organisasi yang kondusif yang dapat mendorong kinerja para pegawai secara optimal`,
+        tooltip: `- Setiap individu dalam organisasi dapat mendorong penerapan nilai-nilai organisasi
+- Setiap individu mendukung pencapaian kinerja organisasi
+- Keberhasilan pencapaian kinerja organisasi dapat dihubungkan dengan integritas dan perilaku individu serta mempengaruhi remunerasi individu`
+      },
+      {
+        grade: 'B',
+        kriteria: `Kebijakan dan implementasi organisasi telah dievaluasi untuk meningkatkan integritas dan nilai etika para pegawai`,
+        tooltip: `Kebijakan dan implementasi telah dievaluasi dengan ketentuan:
+- Berkala
+- Terdokumentasi
+- Dilakukan untuk menangani residual risk
+- Hasil evaluasi telah ditindak lanjuti 
+- Perbaikan telah menghasilkan kinerja yang lebih baik`
+      },
+      {
+        grade: 'C',
+        kriteria: `Penegakan integritas dan nilai etika telah dilaksanakan oleh pegawai dalam pelaksanaan tugas dan fungsinya dalam organisasi`,
+        tooltip: `- Terdapat wujud keteladanan dari pimpinan atas nilai organisasi 
+- Terdapat praktik pembangunan integritas dan nilai etika
+- Terdapat praktik penegakan nilai etika 
+- Terdapat bukti penegakan disiplin
+- Terdapat pemberian punishment bagi pegawai yang melanggar dan reward bagi pegawai yang menegakan integritas dan nilai etika 
+- Proses tersebut di atas dilaksanakan melalui struktur dan mekanisme yang ditetapkan`
+      },
+      {
+        grade: 'D',
+        kriteria: `Kebijakan penegakan integritas dan nilai etika organisasi telah dipahami oleh seluruh pegawai`,
+        tooltip: `Kebijakan telah dikomunikasikan dan dipahami oleh:
+- Pimpinan (struktural)
+- Penanggungjawab penegakan integritas dan nilai etika
+- Pegawai`
+      },
+      {
+        grade: 'E',
+        kriteria: `Terdapat kebijakan penegakan integritas dan nilai etika untuk seluruh pegawai dalam organisasi`,
+        tooltip: `Kebijakan telah mengatur:
+- Keteladanan pimpinan
+- Upaya pembangunan integritas
+- Nilai etika 
+- Penegakan disiplin
+- Pemberian reward and punishment  
+- Penetapan struktur dan mekanisme penanganan penegakan integritas dan nilai etika`
+      }
+    ]
+  },
+  {
+    kode: `1.2.1`,
+    uraian_subunsur: `Komitmen terhadap Kompetensi`,
+    no: ``,
+    uraian_parameter: `Tugas dan jabatan dalam organisasi dilaksanakan dan diisi oleh SDM yang kompeten`,
+    kode_parameter: `1.2.1`,
+    grades: [
+      {
+        grade: 'A',
+        kriteria: `Pengelolaan kompetensi SDM telah diperbaiki secara berkelanjutan dan secara optimal mampu mendukung pencapaian tujuan organisasi`,
+        tooltip: `- Setiap posisi dalam organisasi telah diisi oleh SDM sesuai dengan standar kompetensinya 
+- Penerapan standar kompetensi telah berhasil meningkatkan kinerja yang memberikan dampak bagi pencapaian tujuan organisasi
+- Keberhasilan pencapaian kinerja organisasi dapat dihubungkan dengan kompetensi SDM-nya`
+      },
+      {
+        grade: 'B',
+        kriteria: `Standar kompetensi organisasi dan implementasi/pemanfaatannya telah dievaluasi untuk mengetahui efektivitasnya`,
+        tooltip: `Standar kompetensi dan implementasi/pemanfaatannya telah dievaluasi dengan ketentuan:
+- Berkala
+- Terdokumentasi
+- Dilakukan untuk menangani residual risk
+- Hasil evaluasi telah ditindak lanjuti 
+- Perbaikan telah menghasilkan kinerja yang lebih baik`
+      },
+      {
+        grade: 'C',
+        kriteria: `Standar kompetensi telah diimplementasikan/dimanfaatkan dalam pengelolaan/pembinaan SDM organisasi`,
+        tooltip: `- Standar kompetensi dimanfaatkan untuk menyusun analisis kompetensi SDM
+- Analisis kompetensi yang disusun berdasarkan standar kompetensi dimanfaatkan untuk perencanaan rekrutmen SDM
+- Analisis kompetensi yang disusun berdasarkan standar kompetensi dimanfaatkan untuk perencanaan pengembangan SDM
+- Standar kompetensi dimanfaatkan sebagai dasar pertimbangan pengisian jabatan (mutasi/ promosi/ seleksi)`
+      },
+      {
+        grade: 'D',
+        kriteria: `Standar kompetensi telah dikomunikasikan dan dipahami oleh seluruh pegawai organisasi`,
+        tooltip: `Standar kompetensi telah dikomunikasikan dan dipahami oleh:
+- Pimpinan (struktural)
+- Penanggungjawab pengelolaan SDM
+- Pegawai
+sesuai tusinya`
+      },
+      {
+        grade: 'E',
+        kriteria: `Terdapat standar kompetensi yang jelas untuk seluruh jabatan dan posisi dalam organisasi`,
+        tooltip: `Terdapat standar kompetensi yang mengatur:
+- Standar kompetensi SDM struktural
+- Standar kompetensi SDM fungsional
+- Standar kompetensi manajerial
+- Standar kompetensi sosio kultural
+- Standar kompetensi teknis`
+      }
+    ]
+  },
+  {
+    kode: `1.3.1`,
+    uraian_subunsur: `Kepemimpinan yang Kondusif`,
+    no: ``,
+    uraian_parameter: `Pimpinan K/L/D menciptakan lingkungan kerja yang kondusif untuk pencapaian tujuan organisasi`,
+    kode_parameter: `1.3.1`,
+    grades: [
+      {
+        grade: 'A',
+        kriteria: `Penerapan manajemen kinerja, pengelolaan keuangan, manajemen SDM, serta manajemen risiko dapat meningkatkan efektivitas dan efisiensi kinerja seluruh level pimpinan dan pegawai`,
+        tooltip: `Sudah Jelas`
+      },
+      {
+        grade: 'B',
+        kriteria: `Pimpinan organisasi melaksanakan evaluasi berkala atas kebijakan pengendalian intern dan berupaya mengatasi permasalahan yang berkaitan dengan lingkungan pengendalian yang kondusif`,
+        tooltip: `a. K/L/D melakukan evaluasi untuk meninjau kembali relevansi kebijakan beserta implementasinya dengan ketentuan sebagai berikut:
+1. Telah dilaksanakan evaluasi berkala; 
+2. Evaluasi dilaksanakan untuk menangani residual risk;
+3. Tindak lanjut atas hasil evaluasi  telah dilaksanakan;
+b. Pimpinan organisasi terbuka atas masukan dari pegawai dan adaptif terhadap perubahan.
+c. Keluhan dari pegawai atas keterbatasan/masalah sumberdaya dukungan pelaksanaan pekerjaan dapat diatasi.`
+      },
+      {
+        grade: 'C',
+        kriteria: `Pimpinan organisasi melaksanakan kebijakan dan didukung dengan SDM yang bekerja sesuai dengan kebijakan yang ditetapkan`,
+        tooltip: `a. Pimpinan organisasi menerapkan manajemen berbasis kinerja dan mempertimbangkan risiko dalam pengambilan keputusan.
+b. Pimpinan organisasi memberikan keteladanan dalam beretika, berintegritas, ketaatan terhadap perundang-undangan, dan berkinerja secara efektif dan efisien.
+c. Pegawai mendukung pimpinan organisasi dengan hadir dan bekerja sesuai dengan ketentuan.`
+      },
+      {
+        grade: 'D',
+        kriteria: `Pimpinan organisasi terlibat dalam penyusunan dan penetapkan kebijakan yang mendukung penciptaan lingkungan kerja yang kondusif untuk pencapaian tujuan organisasi serta memahami substansi kebijakan pengendalian intern dan mendorong penerapan kebijakan dalam berbagai interaksi kepada jajaran di bawahnya`,
+        tooltip: `a. Pimpinan organisasi telah memahami substansi dari kebijakan yang telah ditetapkan.
+b. Pimpinan organisasi mengarahkan pegawai agar dapat bekerja selaras dengan kebijakan, melalui:
+1. Rapat internal.
+2. Upacara/apel pagi.
+3. Forum diskusi/jam pimpinan.
+4. Interaksi informal.`
+      },
+      {
+        grade: 'E',
+        kriteria: `Pimpinan organisasi terlibat dalam penyusunan dan penetapkan kebijakan yang mendukung penciptaan lingkungan kerja yang kondusif untuk pencapaian tujuan organisasi`,
+        tooltip: `Pimpinan organisasi terlibat dalam penyusunan kebijakan yang mendukung penciptaan lingkungan kerja yang kondusif untuk pencapaian tujuan organisasi, antara lain kebijakan terkait manajemen kinerja, manajemen keuangan dan aset, manajemen SDM, serta manajemen risiko.`
+      }
+    ]
+  },
+  {
+    kode: `1.3.2`,
+    uraian_subunsur: `Kepemimpinan yang Kondusif`,
+    no: ``,
+    uraian_parameter: `Pimpinan K/L/D mengalokasikan sumber daya untuk penerapan manajemen risiko`,
+    kode_parameter: `1.3.2`,
+    grades: [
+      {
+        grade: 'A',
+        kriteria: `Sudah mengalokasikan sumber daya secara memadai untuk penerapan manajemen risiko pada tingkat operasional unit kerja, strategis unit kerja, dan strategis K/L/D`,
+        tooltip: `a. Instansi Pemerintah telah menganggarkan dana implementasi manajemen risiko seperti rapat terkait manajemen risiko, identifikasi dan analisis risiko, penyusunan profil risiko, implementasi RTP, kegiatan monitoring dan reviu  dalam rencana kerja/DPA/DIPA  dan dalam implementasi manajemen risiko tidak terkendala kekurangan dana implementasi ditingkat operasional unit kerja, strategis unit kerja, dan strategis K/L/D
+b. Minimal 70% SDM yang menjadi anggota UPR pada tingkat operasional dan strategis unit kerja serta strategis K/L/D diisi oleh orang yang berkompeten dalam bidang manajemen risiko`
+      },
+      {
+        grade: 'B',
+        kriteria: `Sudah mengalokasikan sumber daya secara memadai untuk penerapan manajemen risiko pada tingkat operasional unit kerja dan strategis unit kerja namun pada tingkat srategis K/L/D belum memadai`,
+        tooltip: `a. Instansi Pemerintah telah menganggarkan dana implementasi manajemen risiko seperti rapat terkait manajemen risiko, identifikasi dan analisis risiko, penyusunan profil risiko, implementasi RTP, kegiatan monitoring dan reviu  dalam rencana kerja/DPA/DIPA  dan dalam implementasi manajemen risiko tidak terkendala kekurangan dana implementasi ditingkat operasional dan strategis unit kerja, namun masih terkendala kekurangan dana pada tingkat  strategis K/L/D dan
+b. Minimal 70% SDM yang menjadi anggota UPR pada tingkat operasional dan strategis unit kerja diisi oleh orang yang berkompeten dalam bidang manajemen risiko serta kurang dari 70% SDM yang menjadi anggota UPR pada tingkat Strategis K/L/D diisi oleh orang yang berkompeten dalam bidang manajemen risiko`
+      },
+      {
+        grade: 'C',
+        kriteria: `Sudah mengalokasikan sumber daya secara memadai untuk penerapan manajemen risiko pada tingkat operasional unit kerja dan strategis unit kerja`,
+        tooltip: `a. Instansi Pemerintah telah menganggarkan dana implementasi manajemen risiko seperti rapat terkait manajemen risiko, identifikasi dan analisis risiko, penyusunan profil risiko, implementasi RTP, kegiatan monitoring dan reviu  dalam rencana kerja/DPA/DIPA  dan dalam implementasi manajemen risiko tidak terkendala kekurangan dana implementasi ditingkat operasional dan strategis unit kerja
+b. Minimal 70% SDM yang menjadi anggota UPR pada tingkat operasional dan strategis unit kerja diisi oleh orang yang berkompeten dalam bidang manajemen risiko`
+      },
+      {
+        grade: 'D',
+        kriteria: `Sudah mengalokasikan sumber daya secara memadai untuk penerapan manajemen risiko pada tingkat operasional unit kerja namun pada tingkat strategis unit kerja belum memadai`,
+        tooltip: `a. Instansi Pemerintah telah menganggarkan dana implementasi manajemen risiko pada tingkat operasional unit kerja seperti rapat terkait manajemen risiko, identifikasi dan analisis risiko, penyusunan profil risiko, implementasi RTP, kegiatan monitoring dan reviu  dalam rencana kerja/DPA/DIPA secara memadai, namun belum memadai pada tingkat strategis unit kerja, dan/atau
+b. Kurang dari 70% SDM yang menjadi anggota UPR pada tingkat operasional Unit Kerja diisi oleh orang yang berkompeten dalam bidang manajemen risiko`
+      },
+      {
+        grade: 'E',
+        kriteria: `Sudah mengalokasikan sumber daya untuk penerapan manajemen risiko pada tingkat operasional unit kerja namun belum memadai`,
+        tooltip: `a. Instansi Pemerintah telah menganggarkan dana implementasi manajemen risiko pada tingkat operasional unit kerja seperti rapat terkait manajemen risiko, identifikasi dan analisis risiko, penyusunan profil risiko, implementasi RTP, kegiatan monitoring dan reviu  dalam rencana kerja/DPA/DIPA namun belum memadai, dan/atau
+b. Kurang dari 70% SDM yang menjadi anggota UPR pada tingkat operasional Unit Kerja diisi oleh orang yang berkompeten dalam bidang manajemen risiko`
+      }
+    ]
+  },
+  {
+    kode: `1.3.3`,
+    uraian_subunsur: `Kepemimpinan yang Kondusif`,
+    no: ``,
+    uraian_parameter: `Pimpinan K/L/D menggunakan informasi terkait risiko dalam pengambilan keputusan`,
+    kode_parameter: `1.3.3`,
+    grades: [
+      {
+        grade: 'A',
+        kriteria: `Seluruh pengambilan keputusan strategis K/L/D, strategis unit kerja, dan operasional unit kerja telah mempertimbangkan risiko dan memberikan dampak bagi pencapaian tujuan organisasi`,
+        tooltip: `Seluruh keputusan pimpinan instansi maupun pimpinan unit kerja secara umum menggunakan informasi terkait risiko di tingkat operasional unit kerja, strategis unit kerja, dan strategis K/L/D dan memberikan dampak bagi pencapaian tujuan organisasi`
+      },
+      {
+        grade: 'B',
+        kriteria: `Seluruh pengambilan keputusan strategis K/L/D, strategis unit kerja, dan operasional unit kerja telah mempertimbangkan risiko`,
+        tooltip: `Seluruh keputusan pimpinan instansi maupun pimpinan unit kerja secara umum menggunakan informasi terkait risiko di tingkat operasional unit kerja, strategis unit kerja, dan strategis K/L/D`
+      },
+      {
+        grade: 'C',
+        kriteria: `Seluruh pengambilan keputusan strategis unit kerja dan operasional unit kerja telah mempertimbangkan risiko`,
+        tooltip: `Seluruh keputusan pimpinan instansi maupun pimpinan unit kerja secara umum menggunakan informasi terkait risiko di tingkat operasional dan strategis unit kerja`
+      },
+      {
+        grade: 'D',
+        kriteria: `Seluruh pengambilan keputusan operasional unit kerja telah mempertimbangkan risiko`,
+        tooltip: `Seluruh keputusan pimpinan instansi maupun pimpinan unit kerja secara umum menggunakan informasi terkait risiko di tingkat operasional`
+      },
+      {
+        grade: 'E',
+        kriteria: `Sebagian pengambilan keputusan operasional unit kerja telah mempertimbangkan risiko`,
+        tooltip: `Sebagian keputusan pimpinan instansi maupun pimpinan unit kerja secara umum menggunakan informasi terkait risiko di tingkat operasional`
+      }
+    ]
+  },
+];
+
+    const $ = (sel) => document.querySelector(sel);
+
+    const App = {
+      db:null, auth:null,
+      userId:null,
+      currentSatker: localStorage.getItem('spip.currentSatker') || SATKER_LIST[0],
+      assessmentData:{}, unsubscribe:null, bootstrapModal:null,
+      currentGrade:'A',
+      sestamaCache:new Map(),
+
+      init() {
+        try {
+          const app = initializeApp(firebaseConfig);
+          this.db = getFirestore(app);
+          enableIndexedDbPersistence(this.db).catch(()=>{});
+          this.auth = getAuth(app);
+          this.handleAuthentication();
+        } catch (e) {
+          console.error('Firebase init failed:', e);
+          $('#loader').innerText = 'Kunci Firebase salah. Mohon periksa kembali.';
+          return;
+        }
+        this.populateSatkerSelect();
+        this.setupEventListeners();
+        this.bootstrapModal = new bootstrap.Modal($('#assessment-modal'));
+
+        // inisialisasi modal preview global + kosongkan iframe saat ditutup
+        previewModal = new bootstrap.Modal(document.getElementById('preview-modal'));
+        document.getElementById('preview-modal').addEventListener('hidden.bs.modal', ()=>{
+          document.getElementById('preview-iframe').src = '';
+        });
+      },
+
+      handleAuthentication() {
+        onAuthStateChanged(this.auth, async (user)=>{
+          if (user) {
+            this.userId = user.uid;
+            this.loadInitialData();
+          } else {
+            try { await signInAnonymously(this.auth); }
+            catch(e){ console.error('Auth failed:', e); $('#loader').innerText='Gagal otentikasi. Aktifkan login anonim.'; }
+          }
+        });
+      },
+
+      loadInitialData(){
+        $('#loader').style.display='none';
+        $('#main-content').classList.remove('d-none');
+        this.renderTable();
+        this.listenForDataChanges();
+        this.updateProgress();
+      },
+
+      populateSatkerSelect(){
+        const select=$('#satker-select'); select.innerHTML='';
+        SATKER_LIST.forEach(s=>{
+          const opt=new Option(s,s); if(s===this.currentSatker) opt.selected=true; select.add(opt);
+        });
+      },
+
+      gradeBadgeClass(g){
+        return g==='A'?'success':g==='B'?'primary':g==='C'?'info':g==='D'?'warning':g==='E'?'danger':'secondary';
+      },
+
+      renderTable(){
+        const tbody=$('#assessment-table-body'); tbody.innerHTML='';
+        const frag=document.createDocumentFragment();
+        ASSESSMENT_STRUCTURE.forEach(p=>{
+          const data = this.assessmentData[p.kode_parameter];
+          const done = Boolean(data && data.simpulan);
+          const simpulan = done ? data.simpulan : null;
+          const tr=document.createElement('tr');
+          tr.innerHTML=`
+            <td class="px-3">${p.kode_parameter}</td>
+            <td class="px-3">${p.uraian_parameter}</td>
+            <td class="px-3 text-center"><span class="badge rounded-pill ${done?'text-bg-success':'text-bg-warning'}">${done?'Selesai':'Belum Diisi'}</span></td>
+            <td class="px-3 text-center">
+              <button type="button" class="btn btn-primary btn-sm open-modal-btn" data-action="open-modal" data-param-code="${p.kode_parameter}">
+                ${done?'Edit':'Isi Penilaian'}
+              </button>
+            </td>
+            <td class="px-3 text-center">${simpulan?`<span class="badge" data-grade="${simpulan}">${simpulan}</span>`:'<span class="text-muted">-</span>'}</td>`;
+          frag.appendChild(tr);
+        });
+        tbody.appendChild(frag);
+      },
+
+      listenForDataChanges(){
+        if(this.unsubscribe) this.unsubscribe();
+        const docRef=doc(this.db,'assessments',this.currentSatker);
+        this.unsubscribe = onSnapshot(docRef,(snap)=>{
+          if(snap.exists()){
+            const raw=snap.data();
+            const next = raw?.parameters || {};
+            if (!shallowEqual(this.assessmentData, next)) {
+              this.assessmentData = next;
+              this.renderTable(); 
+              this.updateProgress();
+            }
+            this.updateLastSaved(raw?.updated_at || null);
+          }else{
+            if (!shallowEqual(this.assessmentData, {})) {
+              this.assessmentData={}; 
+              this.renderTable(); 
+              this.updateProgress();
+            }
+            this.updateLastSaved(null);
+          }
+        },(err)=>{
+          console.error('onSnapshot error:',err);
+          $('#loader').style.display='block';
+          $('#loader').innerHTML=`<div class="alert alert-danger" role="alert">Gagal mengambil data. Periksa aturan keamanan Firestore Anda.</div>`;
+        });
+      },
+
+      setupEventListeners(){
+        $('#satker-select').addEventListener('change',(e)=>{
+          this.currentSatker=e.target.value; localStorage.setItem('spip.currentSatker',this.currentSatker);
+          this.listenForDataChanges();
+        });
+
+        document.addEventListener('click', (e)=>{
+          const btn=e.target.closest('[data-action="open-modal"]');
+          if(!btn) return;
+          e.preventDefault();
+          this.openModal(btn.getAttribute('data-param-code'))
+              .catch(err=>console.error('openModal failed', err));
+        });
+
+        document.getElementById('assessment-form').addEventListener('submit', (e)=>{
+          e.preventDefault();
+          const f=e.currentTarget;
+          if(!f.checkValidity()){ f.classList.add('was-validated'); return; }
+          this.saveAssessment().catch(err=>console.error('save error',err));
+        });
+
+        // Bukti Dukung
+        document.getElementById('grade-tabs').addEventListener('click', (e)=>{
+          const btn=e.target.closest('button[data-grade]'); if(!btn) return;
+          this.switchGrade(btn.dataset.grade);
+        });
+
+        document.getElementById('btn-open-drive-folder').addEventListener('click', ()=>{
+          const fid = driveFolderIdFor(this.currentSatker, this.currentGrade);
+          if(!fid){ alert('Folder Google Drive belum dikonfigurasi untuk unit/grade ini.'); return; }
+          window.open(`https://drive.google.com/drive/folders/${fid}`, '_blank', 'noopener');
+        });
+      },
+
+      async openModal(paramCode){
+        const param = ASSESSMENT_STRUCTURE.find(p=>p.kode_parameter===paramCode); if(!param) return;
+        document.getElementById('current-parameter-code').value=paramCode;
+        document.getElementById('modal-parameter-title').textContent=`${param.kode_parameter} — ${param.uraian_parameter}`;
+
+        // Kriteria + tooltip
+        const html = param.grades.map(g=>`
+          <p class="mb-1 small">
+            <strong class="fw-semibold text-body-secondary">Grade ${g.grade}:</strong>
+            ${g.kriteria}
+            <button type="button" class="btn btn-link btn-sm p-0 align-baseline ms-1" data-bs-toggle="tooltip" data-bs-placement="top" title="${g.tooltip || 'yang terlampir sebagai berikut'}" aria-label="Info kriteria grade ${g.grade}">
+              <i class="bi bi-info-circle"></i>
+            </button>
+          </p>`).join('');
+        document.getElementById('modal-criteria-container').innerHTML=html;
+        document.querySelectorAll('#assessment-modal [data-bs-toggle="tooltip"]').forEach(el => new bootstrap.Tooltip(el));
+
+        // Prefill
+        const exist = this.assessmentData[paramCode] || {};
+        document.getElementById('metode-penilaian').value = exist.metode_penilaian || 'Wawancara';
+        document.getElementById('simpulan').value = exist.simpulan || 'A';
+        document.getElementById('hasil-pengujian').value = exist.hasil_pengujian || '';
+        document.getElementById('uraian-aoi').value = exist.uraian_aoi || '';
+
+        // Sestama fields / reference
+        const isSestama = this.currentSatker === 'Sestama';
+        const sestamaFields = document.getElementById('sestama-fields');
+        const refCard = document.getElementById('sestama-reference');
+        if (isSestama) {
+          sestamaFields.classList.remove('d-none'); refCard.classList.add('d-none');
+          document.getElementById('simpulan-sestama').value = exist.simpulan_sestama || '';
+          document.getElementById('hasil-pengujian-sestama').value = exist.hasil_pengujian_sestama || '';
+        } else {
+          sestamaFields.classList.add('d-none'); refCard.classList.remove('d-none');
+          try {
+            let ref = this.sestamaCache.get(paramCode);
+            if (!ref) {
+              const sDoc = await getDoc(doc(this.db,'assessments','Sestama'));
+              ref = sDoc.exists() ? (sDoc.data().parameters?.[paramCode] || {}) : {};
+              this.sestamaCache.set(paramCode, ref);
+            }
+            document.getElementById('ref-simpulan-sestama').textContent = ref.simpulan_sestama || ref.simpulan || '—';
+            document.getElementById('ref-uraian-sestama').textContent = ref.hasil_pengujian_sestama || ref.hasil_pengujian || 'Tidak ada rujukan';
+          } catch(err){
+            document.getElementById('ref-simpulan-sestama').textContent='—';
+            document.getElementById('ref-uraian-sestama').innerHTML='<span class="text-danger">Gagal memuat rujukan Sestama</span>';
+            console.error(err);
+          }
+        }
+
+        // Bukti Dukung: Grade A default
+        this.resetGradeTabs('A');
+        this.currentGrade='A';
+        await this.refreshDriveFiles();
+
+        if (!this.bootstrapModal) this.bootstrapModal = new bootstrap.Modal($('#assessment-modal'));
+        this.bootstrapModal.show();
+      },
+
+      async saveAssessment(){
+        const paramCode=document.getElementById('current-parameter-code').value;
+        const payload={
+          metode_penilaian: document.getElementById('metode-penilaian').value,
+          simpulan: document.getElementById('simpulan').value,
+          hasil_pengujian: document.getElementById('hasil-pengujian').value.trim(),
+          uraian_aoi: document.getElementById('uraian-aoi').value.trim()
+        };
+        if (this.currentSatker==='Sestama') {
+          payload.simpulan_sestama = document.getElementById('simpulan-sestama').value || '';
+          payload.hasil_pengujian_sestama = document.getElementById('hasil-pengujian-sestama').value.trim();
+        }
+        const docRef=doc(this.db,'assessments',this.currentSatker);
+        await setDoc(docRef, { parameters:{ [paramCode]: { ...(this.assessmentData[paramCode]||{}), ...payload } }, updated_at:new Date().toISOString() }, { merge:true });
+        if (this.bootstrapModal) this.bootstrapModal.hide();
+      },
+
+      // ====== Bukti Dukung (Google Drive VIEW) ======
+      resetGradeTabs(active){
+        document.querySelectorAll('#grade-tabs [data-grade]').forEach(btn=>{
+          const isActive = btn.dataset.grade===active;
+          btn.classList.toggle('btn-primary', isActive);
+          btn.classList.toggle('btn-outline-primary', !isActive);
+        });
+      },
+
+      switchGrade(grade){
+        this.currentGrade = grade;
+        this.resetGradeTabs(grade);
+        this.refreshDriveFiles();
+      },
+
+      async refreshDriveFiles(){
+        const listEl = document.getElementById('drive-file-list');
+        const key = `${this.currentSatker}_${this.currentGrade}`;
+        const folderId = driveFolderIdFor(this.currentSatker, this.currentGrade);
+
+        if (!folderId) {
+          listEl.innerHTML = '<div class="text-danger px-2 py-1">Folder Google Drive belum dikonfigurasi untuk unit/grade ini.</div>';
+          return;
+        }
+
+        // tampilkan skeleton singkat
+        listEl.innerHTML = `
+          <div class="px-2 py-1 muted">Memuat dokumen…</div>
+          <div class="list-group-item placeholder-glow"><span class="placeholder col-8"></span></div>
+          <div class="list-group-item placeholder-glow"><span class="placeholder col-6"></span></div>
+        `;
+
+        // render dari cache jika ada (instan)
+        if (driveCache.has(key)) {
+          this.renderDriveFiles(driveCache.get(key));
+        }
+
+        // batalkan fetch sebelumnya jika ada
+        if (driveFetchCtrl) driveFetchCtrl.abort();
+        driveFetchCtrl = new AbortController();
+
+        try{
+          const files = await listDriveFolder(folderId, driveFetchCtrl.signal);
+          driveCache.set(key, files);
+          this.renderDriveFiles(files);
+        }catch(err){
+          if (err.name === 'AbortError') return;
+          console.error(err);
+          listEl.innerHTML = '<div class="text-danger px-2 py-1">Gagal memuat dari Google Drive. Cek API Key & izin folder.</div>';
+        }
+      },
+
+      renderDriveFiles(files){
+        const listEl = document.getElementById('drive-file-list');
+        if(!files || !files.length){
+          listEl.innerHTML = '<div class="muted px-2 py-1">Belum ada dokumen di Google Drive.</div>';
+          return;
+        }
+        listEl.innerHTML = '';
+        files.forEach(file=>{
+          const row = document.createElement('div');
+          row.className = 'list-group-item d-flex justify-content-between align-items-center';
+          row.innerHTML = `
+            <a href="${file.webViewLink}" target="_blank" rel="noopener" class="truncate">${file.name}</a>
+            <button class="btn btn-sm btn-outline-primary">Preview</button>
+          `;
+          row.querySelector('button').addEventListener('click', ()=>{
+            document.getElementById('preview-modal-title').textContent = file.name;
+            document.getElementById('preview-iframe').src = drivePreviewUrl(file);
+            previewModal?.show();
+          });
+          listEl.appendChild(row);
+        });
+      },
+
+      updateProgress(){
+        const total = ASSESSMENT_STRUCTURE.length;
+        const done = Object.values(this.assessmentData||{}).filter(v=>v && v.simpulan).length;
+        const pct = Math.round((done/Math.max(1,total))*100);
+        const bar = document.getElementById('progress-bar');
+        bar.style.width = pct + '%';
+        bar.textContent = pct + '%';
+        bar.setAttribute('aria-valuenow', pct);
+      },
+
+      updateLastSaved(ts){
+        const el = document.getElementById('last-saved');
+        if(!ts){ el.textContent = '—'; return; }
+        try{
+          const dt = new Date(ts);
+          el.textContent = `Terakhir disimpan: ${dt.toLocaleString()}`;
+        }catch{ el.textContent='—'; }
+      }
+    };
+
+    // Start app
+    window.addEventListener('DOMContentLoaded', ()=> App.init());
+  </script>
+
+  <script>
+    // Export to PDF via browser print
+    document.addEventListener('DOMContentLoaded', () => {
+      const btn = document.getElementById('btn-export-pdf');
+      if (btn) {
+        btn.addEventListener('click', () => {
+          // Pastikan konten utama tampil penuh sebelum print
+          const main = document.getElementById('main-content');
+          if (main && main.classList.contains('d-none')) {
+            // kalau masih loading, tunggu sebentar
+            setTimeout(() => window.print(), 300);
+          } else {
+            window.print();
+          }
+        });
+      }
+    });
+  </script>
+
+
+  <script>
+    // === Collector untuk Dashboard (rekap A–E per unit) ===
+    (function(){
+      function collect(){
+        try{
+          const select = document.getElementById('satker-select');
+          const unit = (select && select.value) ? select.value : 'Unit Tanpa Nama';
+          // Hitung badge grade di kolom Grade
+          const counts = {A:0,B:0,C:0,D:0,E:0};
+          document.querySelectorAll('#assessment-table-body .badge[data-grade]').forEach(b=>{
+            const g = b.getAttribute('data-grade');
+            if (counts[g] != null) counts[g]++;
+          });
+          const total = Object.values(counts).reduce((a,b)=>a+b,0);
+          const key = 'gradeDashboardData';
+          const data = JSON.parse(localStorage.getItem(key) || '{}');
+          data[unit] = { counts, total, updated_at: new Date().toISOString() };
+          localStorage.setItem(key, JSON.stringify(data));
+        }catch(e){/* noop */}
+      }
+
+      // Observasi perubahan tabel agar collector jalan otomatis
+      document.addEventListener('DOMContentLoaded', () => {
+        const tbody = document.getElementById('assessment-table-body');
+        if (tbody){
+          const mo = new MutationObserver(() => collect());
+          mo.observe(tbody, { childList:true, subtree:true, attributes:false });
+          // koleksi awal (jaga-jaga)
+          setTimeout(collect, 700);
+        } else {
+          setTimeout(collect, 1000);
+        }
+
+        // Bila user ganti unit
+        const satker = document.getElementById('satker-select');
+        if (satker) satker.addEventListener('change', () => setTimeout(collect, 1000));
+      });
+    })();
+  </script>
+
+
+<!-- ===== START: Tambahan Drive folders per Parameter Sub Unsur (TIDAK mengubah kode lama) ===== -->
+<script>
+// Mapping per Unit × Sub Unsur (kode_parameter) × Grade → FolderId
+// Isi <folderId> dengan ID folder Google Drive (bukan full URL).
+// Kosongkan ("") jika belum ada—sistem akan tanpa fallback ke unit-level mapping.
+window.DRIVE_FOLDERS_PARAM = {
+  "Sestama": {
+    // Contoh yang diberikan: 1.1.1 Grade A
+    "1.1.1": { A:"1ptHq3fU-BbAGKy5UNvzNhYJ3vo1CsJWI", B:"1lbQ2FydaKVo5BRVaz5n7W_w-LckQvq7L", C:"1J_qAmpTw3jlbfa4bPcpdGpX9vue57fqh", D:"19DEvfcTHMByfbTny1W7L1Ish1LgldhLP", E:"1HRo4VZHa-hUx8sxC4uimnNVdjMtNsU_r" },
+    "1.2.1": { A:"1ptHq3fU-BbAGKy5UNvzNhYJ3vo1CsJWI", B:"1lbQ2FydaKVo5BRVaz5n7W_w-LckQvq7L", C:"1J_qAmpTw3jlbfa4bPcpdGpX9vue57fqh", D:"19DEvfcTHMByfbTny1W7L1Ish1LgldhLP", E:"1HRo4VZHa-hUx8sxC4uimnNVdjMtNsU_r" },
+    "1.3.1": { A:"1ptHq3fU-BbAGKy5UNvzNhYJ3vo1CsJWI", B:"1lbQ2FydaKVo5BRVaz5n7W_w-LckQvq7L", C:"1J_qAmpTw3jlbfa4bPcpdGpX9vue57fqh", D:"19DEvfcTHMByfbTny1W7L1Ish1LgldhLP", E:"1HRo4VZHa-hUx8sxC4uimnNVdjMtNsU_r" },
+    "1.3.2": { A:"1ptHq3fU-BbAGKy5UNvzNhYJ3vo1CsJWI", B:"1lbQ2FydaKVo5BRVaz5n7W_w-LckQvq7L", C:"1J_qAmpTw3jlbfa4bPcpdGpX9vue57fqh", D:"19DEvfcTHMByfbTny1W7L1Ish1LgldhLP", E:"1HRo4VZHa-hUx8sxC4uimnNVdjMtNsU_r" },
+    "1.3.3": { A:"1ptHq3fU-BbAGKy5UNvzNhYJ3vo1CsJWI", B:"1lbQ2FydaKVo5BRVaz5n7W_w-LckQvq7L", C:"1J_qAmpTw3jlbfa4bPcpdGpX9vue57fqh", D:"19DEvfcTHMByfbTny1W7L1Ish1LgldhLP", E:"1HRo4VZHa-hUx8sxC4uimnNVdjMtNsU_r" }
+  },
+  "Inspektorat": {
+    "1.1.1": { A:"1ptHq3fU-BbAGKy5UNvzNhYJ3vo1CsJWI", B:"1lbQ2FydaKVo5BRVaz5n7W_w-LckQvq7L", C:"1J_qAmpTw3jlbfa4bPcpdGpX9vue57fqh", D:"19DEvfcTHMByfbTny1W7L1Ish1LgldhLP", E:"1HRo4VZHa-hUx8sxC4uimnNVdjMtNsU_r" },
+    "1.2.1": { A:"1ptHq3fU-BbAGKy5UNvzNhYJ3vo1CsJWI", B:"1lbQ2FydaKVo5BRVaz5n7W_w-LckQvq7L", C:"1J_qAmpTw3jlbfa4bPcpdGpX9vue57fqh", D:"19DEvfcTHMByfbTny1W7L1Ish1LgldhLP", E:"1HRo4VZHa-hUx8sxC4uimnNVdjMtNsU_r" },
+    "1.3.1": { A:"1ptHq3fU-BbAGKy5UNvzNhYJ3vo1CsJWI", B:"1lbQ2FydaKVo5BRVaz5n7W_w-LckQvq7L", C:"1J_qAmpTw3jlbfa4bPcpdGpX9vue57fqh", D:"19DEvfcTHMByfbTny1W7L1Ish1LgldhLP", E:"1HRo4VZHa-hUx8sxC4uimnNVdjMtNsU_r" },
+    "1.3.2": { A:"1ptHq3fU-BbAGKy5UNvzNhYJ3vo1CsJWI", B:"1lbQ2FydaKVo5BRVaz5n7W_w-LckQvq7L", C:"1J_qAmpTw3jlbfa4bPcpdGpX9vue57fqh", D:"19DEvfcTHMByfbTny1W7L1Ish1LgldhLP", E:"1HRo4VZHa-hUx8sxC4uimnNVdjMtNsU_r" },
+    "1.3.3": { A:"1ptHq3fU-BbAGKy5UNvzNhYJ3vo1CsJWI", B:"1lbQ2FydaKVo5BRVaz5n7W_w-LckQvq7L", C:"1J_qAmpTw3jlbfa4bPcpdGpX9vue57fqh", D:"19DEvfcTHMByfbTny1W7L1Ish1LgldhLP", E:"1HRo4VZHa-hUx8sxC4uimnNVdjMtNsU_r" }
+  },
+  "Pusdatin": {
+    "1.1.1": { A:"1ptHq3fU-BbAGKy5UNvzNhYJ3vo1CsJWI", B:"1lbQ2FydaKVo5BRVaz5n7W_w-LckQvq7L", C:"1J_qAmpTw3jlbfa4bPcpdGpX9vue57fqh", D:"19DEvfcTHMByfbTny1W7L1Ish1LgldhLP", E:"1HRo4VZHa-hUx8sxC4uimnNVdjMtNsU_r" },
+    "1.2.1": { A:"1ptHq3fU-BbAGKy5UNvzNhYJ3vo1CsJWI", B:"1lbQ2FydaKVo5BRVaz5n7W_w-LckQvq7L", C:"1J_qAmpTw3jlbfa4bPcpdGpX9vue57fqh", D:"19DEvfcTHMByfbTny1W7L1Ish1LgldhLP", E:"1HRo4VZHa-hUx8sxC4uimnNVdjMtNsU_r" },
+    "1.3.1": { A:"1ptHq3fU-BbAGKy5UNvzNhYJ3vo1CsJWI", B:"1lbQ2FydaKVo5BRVaz5n7W_w-LckQvq7L", C:"1J_qAmpTw3jlbfa4bPcpdGpX9vue57fqh", D:"19DEvfcTHMByfbTny1W7L1Ish1LgldhLP", E:"1HRo4VZHa-hUx8sxC4uimnNVdjMtNsU_r" },
+    "1.3.2": { A:"1ptHq3fU-BbAGKy5UNvzNhYJ3vo1CsJWI", B:"1lbQ2FydaKVo5BRVaz5n7W_w-LckQvq7L", C:"1J_qAmpTw3jlbfa4bPcpdGpX9vue57fqh", D:"19DEvfcTHMByfbTny1W7L1Ish1LgldhLP", E:"1HRo4VZHa-hUx8sxC4uimnNVdjMtNsU_r" },
+    "1.3.3": { A:"1ptHq3fU-BbAGKy5UNvzNhYJ3vo1CsJWI", B:"1lbQ2FydaKVo5BRVaz5n7W_w-LckQvq7L", C:"1J_qAmpTw3jlbfa4bPcpdGpX9vue57fqh", D:"19DEvfcTHMByfbTny1W7L1Ish1LgldhLP", E:"1HRo4VZHa-hUx8sxC4uimnNVdjMtNsU_r" }
+  },
+  "Puslat": {
+    "1.1.1": { A:"1ptHq3fU-BbAGKy5UNvzNhYJ3vo1CsJWI", B:"1lbQ2FydaKVo5BRVaz5n7W_w-LckQvq7L", C:"1J_qAmpTw3jlbfa4bPcpdGpX9vue57fqh", D:"19DEvfcTHMByfbTny1W7L1Ish1LgldhLP", E:"1HRo4VZHa-hUx8sxC4uimnNVdjMtNsU_r" },
+    "1.2.1": { A:"1ptHq3fU-BbAGKy5UNvzNhYJ3vo1CsJWI", B:"1lbQ2FydaKVo5BRVaz5n7W_w-LckQvq7L", C:"1J_qAmpTw3jlbfa4bPcpdGpX9vue57fqh", D:"19DEvfcTHMByfbTny1W7L1Ish1LgldhLP", E:"1HRo4VZHa-hUx8sxC4uimnNVdjMtNsU_r" },
+    "1.3.1": { A:"1ptHq3fU-BbAGKy5UNvzNhYJ3vo1CsJWI", B:"1lbQ2FydaKVo5BRVaz5n7W_w-LckQvq7L", C:"1J_qAmpTw3jlbfa4bPcpdGpX9vue57fqh", D:"19DEvfcTHMByfbTny1W7L1Ish1LgldhLP", E:"1HRo4VZHa-hUx8sxC4uimnNVdjMtNsU_r" },
+    "1.3.2": { A:"1ptHq3fU-BbAGKy5UNvzNhYJ3vo1CsJWI", B:"1lbQ2FydaKVo5BRVaz5n7W_w-LckQvq7L", C:"1J_qAmpTw3jlbfa4bPcpdGpX9vue57fqh", D:"19DEvfcTHMByfbTny1W7L1Ish1LgldhLP", E:"1HRo4VZHa-hUx8sxC4uimnNVdjMtNsU_r" },
+    "1.3.3": { A:"1ptHq3fU-BbAGKy5UNvzNhYJ3vo1CsJWI", B:"1lbQ2FydaKVo5BRVaz5n7W_w-LckQvq7L", C:"1J_qAmpTw3jlbfa4bPcpdGpX9vue57fqh", D:"19DEvfcTHMByfbTny1W7L1Ish1LgldhLP", E:"1HRo4VZHa-hUx8sxC4uimnNVdjMtNsU_r" }
+  },
+  "D1": {
+    "1.1.1": { A:"1ptHq3fU-BbAGKy5UNvzNhYJ3vo1CsJWI", B:"1lbQ2FydaKVo5BRVaz5n7W_w-LckQvq7L", C:"1J_qAmpTw3jlbfa4bPcpdGpX9vue57fqh", D:"19DEvfcTHMByfbTny1W7L1Ish1LgldhLP", E:"1HRo4VZHa-hUx8sxC4uimnNVdjMtNsU_r" },
+    "1.2.1": { A:"1ptHq3fU-BbAGKy5UNvzNhYJ3vo1CsJWI", B:"1lbQ2FydaKVo5BRVaz5n7W_w-LckQvq7L", C:"1J_qAmpTw3jlbfa4bPcpdGpX9vue57fqh", D:"19DEvfcTHMByfbTny1W7L1Ish1LgldhLP", E:"1HRo4VZHa-hUx8sxC4uimnNVdjMtNsU_r" },
+    "1.3.1": { A:"1ptHq3fU-BbAGKy5UNvzNhYJ3vo1CsJWI", B:"1lbQ2FydaKVo5BRVaz5n7W_w-LckQvq7L", C:"1J_qAmpTw3jlbfa4bPcpdGpX9vue57fqh", D:"19DEvfcTHMByfbTny1W7L1Ish1LgldhLP", E:"1HRo4VZHa-hUx8sxC4uimnNVdjMtNsU_r" },
+    "1.3.2": { A:"1ptHq3fU-BbAGKy5UNvzNhYJ3vo1CsJWI", B:"1lbQ2FydaKVo5BRVaz5n7W_w-LckQvq7L", C:"1J_qAmpTw3jlbfa4bPcpdGpX9vue57fqh", D:"19DEvfcTHMByfbTny1W7L1Ish1LgldhLP", E:"1HRo4VZHa-hUx8sxC4uimnNVdjMtNsU_r" },
+    "1.3.3": { A:"1ptHq3fU-BbAGKy5UNvzNhYJ3vo1CsJWI", B:"1lbQ2FydaKVo5BRVaz5n7W_w-LckQvq7L", C:"1J_qAmpTw3jlbfa4bPcpdGpX9vue57fqh", D:"19DEvfcTHMByfbTny1W7L1Ish1LgldhLP", E:"1HRo4VZHa-hUx8sxC4uimnNVdjMtNsU_r" }
+  },
+  "D3": {
+    "1.1.1": { A:"1ptHq3fU-BbAGKy5UNvzNhYJ3vo1CsJWI", B:"1lbQ2FydaKVo5BRVaz5n7W_w-LckQvq7L", C:"1J_qAmpTw3jlbfa4bPcpdGpX9vue57fqh", D:"19DEvfcTHMByfbTny1W7L1Ish1LgldhLP", E:"1HRo4VZHa-hUx8sxC4uimnNVdjMtNsU_r" },
+    "1.2.1": { A:"1ptHq3fU-BbAGKy5UNvzNhYJ3vo1CsJWI", B:"1lbQ2FydaKVo5BRVaz5n7W_w-LckQvq7L", C:"1J_qAmpTw3jlbfa4bPcpdGpX9vue57fqh", D:"19DEvfcTHMByfbTny1W7L1Ish1LgldhLP", E:"1HRo4VZHa-hUx8sxC4uimnNVdjMtNsU_r" },
+    "1.3.1": { A:"1ptHq3fU-BbAGKy5UNvzNhYJ3vo1CsJWI", B:"1lbQ2FydaKVo5BRVaz5n7W_w-LckQvq7L", C:"1J_qAmpTw3jlbfa4bPcpdGpX9vue57fqh", D:"19DEvfcTHMByfbTny1W7L1Ish1LgldhLP", E:"1HRo4VZHa-hUx8sxC4uimnNVdjMtNsU_r" },
+    "1.3.2": { A:"1ptHq3fU-BbAGKy5UNvzNhYJ3vo1CsJWI", B:"1lbQ2FydaKVo5BRVaz5n7W_w-LckQvq7L", C:"1J_qAmpTw3jlbfa4bPcpdGpX9vue57fqh", D:"19DEvfcTHMByfbTny1W7L1Ish1LgldhLP", E:"1HRo4VZHa-hUx8sxC4uimnNVdjMtNsU_r" },
+    "1.3.3": { A:"1ptHq3fU-BbAGKy5UNvzNhYJ3vo1CsJWI", B:"1lbQ2FydaKVo5BRVaz5n7W_w-LckQvq7L", C:"1J_qAmpTw3jlbfa4bPcpdGpX9vue57fqh", D:"19DEvfcTHMByfbTny1W7L1Ish1LgldhLP", E:"1HRo4VZHa-hUx8sxC4uimnNVdjMtNsU_r" }
+  },
+  "D4": {
+    "1.1.1": { A:"1ptHq3fU-BbAGKy5UNvzNhYJ3vo1CsJWI", B:"1lbQ2FydaKVo5BRVaz5n7W_w-LckQvq7L", C:"1J_qAmpTw3jlbfa4bPcpdGpX9vue57fqh", D:"19DEvfcTHMByfbTny1W7L1Ish1LgldhLP", E:"1HRo4VZHa-hUx8sxC4uimnNVdjMtNsU_r" },
+    "1.2.1": { A:"1ptHq3fU-BbAGKy5UNvzNhYJ3vo1CsJWI", B:"1lbQ2FydaKVo5BRVaz5n7W_w-LckQvq7L", C:"1J_qAmpTw3jlbfa4bPcpdGpX9vue57fqh", D:"19DEvfcTHMByfbTny1W7L1Ish1LgldhLP", E:"1HRo4VZHa-hUx8sxC4uimnNVdjMtNsU_r" },
+    "1.3.1": { A:"1ptHq3fU-BbAGKy5UNvzNhYJ3vo1CsJWI", B:"1lbQ2FydaKVo5BRVaz5n7W_w-LckQvq7L", C:"1J_qAmpTw3jlbfa4bPcpdGpX9vue57fqh", D:"19DEvfcTHMByfbTny1W7L1Ish1LgldhLP", E:"1HRo4VZHa-hUx8sxC4uimnNVdjMtNsU_r" },
+    "1.3.2": { A:"1ptHq3fU-BbAGKy5UNvzNhYJ3vo1CsJWI", B:"1lbQ2FydaKVo5BRVaz5n7W_w-LckQvq7L", C:"1J_qAmpTw3jlbfa4bPcpdGpX9vue57fqh", D:"19DEvfcTHMByfbTny1W7L1Ish1LgldhLP", E:"1HRo4VZHa-hUx8sxC4uimnNVdjMtNsU_r" },
+    "1.3.3": { A:"1ptHq3fU-BbAGKy5UNvzNhYJ3vo1CsJWI", B:"1lbQ2FydaKVo5BRVaz5n7W_w-LckQvq7L", C:"1J_qAmpTw3jlbfa4bPcpdGpX9vue57fqh", D:"19DEvfcTHMByfbTny1W7L1Ish1LgldhLP", E:"1HRo4VZHa-hUx8sxC4uimnNVdjMtNsU_r" }
+  }
+};
+
+// Helper global: ambil ID folder per Unit × Kode × Grade, fallback ke mapping Unit × Grade lama.
+window.getParamGradeFolderId = function(unit, kodeParam, grade){
+  return window.DRIVE_FOLDERS_PARAM?.[unit]?.[kodeParam]?.[grade] || null;
+};
+</script>
+<!-- ===== END: Tambahan Drive folders per Parameter Sub Unsur ===== -->
+
+<!-- ===== START: TOC (Test of Control) Add-on — kolom + modal + pre-assessment ===== -->
+<script>
+(function(){
+  // Ganti dengan URL Web App (Apps Script) kamu
+  const TOC_WEB_APP_URL = "PASTE_YOUR_APPS_SCRIPT_WEB_APP_URL";
+  const GRADES = ["A","B","C","D","E"];
+
+  function getActiveUnit(){
+    const s = document.querySelector("#satker-select");
+    return s ? s.value : "Sestama";
+  }
+  function getParamCodeFromRow(tr){
+    // kolom pertama = kode parameter
+    return tr && tr.cells && tr.cells[0] ? tr.cells[0].textContent.trim() : "";
+  }
+  function getFolders(unit, kode){
+    const out = {};
+    for(const g of GRADES){
+      const id = (window.getParamGradeFolderId ? window.getParamGradeFolderId(unit, kode, g) : null);
+      if (id) out[g] = id;
+    }
+    return out;
+  }
+  function criteriaFor(kode){
+    // Ambil seluruh "kriteria" dari ASSESSMENT_STRUCTURE untuk kode ini → jadi satu string
+    try{
+      const p = (window.ASSESSMENT_STRUCTURE||[]).find(x=>x.kode_parameter===kode);
+      if(!p) return "";
+      return (p.grades||[]).map(g=>String(g.kriteria||"")).join(" | ");
+    }catch{ return ""; }
+  }
+
+  // Sisipkan kolom "TOC" setelah "Status"
+  function injectTocColumn(){
+    const table = document.querySelector("#assessment-table-body")?.closest("table");
+    if(!table) return;
+    const headRow = table.querySelector("thead tr");
+    if(!headRow) return;
+
+    // cari index kolom "Status"
+    let statusIdx = -1;
+    [...headRow.children].forEach((th,i)=>{
+      const t=(th.textContent||"").trim().toLowerCase();
+      if(t==="status") statusIdx = i;
+    });
+    if(statusIdx<0) return;
+
+    // TH TOC bila belum ada
+    const hasToc = [...headRow.children].some(th => (th.textContent||"").trim()==="TOC");
+    if(!hasToc){
+      const th = document.createElement("th");
+      th.textContent = "TOC";
+      th.className = "px-3 text-center";
+      headRow.insertBefore(th, headRow.children[statusIdx+1] || null);
+    }
+    // Tambahkan tombol TOC di setiap baris
+    document.querySelectorAll("#assessment-table-body tr").forEach(tr=>{
+      const cells = tr.children;
+      // Jika sudah ada TOC di posisi tsb, skip
+      if(cells.length>statusIdx+1 && cells[statusIdx+1].querySelector?.('[data-action="open-toc"]')) return;
+      const td = document.createElement("td");
+      td.className = "px-3 text-center";
+      td.innerHTML = `<button class="btn btn-outline-primary btn-sm" data-action="open-toc"><i class="bi bi-robot me-1"></i>TOC</button>`;
+      tr.insertBefore(td, cells[statusIdx+1] || null);
+    });
+  }
+
+  // Modal TOC dibuat via JS agar tak perlu edit HTML utama
+  function ensureTocModal(){
+    if(document.querySelector("#tocModal")) return;
+    const html = `
+    <div class="modal fade" id="tocModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+          <div class="modal-header">
+            <div>
+              <h5 class="modal-title fw-bold">Test of Control (TOC) · Pre-Assessment</h5>
+              <div id="tocSubTitle" class="text-muted small"></div>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <div id="tocLoading" class="alert alert-info d-flex align-items-center gap-2">
+              <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+              <div>Analisis bukti dukung Google Drive sedang diproses…</div>
+            </div>
+            <div id="tocError" class="alert alert-danger d-none"></div>
+            <div id="tocResult" class="d-none">
+              <div class="row g-3">
+                <div class="col-md-4">
+                  <div class="card h-100"><div class="card-body">
+                    <div class="text-muted small mb-1">Saran Grade</div>
+                    <div id="tocGrade" style="font-size:2rem"></div>
+                    <div class="text-muted small" id="tocScore"></div>
+                    <div class="mt-3">
+                      <div class="text-muted small">Skor per Grade</div>
+                      <div id="tocPerGrade" class="mt-1 small"></div>
+                    </div>
+                  </div></div>
+                </div>
+                <div class="col-md-8">
+                  <div class="card h-100"><div class="card-body">
+                    <div class="text-muted small mb-1">Ringkasan Analisa</div>
+                    <div id="tocAnalisa" class="mb-2"></div>
+                    <div class="text-muted small mb-1">Kriteria Teridentifikasi</div>
+                    <div id="tocKriteria" class="small"></div>
+                  </div></div>
+                </div>
+              </div>
+              <div class="card mt-3"><div class="card-body">
+                <div class="text-muted small mb-1">Lampiran Bukti Dukung</div>
+                <div id="tocLampiran" class="small"></div>
+              </div></div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+            <button class="btn btn-primary" id="tocApplyBtn"><i class="bi bi-check2-circle me-1"></i>Terapkan Grade</button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+    document.body.insertAdjacentHTML("beforeend", html);
+  }
+
+  // Render hasil TOC ke modal
+  function renderTOC(data){
+    const GR = data.perGradeScores || {};
+    const g = data.grade || "E";
+    document.querySelector("#tocGrade").innerHTML = `<span class="badge bg-primary-subtle border text-primary fs-4 px-3 py-1">${g}</span>`;
+    document.querySelector("#tocScore").textContent = "Skor total: " + (data.score ?? "-") + " / 100";
+    document.querySelector("#tocPerGrade").innerHTML = GRADES.map(x=>`<div>Grade ${x}: <strong>${GR[x]??0}</strong></div>`).join("");
+    const chips = (data.kriteriaTerpenuhi||[]).map(k=>`<span class="badge text-bg-light me-1 mb-1">${k}</span>`).join("");
+    document.querySelector("#tocAnalisa").textContent = data.message || "Analisa selesai.";
+    document.querySelector("#tocKriteria").innerHTML = chips || "-";
+    const ev = (data.evidence||[]).map(e=>{
+      const url = e.url || `https://drive.google.com/file/d/${e.id}/view`;
+      const tag = e.grade ? `<span class="badge text-bg-secondary ms-2">G${e.grade}</span>` : "";
+      return `<div>• <a href="${url}" target="_blank" rel="noopener">${e.name||e.id}</a> <span class="text-muted">(${e.mime||"-"})</span>${tag}</div>`;
+    }).join("");
+    document.querySelector("#tocLampiran").innerHTML = ev || "-";
+    document.querySelector("#tocResult").classList.remove("d-none");
+  }
+
+  // Event: klik tombol TOC
+  let __tocRow = null, __lastTOC=null, __tocModal=null;
+  document.addEventListener("click", async (e)=>{
+    const btn = e.target.closest('[data-action="open-toc"]');
+    if(!btn) return;
+
+    ensureTocModal(); injectTocColumn();
+    __tocModal = __tocModal || (typeof bootstrap!=="undefined" ? new bootstrap.Modal("#tocModal") : null);
+
+    __tocRow = btn.closest("tr");
+    const unit = getActiveUnit();
+    const kode = getParamCodeFromRow(__tocRow);
+
+    document.querySelector("#tocSubTitle").textContent = `${unit} · ${kode}`;
+    document.querySelector("#tocError").classList.add("d-none");
+    document.querySelector("#tocResult").classList.add("d-none");
+    document.querySelector("#tocLoading").classList.remove("d-none");
+    document.querySelector("#tocApplyBtn").disabled = true;
+    __lastTOC = null;
+
+    __tocModal && __tocModal.show();
+
+    try{
+      const payload = {
+        unit, kode,
+        folders: getFolders(unit, kode),
+        criteria: criteriaFor(kode)
+      };
+      if(!TOC_WEB_APP_URL || TOC_WEB_APP_URL.startsWith("PASTE_")){
+        throw new Error("TOC_WEB_APP_URL belum diisi di HTML.");
+      }
+      const res = await fetch(TOC_WEB_APP_URL, {
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body: JSON.stringify(payload)
+      });
+      if(!res.ok) throw new Error(res.status+" "+res.statusText);
+      const data = await res.json();
+      __lastTOC = data;
+      renderTOC(data);
+      document.querySelector("#tocApplyBtn").disabled = false;
+    }catch(err){
+      const box = document.querySelector("#tocError");
+      box.textContent = "Gagal memuat TOC: " + err;
+      box.classList.remove("d-none");
+    }finally{
+      document.querySelector("#tocLoading").classList.add("d-none");
+    }
+  });
+
+  // Terapkan grade ke kolom "Grade" baris aktif
+  document.addEventListener("click",(e)=>{
+    if(e.target.id!=="tocApplyBtn") return;
+    if(!__tocRow || !__lastTOC) return;
+
+    const table = __tocRow.closest("table");
+    const heads = [...table.querySelectorAll("thead th")].map(th => (th.textContent||"").trim().toLowerCase());
+    const gradeIdx = heads.indexOf("grade");
+    if(gradeIdx>=0){
+      const cell = __tocRow.children[gradeIdx];
+      let badge = cell.querySelector(".badge[data-grade]");
+      if(!badge){
+        cell.innerHTML = `<span class="badge" data-grade="${__lastTOC.grade||'E'}">${__lastTOC.grade||'E'}</span>`;
+      }else{
+        badge.setAttribute("data-grade", __lastTOC.grade||"E");
+        badge.textContent = __lastTOC.grade||"E";
+      }
+    }
+    const m = bootstrap && bootstrap.Modal.getInstance(document.querySelector("#tocModal"));
+    m && m.hide();
+  });
+
+  // Pastikan kolom TOC tetap ada saat tabel di-render ulang
+  document.addEventListener("DOMContentLoaded", ()=>{
+    injectTocColumn();
+    const tbody = document.querySelector("#assessment-table-body");
+    if(tbody){
+      const mo = new MutationObserver(()=> injectTocColumn());
+      mo.observe(tbody, { childList:true, subtree:false });
+    }
+  });
+})();
+</script>
+<!-- ===== END: TOC Add-on ===== -->
+
+</body>
+</html>
