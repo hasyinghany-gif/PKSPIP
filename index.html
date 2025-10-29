@@ -5,13 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Aplikasi Penjamin Kualitas Maturitas SPIP</title>
 
-  <!-- Bootstrap CSS & Icons -->
+  <!-- Bootstrap & Icons -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" />
   <!-- Google Font -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
-  <!-- Preconnect untuk percepat akses Drive -->
+  <!-- Preconnect untuk Drive -->
   <link rel="preconnect" href="https://www.googleapis.com" crossorigin>
   <link rel="preconnect" href="https://docs.google.com" crossorigin>
   <link rel="preconnect" href="https://drive.google.com" crossorigin>
@@ -30,9 +30,25 @@
       font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial,"Noto Sans";
       background:#f8f9fa;
     }
+
+    /* LOGIN */
+    #login-section{
+      display:flex;align-items:center;justify-content:center;min-height:100vh;
+      background:linear-gradient(145deg,#e9f2ff,#f9fafb);
+      padding:24px;
+    }
+    .login-card{
+      width:100%;max-width:400px;background:#fff;border-radius:16px;
+      box-shadow:0 12px 28px rgba(13,110,253,.08);padding:2rem;border:1px solid #eef2f7;
+    }
+    .login-card .btn{width:100%;}
+    .login-card a{cursor:pointer;}
+
+    /* APP */
     .sticky-toolbar{position:sticky;top:0;z-index:1030}
     .criteria-box{max-height:180px;overflow-y:auto}
     .form-hint{font-size:.85rem;color:#6c757d}
+    .brand-row img{height:40px;object-fit:contain}
 
     .badge[data-grade]{
       border-radius:999px;
@@ -50,7 +66,7 @@
     @media print {
       @page { size: A4 portrait; margin: 14mm; }
       html, body { background: #fff !important; }
-      .sticky-toolbar, .btn, .modal, .nav, #loader { display: none !important; }
+      .sticky-toolbar, .btn, .modal, .nav, #loader, #logoutBtn { display: none !important; }
       .card, .table-responsive { box-shadow: none !important; border: 0 !important; }
       .table { font-size: 12px; }
       .table thead th { background: #f1f3f5 !important; color: #000 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
@@ -61,12 +77,57 @@
 </head>
 
 <body>
-  <div id="app" class="container my-4 my-md-5">
+
+  <!-- ======================= LOGIN / REGISTER ======================= -->
+  <section id="login-section">
+    <div class="login-card">
+      <div class="text-center mb-3">
+        <!-- Logo SPIP: simpan file gambar sebagai "logo-spip.png" di folder yang sama -->
+        <img src="logo-spip.png" alt="Logo SPIP" style="height:48px;object-fit:contain" onerror="this.style.display='none'">
+      </div>
+      <h4 class="text-center mb-3 text-primary"><i class="bi bi-shield-lock"></i> Login SPIP</h4>
+
+      <form id="loginForm" novalidate>
+        <div class="mb-3">
+          <label class="form-label">Email</label>
+          <input type="email" id="email" class="form-control" placeholder="nama@domain.go.id" required />
+          <div class="invalid-feedback">Masukkan email yang valid.</div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Kata Sandi</label>
+          <input type="password" id="password" class="form-control" placeholder="••••••••" required />
+          <div class="invalid-feedback">Masukkan kata sandi.</div>
+        </div>
+
+        <button type="submit" id="submitBtn" class="btn btn-primary">
+          <i class="bi bi-box-arrow-in-right me-1"></i> Masuk
+        </button>
+        <div id="loginError" class="text-danger small mt-3 text-center"></div>
+      </form>
+
+      <div class="text-center mt-3 small text-muted">
+        <span id="toggleText">Belum punya akun?</span>
+        <a id="toggleLink">Daftar Baru</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================= APP · SPIP =========================== -->
+  <div id="app" class="container my-4 my-md-5" style="display:none">
+    <div class="d-flex justify-content-end mb-3">
+      <button id="logoutBtn" class="btn btn-outline-danger btn-sm">
+        <i class="bi bi-box-arrow-right me-1"></i> Keluar
+      </button>
+    </div>
 
     <!-- Header -->
     <header class="card shadow-sm mb-4 border-0">
       <div class="card-body p-4">
-        <h1 class="h3 fw-bold text-primary mb-1">Penjamin Kualitas Maturitas Penyelenggaraan SPIP</h1>
+        <div class="d-flex align-items-center gap-3 brand-row mb-2">
+          <img src="logo-spip.png" alt="Logo SPIP" onerror="this.style.display='none'">
+          <h1 class="h3 fw-bold text-primary mb-0">Penjamin Kualitas Maturitas Penyelenggaraan SPIP</h1>
+        </div>
         <p class="text-muted mb-1">Periode Penilaian: 01 Juli 2024 s.d. 30 Juni 2025</p>
         <p class="text-muted small mb-0">KK 3.1 · Penilaian Struktur & Proses Efektivitas dan Efisiensi</p>
       </div>
@@ -101,7 +162,7 @@
         <span class="visually-hidden">Loading...</span>
       </div>
       <p class="mt-2 text-muted">Menghubungkan ke database...</p>
-      <p id="loader-tip" class="small text-muted">Pastikan Anonymous Sign-in aktif & aturan Firestore sesuai.</p>
+      <p id="loader-tip" class="small text-muted">Pastikan Email/Password Auth aktif & aturan Firestore sesuai.</p>
     </div>
 
     <!-- Main -->
@@ -275,8 +336,18 @@
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
 
-  <!-- Firebase + App Script (Firestore saja) -->
+  <!-- =================== Firebase + App Script =================== -->
   <script type="module">
+    /* ==== Firebase config (Email/Password Auth + Firestore) ==== */
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { 
+      getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword,
+      signOut, onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { 
+      getFirestore, doc, onSnapshot, setDoc, getDoc, enableIndexedDbPersistence 
+    } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
     const firebaseConfig = {
       apiKey: "AIzaSyCYwuJHeL_YlyW7zPNRGSXe_NB8r_Ql_t0",
       authDomain: "spip-8e5e9.firebaseapp.com",
@@ -285,10 +356,12 @@
       measurementId: "G-J44L941K89"
     };
 
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    import { getFirestore, doc, onSnapshot, setDoc, getDoc, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    enableIndexedDbPersistence(db).catch(()=>{});
 
+    /* ==== Google Drive (public files) ==== */
     const DRIVE_API_KEY = "AIzaSyAukkICkUg5NsFaGy0K8F-GDeOXWCWml4s";
     function drivePreviewUrl(file) {
       const mt = file.mimeType || "";
@@ -306,6 +379,10 @@
       const data = await res.json(); 
       return data.files || [];
     }
+
+    /* ==== Helpers & constants ==== */
+    const SATKER_LIST = ['Inspektorat', 'Pusdatin', 'Sestama', 'D1', 'D3', 'Puslat', 'D4'];
+    const $ = (sel) => document.querySelector(sel);
     function shallowEqual(a, b){
       const ka = Object.keys(a||{}), kb = Object.keys(b||{});
       if (ka.length !== kb.length) return false;
@@ -313,13 +390,7 @@
       return true;
     }
 
-    const driveCache = new Map();
-    let driveFetchCtrl = null;
-    let previewModal = null;
-
-    const SATKER_LIST = ['Inspektorat', 'Pusdatin', 'Sestama', 'D1', 'D3', 'Puslat', 'D4'];
-
-    /* ====== ASSESSMENT_STRUCTURE LENGKAP ====== */
+    /* ====== ASSESSMENT_STRUCTURE (Contoh 5 parameter) ====== */
     const ASSESSMENT_STRUCTURE = [
       {
         kode: `1.1.1`,
@@ -458,7 +529,7 @@ b. Pimpinan organisasi mengarahkan pegawai agar dapat bekerja selaras dengan keb
 b. Minimal 70% SDM yang menjadi anggota UPR pada tingkat operasional dan strategis unit kerja serta strategis K/L/D diisi oleh orang yang berkompeten dalam bidang manajemen risiko` },
           { grade: 'B',
             kriteria: `Sudah mengalokasikan sumber daya secara memadai untuk penerapan manajemen risiko pada tingkat operasional unit kerja dan strategis unit kerja namun pada tingkat srategis K/L/D belum memadai`,
-            tooltip:`a. Instansi Pemerintah telah menganggarkan dana implementasi manajemen risiko seperti rapat terkait manajemen risiko, identifikasi dan analisis risiko, penyusunan profil risiko, implementasi RTP, kegiatan monitoring dan reviu  dalam rencana kerja/DPA/DIPA  dan dalam implementasi manajemen risiko tidak terkendala kekurangan dana implementasi ditingkat operasional dan strategis unit kerja, namun masih terkendala kekurangan dana pada tingkat  strategis K/L/D dan
+            tooltip:`a. Instansi Pemerintah telah menganggarkan dana implementasi manajemen risiko seperti rapat terkait manajemen risiko, identifikasi dan analisis risiko, penyusunan profil risiko, implementasi RTP, kegiatan monitoring dan reviu  dalam rencana kerja/DPA/DIPA  dan dalam implementasi manajemen risiko tidak terkendala kekurangan dana pada tingkat operasional dan strategis unit kerja, namun masih terkendala kekurangan dana pada tingkat  strategis K/L/D dan
 b. Minimal 70% SDM yang menjadi anggota UPR pada tingkat operasional dan strategis unit kerja diisi oleh orang yang berkompeten dalam bidang manajemen risiko serta kurang dari 70% SDM yang menjadi anggota UPR pada tingkat Strategis K/L/D diisi oleh orang yang berkompeten dalam bidang manajemen risiko` },
           { grade: 'C',
             kriteria: `Sudah mengalokasikan sumber daya secara memadai untuk penerapan manajemen risiko pada tingkat operasional unit kerja dan strategis unit kerja`,
@@ -499,52 +570,33 @@ b. Kurang dari 70% SDM yang menjadi anggota UPR pada tingkat operasional Unit Ke
         ]
       }
     ];
+    window.ASSESSMENT_STRUCTURE = ASSESSMENT_STRUCTURE;
 
-    const $ = (sel) => document.querySelector(sel);
-
+    /* ====== APP Controller ====== */
     const App = {
-      db:null, auth:null, userId:null,
+      db, auth,
       currentSatker: localStorage.getItem('spip.currentSatker') || SATKER_LIST[0],
       assessmentData:{}, unsubscribe:null, bootstrapModal:null,
       currentGrade:'A', sestamaCache:new Map(),
+      driveFetchCtrl:null,
 
-      init() {
-        try {
-          const app = initializeApp(firebaseConfig);
-          this.db = getFirestore(app);
-          enableIndexedDbPersistence(this.db).catch(()=>{});
-          this.auth = getAuth(app);
-          this.handleAuthentication();
-        } catch (e) {
-          console.error('Firebase init failed:', e);
-          $('#loader').innerText = 'Kunci Firebase salah. Mohon periksa kembali.';
-          return;
-        }
+      initAfterAuth(){
+        // UI ready
+        $('#login-section').style.display='none';
+        $('#app').style.display='block';
+
+        // set listeners/UI
         this.populateSatkerSelect();
         this.setupEventListeners();
         this.bootstrapModal = new bootstrap.Modal($('#assessment-modal'));
 
-        previewModal = new bootstrap.Modal(document.getElementById('preview-modal'));
+        // preview modal cleanup
+        const pm = new bootstrap.Modal(document.getElementById('preview-modal'));
         document.getElementById('preview-modal').addEventListener('hidden.bs.modal', ()=>{
           document.getElementById('preview-iframe').src = '';
         });
-      },
 
-      handleAuthentication() {
-        onAuthStateChanged(this.auth, async (user)=>{
-          if (user) {
-            this.userId = user.uid;
-            this.loadInitialData();
-          } else {
-            try { await signInAnonymously(this.auth); }
-            catch(e){ console.error('Auth failed:', e); $('#loader').innerText='Gagal otentikasi. Aktifkan login anonim.'; }
-          }
-        });
-      },
-
-      loadInitialData(){
-        $('#loader').style.display='none';
-        $('#main-content').classList.remove('d-none');
+        // load data
         this.renderTable();
         this.listenForDataChanges();
         this.updateProgress();
@@ -557,34 +609,13 @@ b. Kurang dari 70% SDM yang menjadi anggota UPR pada tingkat operasional Unit Ke
         });
       },
 
-      renderTable(){
-        const tbody=$('#assessment-table-body'); tbody.innerHTML='';
-        const frag=document.createDocumentFragment();
-        ASSESSMENT_STRUCTURE.forEach(p=>{
-          const data = this.assessmentData[p.kode_parameter];
-          const done = Boolean(data && data.simpulan);
-          const simpulan = done ? data.simpulan : null;
-          const tr=document.createElement('tr');
-          tr.innerHTML=`
-            <td class="px-3">${p.kode_parameter}</td>
-            <td class="px-3">${p.uraian_parameter}</td>
-            <td class="px-3 text-center"><span class="badge rounded-pill ${done?'text-bg-success':'text-bg-warning'}">${done?'Selesai':'Belum Diisi'}</span></td>
-            <td class="px-3 text-center"><button class="btn btn-outline-primary btn-sm" data-action="open-toc"><i class="bi bi-robot me-1"></i>TOC</button></td>
-            <td class="px-3 text-center">
-              <button type="button" class="btn btn-primary btn-sm open-modal-btn" data-action="open-modal" data-param-code="${p.kode_parameter}">
-                ${done?'Edit':'Isi Penilaian'}
-              </button>
-            </td>
-            <td class="px-3 text-center">${simpulan?`<span class="badge" data-grade="${simpulan}">${simpulan}</span>`:'<span class="text-muted">-</span>'}</td>`;
-          frag.appendChild(tr);
-        });
-        tbody.appendChild(frag);
-      },
-
       listenForDataChanges(){
         if(this.unsubscribe) this.unsubscribe();
         const docRef=doc(this.db,'assessments',this.currentSatker);
         this.unsubscribe = onSnapshot(docRef,(snap)=>{
+          $('#loader').style.display='none';
+          $('#main-content').classList.remove('d-none');
+
           if(snap.exists()){
             const raw=snap.data();
             const next = raw?.parameters || {};
@@ -640,20 +671,56 @@ b. Kurang dari 70% SDM yang menjadi anggota UPR pada tingkat operasional Unit Ke
           if(!fid){ alert('Folder Google Drive belum dikonfigurasi untuk unit/grade ini.'); return; }
           window.open(`https://drive.google.com/drive/folders/${fid}`, '_blank', 'noopener');
         });
+
+        // Export PDF (print)
+        const btn = document.getElementById('btn-export-pdf');
+        if (btn) {
+          btn.addEventListener('click', () => {
+            const main = document.getElementById('main-content');
+            if (main && main.classList.contains('d-none')) {
+              setTimeout(() => window.print(), 300);
+            } else {
+              window.print();
+            }
+          });
+        }
+      },
+
+      renderTable(){
+        const tbody=$('#assessment-table-body'); tbody.innerHTML='';
+        const frag=document.createDocumentFragment();
+        ASSESSMENT_STRUCTURE.forEach(p=>{
+          const data = this.assessmentData[p.kode_parameter];
+          const done = Boolean(data && data.simpulan);
+          const simpulan = done ? data.simpulan : null;
+          const tr=document.createElement('tr');
+          tr.innerHTML=`
+            <td class="px-3">${p.kode_parameter}</td>
+            <td class="px-3">${p.uraian_parameter}</td>
+            <td class="px-3 text-center"><span class="badge rounded-pill ${done?'text-bg-success':'text-bg-warning'}">${done?'Selesai':'Belum Diisi'}</span></td>
+            <td class="px-3 text-center"><button class="btn btn-outline-primary btn-sm" data-action="open-toc"><i class="bi bi-robot me-1"></i>TOC</button></td>
+            <td class="px-3 text-center">
+              <button type="button" class="btn btn-primary btn-sm open-modal-btn" data-action="open-modal" data-param-code="${p.kode_parameter}">
+                ${done?'Edit':'Isi Penilaian'}
+              </button>
+            </td>
+            <td class="px-3 text-center">${simpulan?`<span class="badge" data-grade="${simpulan}">${simpulan}</span>`:'<span class="text-muted">-</span>'}</td>`;
+          frag.appendChild(tr);
+        });
+        tbody.appendChild(frag);
       },
 
       async openModal(paramCode){
         const param = ASSESSMENT_STRUCTURE.find(p=>p.kode_parameter===paramCode); if(!param) return;
         document.getElementById('current-parameter-code').value=paramCode;
+        window.__currentParamCode = paramCode; // for Drive mapper
         document.getElementById('modal-parameter-title').textContent=`${param.kode_parameter} — ${param.uraian_parameter}`;
 
         const html = param.grades.map(g=>`
           <p class="mb-1 small">
             <strong class="fw-semibold text-body-secondary">Grade ${g.grade}:</strong>
             ${g.kriteria}
-            <button type="button" class="btn btn-link btn-sm p-0 align-baseline ms-1" data-bs-toggle="tooltip" data-bs-placement="top" title="${g.tooltip || 'yang terlampir sebagai berikut'}" aria-label="Info kriteria grade ${g.grade}">
-              <i class="bi bi-info-circle"></i>
-            </button>
+            <button type="button" class="btn btn-link btn-sm p-0 align-baseline ms-1" data-bs-toggle="tooltip" data-bs-placement="top" title="${g.tooltip || 'yang terlampir sebagai berikut'}" aria-label="Info kriteria grade ${g.grade}"><i class="bi bi-info-circle"></i></button>
           </p>`).join('');
         document.getElementById('modal-criteria-container').innerHTML=html;
         document.querySelectorAll('#assessment-modal [data-bs-toggle="tooltip"]').forEach(el => new bootstrap.Tooltip(el));
@@ -741,11 +808,11 @@ b. Kurang dari 70% SDM yang menjadi anggota UPR pada tingkat operasional Unit Ke
           <div class="list-group-item placeholder-glow"><span class="placeholder col-8"></span></div>
           <div class="list-group-item placeholder-glow"><span class="placeholder col-6"></span></div>`;
 
-        if (driveFetchCtrl) driveFetchCtrl.abort();
-        driveFetchCtrl = new AbortController();
+        if (this.driveFetchCtrl) this.driveFetchCtrl.abort();
+        this.driveFetchCtrl = new AbortController();
 
         try{
-          const files = await listDriveFolder(folderId, driveFetchCtrl.signal);
+          const files = await listDriveFolder(folderId, this.driveFetchCtrl.signal);
           this.renderDriveFiles(files);
         }catch(err){
           if (err.name === 'AbortError') return;
@@ -770,7 +837,8 @@ b. Kurang dari 70% SDM yang menjadi anggota UPR pada tingkat operasional Unit Ke
           row.querySelector('button').addEventListener('click', ()=>{
             document.getElementById('preview-modal-title').textContent = file.name;
             document.getElementById('preview-iframe').src = drivePreviewUrl(file);
-            previewModal?.show();
+            const m = new bootstrap.Modal(document.getElementById('preview-modal'));
+            m.show();
           });
           listEl.appendChild(row);
         });
@@ -796,10 +864,60 @@ b. Kurang dari 70% SDM yang menjadi anggota UPR pada tingkat operasional Unit Ke
       }
     };
 
-    // Start app
-    window.addEventListener('DOMContentLoaded', ()=> App.init());
+    // ======= Login / Register handlers =======
+    const loginSection = document.getElementById("login-section");
+    const appSection = document.getElementById("app");
+    const form = document.getElementById("loginForm");
+    const errorBox = document.getElementById("loginError");
+    const toggleLink = document.getElementById("toggleLink");
+    const toggleText = document.getElementById("toggleText");
+    const submitBtn = document.getElementById("submitBtn");
+    const logoutBtn = document.getElementById("logoutBtn");
 
-    // Helper folder mapping
+    let isRegister = false;
+
+    toggleLink.addEventListener("click", e=>{
+      e.preventDefault();
+      isRegister = !isRegister;
+      toggleText.textContent = isRegister ? "Sudah punya akun?" : "Belum punya akun?";
+      toggleLink.textContent = isRegister ? "Masuk" : "Daftar Baru";
+      submitBtn.innerHTML = isRegister
+        ? '<i class="bi bi-person-plus me-1"></i> Daftar'
+        : '<i class="bi bi-box-arrow-in-right me-1"></i> Masuk';
+    });
+
+    form.addEventListener("submit", async e=>{
+      e.preventDefault();
+      const email = document.getElementById("email").value.trim();
+      const pass = document.getElementById("password").value;
+      form.classList.add("was-validated");
+      if(!form.checkValidity()) return;
+      errorBox.textContent = "";
+      try {
+        if(isRegister) {
+          await createUserWithEmailAndPassword(auth, email, pass);
+        } else {
+          await signInWithEmailAndPassword(auth, email, pass);
+        }
+      } catch(err) {
+        errorBox.textContent = (err?.message || "Login gagal").replace("Firebase:","");
+      }
+    });
+
+    logoutBtn.addEventListener("click", async ()=>{ await signOut(auth); });
+
+    onAuthStateChanged(auth, user=>{
+      if(user){
+        loginSection.style.display="none";
+        appSection.style.display="block";
+        App.initAfterAuth();
+      } else {
+        loginSection.style.display="flex";
+        appSection.style.display="none";
+      }
+    });
+
+    // Helper Drive folder mapping accessor (used by TOC & modal)
     function driveFolderIdFor(unit, grade){
       const paramCode = document.getElementById('current-parameter-code')?.value || window.__currentParamCode || '';
       return window.DRIVE_FOLDERS_PARAM?.[unit]?.[paramCode]?.[grade] || null;
@@ -807,30 +925,14 @@ b. Kurang dari 70% SDM yang menjadi anggota UPR pada tingkat operasional Unit Ke
     window.getParamGradeFolderId = function(unit, kodeParam, grade){
       return window.DRIVE_FOLDERS_PARAM?.[unit]?.[kodeParam]?.[grade] || null;
     };
-
-    // EXPOSE struktur ke global utk TOC
-    window.ASSESSMENT_STRUCTURE = ASSESSMENT_STRUCTURE;
   </script>
 
-  <!-- Export to PDF via browser print -->
+  <!-- Mapping per Unit × Parameter × Grade -->
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const btn = document.getElementById('btn-export-pdf');
-      if (btn) {
-        btn.addEventListener('click', () => {
-          const main = document.getElementById('main-content');
-          if (main && main.classList.contains('d-none')) {
-            setTimeout(() => window.print(), 300);
-          } else {
-            window.print();
-          }
-        });
-      }
-    });
-  </script>
-
-  <!-- Mapping per Unit × Parameter × Grade (dari kamu) -->
-  <script>
+    /*  NOTE:
+        - Pastikan folder Google Drive sudah di-share public (Anyone with the link – Viewer).
+        - Isi ID folder sesuai unit/parameter/grade.
+    */
     window.DRIVE_FOLDERS_PARAM = {
       "Sestama": {
         "1.1.1": { A:"1ptHq3fU-BbAGKy5UNvzNhYJ3vo1CsJWI", B:"1lbQ2FydaKVo5BRVaz5n7W_w-LckQvq7L", C:"1J_qAmpTw3jlbfa4bPcpdGpX9vue57fqh", D:"19DEvfcTHMByfbTny1W7L1Ish1LgldhLP", E:"1HRo4VZHa-hUx8sxC4uimnNVdjMtNsU_r" },
@@ -884,7 +986,7 @@ b. Kurang dari 70% SDM yang menjadi anggota UPR pada tingkat operasional Unit Ke
     };
   </script>
 
-  <!-- ===== TOC Add-on (FINAL) – pakai Web App kamu & text/plain anti-preflight ===== -->
+  <!-- ===== TOC Add-on (pakai Web App kamu & text/plain anti-preflight) ===== -->
   <script>
   (function(){
     'use strict';
