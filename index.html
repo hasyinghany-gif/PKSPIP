@@ -380,7 +380,18 @@
       const data = await res.json();
       return (data.files || []);
     }
-  
+
+    /* ==== Helpers & constants ==== */
+    const SATKER_LIST = ['Inspektorat', 'Pusdatin', 'Sestama', 'D1', 'D3', 'Puslat', 'D4'];
+    const APPROVED_ROLES = ["admin","monitor","member"]; // <— tambahan: role yang diizinkan masuk
+    const $ = (sel) => document.querySelector(sel);
+    function shallowEqual(a, b){
+      const ka = Object.keys(a||{}), kb = Object.keys(b||{});
+      if (ka.length !== kb.length) return false;
+      for (const k of ka){ if (a[k]?.simpulan !== b[k]?.simpulan) return false; }
+      return true;
+    }
+
     /* ====== ASSESSMENT_STRUCTURE (Contoh 5 parameter) ====== */
     const ASSESSMENT_STRUCTURE = [
       {
@@ -1153,3 +1164,4 @@
 
 </body>
 </html>
+
