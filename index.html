@@ -134,27 +134,44 @@
     </header>
 
     <!-- Toolbar -->
-    <div class="sticky-toolbar card shadow-sm border-0 mb-3">
-      <div class="card-body d-flex flex-column flex-md-row gap-3 align-items-md-center">
-        <div class="d-flex align-items-center gap-2">
-          <i class="bi bi-building text-primary"></i>
-          <label for="satker-select" class="form-label fw-semibold mb-0">Pilih Unit Organisasi (Unor)</label>
-        </div>
-        <select id="satker-select" class="form-select flex-grow-1" aria-label="Pilih Satuan Kerja"></select>
-        <div class="ms-md-auto d-flex align-items-center gap-2">
-          <div class="small text-muted" id="last-saved">—</div>
-          <a href="dashboard_interactive.html" target="_blank" class="btn btn-outline-secondary btn-sm" id="btn-open-dashboard" title="Buka Dashboard" aria-label="Buka Dashboard">
-            <i class="bi bi-speedometer2 me-1"></i> Dashboard
-          </a>
-          <button id="btn-export-pdf" class="btn btn-outline-danger btn-sm" title="Ekspor ke PDF" aria-label="Ekspor ke PDF">
-            <i class="bi bi-filetype-pdf me-1"></i> Export PDF
-          </button>
-        </div>
-      </div>
-      <div class="progress rounded-0" role="progressbar" aria-label="Progress penyelesaian" aria-valuemin="0" aria-valuemax="100">
-        <div id="progress-bar" class="progress-bar" style="width:0%">0%</div>
-      </div>
+<div class="sticky-toolbar card shadow-sm border-0 mb-3">
+  <div class="card-body d-flex flex-column flex-md-row gap-3 align-items-md-center">
+    <div class="d-flex align-items-center gap-2">
+      <i class="bi bi-building text-primary"></i>
+      <label for="satker-select" class="form-label fw-semibold mb-0">Pilih Unit Organisasi (Unor)</label>
     </div>
+    <select id="satker-select" class="form-select flex-grow-1" aria-label="Pilih Satuan Kerja"></select>
+
+    <!-- BAGIAN KANAN -->
+    <div class="ms-md-auto d-flex align-items-center gap-2">
+      <div class="small text-muted" id="last-saved">—</div>
+
+      <!-- Tombol Dashboard -->
+      <a href="dashboard_interactive.html" target="_blank" class="btn btn-outline-secondary btn-sm" id="btn-open-dashboard" title="Buka Dashboard" aria-label="Buka Dashboard">
+        <i class="bi bi-speedometer2 me-1"></i> Dashboard
+      </a>
+
+      <!-- Tombol Export PDF -->
+      <button id="btn-export-pdf" class="btn btn-outline-danger btn-sm" title="Ekspor ke PDF" aria-label="Ekspor ke PDF">
+        <i class="bi bi-filetype-pdf me-1"></i> Export PDF
+      </button>
+
+      <!-- 🔹 Tambahkan tombol READ dan PLAY di bawah ini -->
+      <a href="read.html" class="btn btn-outline-info btn-sm" title="Fakta & Edukasi SPIP">
+        <i class="bi bi-book me-1"></i> READ
+      </a>
+      <a href="play.html" class="btn btn-outline-success btn-sm" title="Mini Game / Kuis SPIP">
+        <i class="bi bi-controller me-1"></i> PLAY
+      </a>
+      <!-- 🔹 Selesai -->
+    </div>
+  </div>
+
+  <!-- Progress Bar -->
+  <div class="progress rounded-0" role="progressbar" aria-label="Progress penyelesaian" aria-valuemin="0" aria-valuemax="100">
+    <div id="progress-bar" class="progress-bar" style="width:0%">0%</div>
+  </div>
+</div>
 
     <!-- Loading -->
     <div id="loader" class="text-center p-5">
