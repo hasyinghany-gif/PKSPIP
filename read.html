@@ -10,168 +10,459 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
   <style>
+    /* ================= Base Tokens ================= */
     :root{
-      --brand:#16a085;
-      --brand-2:#6366f1;
-      --ink:#0f172a;
-      --muted:#64748b;
-      --bg:#fbfcff;
-      --bg-soft-1:#eaf3ff;
-      --bg-soft-2:#e7fff7;
+      --brand:#16a085;        /* teal */
+      --brand-2:#6366f1;      /* indigo */
+      --ink:#0f172a;          /* slate-900 */
+      --muted:#64748b;        /* slate-500 */
+      --bg: #fbfcff;
+      --bg-soft-1: #eaf3ff;
+      --bg-soft-2: #e7fff7;
       --panel:#ffffff;
-      --border:rgba(99,102,241,.12);
-      --ring:0 8px 24px rgba(13,110,253,.08);
+      --border: rgba(99,102,241,.12);
+      --panel-glass: rgba(255,255,255,.72);
+      --ring: 0 10px 30px rgba(99,102,241,.12);
+      --chip-start:#ecfeff;
+      --chip-end:#eef2ff;
+      --chip-ink:#0ea5a6;
+      --table-head:#f8fbff;
+      --icon-1:#3949ab;
+      --icon-bg-1:#eef2ff;
+      --icon-bd-1:#e2e8ff;
+
+      /* badges */
       --grade-a:#22c55e; --grade-b:#a3e635; --grade-c:#facc15; --grade-d:#fb923c; --grade-e:#ef4444;
     }
-    /* DARK THEME */
-    html[data-theme="dark"], @media(prefers-color-scheme: dark){
-      --ink:#f3f4f6;
-      --muted:#9ca3af;
+
+    /* ================ Dark Theme Overrides ================ */
+    /* html[data-theme="dark"] is forced dark; "auto" follows system (script below will set) */
+    @media (prefers-color-scheme: dark){
+      html[data-theme="auto"]{
+        --ink:#e5e7eb;
+        --muted:#a3aab6;
+        --bg:#0b1020;
+        --bg-soft-1:#0f1730;
+        --bg-soft-2:#0a1f1a;
+        --panel:#0f1426;
+        --border: rgba(99,102,241,.25);
+        --panel-glass: rgba(20,24,45,.72);
+        --ring: 0 10px 36px rgba(99,102,241,.22);
+        --chip-start:#062a2a; --chip-end:#141a32; --chip-ink:#34d399;
+        --table-head:#121a2e;
+        --icon-1:#93a0ff; --icon-bg-1:#121a2e; --icon-bd-1:#1b2542;
+      }
+    }
+    html[data-theme="dark"]{
+      --ink:#e5e7eb;
+      --muted:#a3aab6;
       --bg:#0b1020;
       --bg-soft-1:#0f1730;
       --bg-soft-2:#0a1f1a;
       --panel:#0f1426;
-      --border:rgba(99,102,241,.25);
-      --ring:0 10px 30px rgba(99,102,241,.22);
+      --border: rgba(99,102,241,.25);
+      --panel-glass: rgba(20,24,45,.72);
+      --ring: 0 10px 36px rgba(99,102,241,.22);
+      --chip-start:#062a2a; --chip-end:#141a32; --chip-ink:#34d399;
+      --table-head:#121a2e;
+      --icon-1:#93a0ff; --icon-bg-1:#121a2e; --icon-bd-1:#1b2542;
     }
 
+    /* ================= Layout & Components ================= */
+    html,body{height:100%}
     body{
-      font-family:"Plus Jakarta Sans",system-ui;
-      background:linear-gradient(180deg,var(--bg),var(--bg-soft-1));
+      font-family:"Plus Jakarta Sans",system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Noto Sans";
       color:var(--ink);
+      background:
+        radial-gradient(900px 500px at 120% -10%, var(--bg-soft-1) 0%, transparent 60%),
+        radial-gradient(700px 400px at -10% -10%, var(--bg-soft-2) 0%, transparent 60%),
+        linear-gradient(180deg,var(--bg), var(--bg) 60%, var(--bg-soft-1));
     }
-    h1,h2,h3,h4,h5,h6{color:var(--ink);font-weight:700;}
-    .muted{color:var(--muted);}
-    .shadow-soft{box-shadow:var(--ring);}
+    .shadow-soft{box-shadow:var(--ring)}
+    .text-gradient{
+      background:linear-gradient(92deg,var(--brand),var(--brand-2));
+      -webkit-background-clip:text;background-clip:text;color:transparent;
+    }
     .hero{padding:3rem 0 2rem;}
     .chip{
-      background:linear-gradient(92deg,#ecfeff,#eef2ff);
-      color:#0ea5a6;border-radius:999px;padding:.4rem .75rem;font-weight:700;
+      background:linear-gradient(92deg,var(--chip-start),var(--chip-end));
+      border:1px solid #dbeafe22;
+      color:var(--chip-ink);
+      border-radius:999px;
+      padding:.38rem .7rem;font-weight:700;letter-spacing:.2px;
     }
-    .fact-card{
-      border:1px solid var(--border);border-radius:1rem;background:var(--panel);
-      transition:transform .2s ease, box-shadow .2s ease;
+    .glass{
+      background:var(--panel-glass);
+      border:1px solid var(--border);
+      backdrop-filter:saturate(160%) blur(6px);
+      border-radius:1rem;
     }
-    .fact-card:hover{transform:translateY(-3px);box-shadow:var(--ring);}
-    .fact-card h5{color:var(--ink);font-weight:700;}
-    html[data-theme="dark"] .fact-card h5{color:#f8fafc;}
-    .fact-card .muted{opacity:.85;}
+    .fact-card{border:1px solid var(--border);border-radius:1rem;background:var(--panel)}
     .fact-card .icon{
-      width:42px;height:42px;display:inline-grid;place-items:center;
-      border-radius:.8rem;background:#1e293b33;color:#60a5fa;
+      width:44px;height:44px;display:inline-grid;place-items:center;border-radius:.9rem;
+      background:var(--icon-bg-1); color:var(--icon-1); border:1px solid var(--icon-bd-1);
     }
+    .link-card{
+      border:1px solid var(--border);border-radius:1rem;padding:1rem 1.1rem;display:block;text-decoration:none;
+      transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease; color:var(--ink);
+      background:var(--panel);
+    }
+    .link-card:hover{transform:translateY(-2px);box-shadow:var(--ring);border-color:#cdd6ff33}
 
-    .badge-grade{border-radius:999px;padding:.35rem .6rem;font-weight:700}
+    .badge-grade{border-radius:999px;padding:.35rem .62rem;font-weight:800;letter-spacing:.3px}
     .bg-a{background:var(--grade-a);color:#fff}.bg-b{background:var(--grade-b);color:#111}
     .bg-c{background:var(--grade-c);color:#111}.bg-d{background:var(--grade-d);color:#fff}
     .bg-e{background:var(--grade-e);color:#fff}
 
-    /* table dark fix */
-    .table{
-      --bs-table-bg:var(--panel);
-      --bs-table-color:var(--ink);
-      --bs-table-border-color:#22304a;
-    }
-    .table > :not(caption) > * > *{
-      background-color:var(--bs-table-bg)!important;
-      color:var(--bs-table-color)!important;
-      border-color:var(--bs-table-border-color)!important;
-    }
-    .table thead th{background:#1e1f32!important;color:#e5e7eb!important;}
+    .timeline{position:relative}
+    .timeline:before{content:"";position:absolute;left:18px;top:0;bottom:0;width:2px;background:#e6eaf355}
+    html[data-theme="dark"] .timeline:before{background:#1f2a4a}
+    .t-item{position:relative;padding-left:48px;padding-bottom:22px}
+    .t-item:last-child{padding-bottom:4px}
+    .t-bullet{position:absolute;left:10px;top:2px;width:18px;height:18px;background:linear-gradient(135deg,var(--brand),var(--brand-2));border:3px solid var(--panel);border-radius:50%;box-shadow:0 0 0 2px #dbe4ff33}
 
-    /* list group fix */
-    .list-group-item{background:var(--panel)!important;color:var(--ink)!important;border-color:rgba(99,102,241,.25)!important;}
+    .table-lite td, .table-lite th{vertical-align:middle}
+    .table thead th{background:var(--table-head); color:var(--ink)}
+    .table{color:var(--ink)}
+    .table tbody tr{background:var(--panel)}
+    .table tbody td{border-color:#e9edf533}
+    html[data-theme="dark"] .table tbody td{border-color:#22304a}
 
-    footer{border-top:1px solid var(--border);color:var(--muted);}
-    .btn-ghost{border:1px solid var(--border);background:var(--panel);color:var(--ink);}
-    .btn-primary{background:linear-gradient(90deg,var(--brand),var(--brand-2));border:0;}
-    .btn-success{background:linear-gradient(90deg,#10b981,#22c55e);border:0;}
+    .btn-ghost{border:1px solid #dbeafe55;color:var(--ink);background:var(--panel)}
+    .btn-ghost:hover{border-color:#c7d2fe55;box-shadow:var(--ring)}
+    .btn-primary{background:linear-gradient(92deg,var(--brand),var(--brand-2)); border:0}
+    .btn-primary:hover{filter:brightness(1.05)}
+    .btn-success{background:linear-gradient(92deg,#10b981,#22c55e);border:0}
+
+    footer{background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.02));border-top:1px solid var(--border)}
+    .muted{color:var(--muted)}
   </style>
 </head>
 <body>
 
+  <!-- Header / Hero -->
   <header class="hero">
     <div class="container">
-      <div class="d-flex align-items-center gap-3">
-        <a href="index.html" class="btn btn-ghost btn-sm"><i class="bi bi-arrow-left"></i> Kembali</a>
+      <div class="d-flex flex-wrap align-items-center gap-3">
+        <a class="btn btn-ghost btn-sm" href="index.html"><i class="bi bi-arrow-left"></i> Kembali</a>
         <span class="chip">READ</span>
+
+        <!-- Theme Toggle -->
+        <div class="ms-auto d-flex align-items-center gap-2">
+          <button id="themeToggle" class="btn btn-ghost btn-sm" type="button" title="Ganti tema">
+            <i class="bi bi-moon-stars" id="themeIcon"></i>
+            <span class="ms-1 d-none d-sm-inline" id="themeLabel">Dark</span>
+          </button>
+        </div>
       </div>
-      <div class="mt-4">
-        <h1 class="display-6 fw-bold text-gradient">Fakta & Edukasi Singkat tentang SPIP</h1>
-        <p class="muted">Rangkuman inti agar tim cepat memahami konteks penugasan dan makna grade A–E.</p>
-        <div class="d-flex flex-wrap gap-2">
-          <a href="#fakta" class="btn btn-primary btn-sm"><i class="bi bi-lightbulb me-1"></i> Fakta Ringkas</a>
-          <a href="#faq" class="btn btn-ghost btn-sm">FAQ</a>
+
+      <div class="row align-items-center mt-3">
+        <div class="col-lg-7">
+          <h1 class="display-6 fw-extrabold text-gradient mb-2">Fakta & Edukasi Singkat tentang SPIP</h1>
+          <p class="muted mb-3">Rangkum inti penugasan: apa yang dinilai, bagaimana memaknai grade A–E, dan langkah kerja yang efektif.</p>
+          <div class="d-flex flex-wrap gap-2">
+            <a href="#fakta" class="btn btn-primary"><i class="bi bi-lightbulb me-1"></i> Fakta Ringkas</a>
+            <a href="#faq" class="btn btn-ghost">FAQ</a>
+            <a href="play.html" class="btn btn-success"><i class="bi bi-controller me-1"></i> Coba PLAY</a>
+          </div>
+        </div>
+
+        <div class="col-lg-5">
+          <div class="glass p-3 p-lg-4 shadow-soft">
+            <div class="row g-3">
+              <div class="col-6">
+                <div class="text-center p-3 rounded-3" style="background:#f1fff71a;border:1px solid #2aa36b33">
+                  <div class="fw-bold fs-4" style="color:#34d399">Efektif</div>
+                  <div class="small muted">Pencapaian tujuan</div>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="text-center p-3 rounded-3" style="background:#fff8ed1a;border:1px solid #f59e0b33">
+                  <div class="fw-bold fs-4" style="color:#fbbf24">Efisien</div>
+                  <div class="small muted">Optimal sumber daya</div>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="text-center p-3 rounded-3" style="background:#eef2ff1a;border:1px solid #6366f133">
+                  <div class="fw-bold fs-4" style="color:#818cf8">Patuh</div>
+                  <div class="small muted">Kepatuhan aturan</div>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="text-center p-3 rounded-3" style="background:#fff1f21a;border:1px solid #ef444433">
+                  <div class="fw-bold fs-4" style="color:#f87171">Andal</div>
+                  <div class="small muted">Informasi handal</div>
+                </div>
+              </div>
+            </div>
+            <p class="small muted mt-3 mb-0">Empat sasaran umum pengendalian intern — gampang diingat, gampang dikerjakan.</p>
+          </div>
         </div>
       </div>
     </div>
   </header>
 
+  <!-- Fakta Ringkas -->
   <section id="fakta" class="py-5">
     <div class="container">
-      <h2 class="h4 fw-bold mb-3"><i class="bi bi-search me-1"></i>Fakta Ringkas</h2>
+      <h2 class="h4 fw-bold mb-3">🔎 Fakta Ringkas</h2>
       <div class="row g-3">
         <div class="col-md-4">
-          <div class="fact-card p-3 h-100">
+          <div class="card fact-card shadow-soft p-3 h-100">
             <div class="icon mb-2"><i class="bi bi-shield-check"></i></div>
-            <h5>Apa itu SPIP?</h5>
-            <p class="muted">Sistem Pengendalian Intern Pemerintah memastikan kegiatan berjalan efektif, efisien, patuh, dan laporan andal.</p>
+            <h5 class="mb-1">Apa itu SPIP?</h5>
+            <p class="muted mb-0">Sistem Pengendalian Intern Pemerintah untuk memastikan kegiatan berjalan efektif, efisien, patuh, dan laporan andal.</p>
           </div>
         </div>
         <div class="col-md-4">
-          <div class="fact-card p-3 h-100">
+          <div class="card fact-card shadow-soft p-3 h-100">
             <div class="icon mb-2"><i class="bi bi-diagram-3"></i></div>
-            <h5>Lingkup Penilaian</h5>
-            <p class="muted">Menilai penerapan kebijakan, proses, & bukti tiap parameter. Hasil direkap menjadi grade per unit.</p>
+            <h5 class="mb-1">Lingkup Penilaian</h5>
+            <p class="muted mb-0">Menilai penerapan kebijakan, proses, & bukti pada tiap parameter. Hasilnya direkap menjadi grade per unit.</p>
           </div>
         </div>
         <div class="col-md-4">
-          <div class="fact-card p-3 h-100">
+          <div class="card fact-card shadow-soft p-3 h-100">
             <div class="icon mb-2"><i class="bi bi-graph-up-arrow"></i></div>
-            <h5>Makna Grade</h5>
-            <p class="muted"><span class="badge-grade bg-a">A</span> terbaik → <span class="badge-grade bg-e">E</span> perlu perbaikan. Fokus pada konsistensi bukti & tindak lanjut.</p>
+            <h5 class="mb-1">Makna Grade</h5>
+            <p class="muted mb-0"><span class="badge-grade bg-a">A</span> terbaik → <span class="badge-grade bg-e">E</span> perlu perbaikan. Fokus pada konsistensi bukti & tindak lanjut.</p>
           </div>
         </div>
       </div>
     </div>
   </section>
 
+  <!-- Tabel Ringkas: A–E -->
   <section class="pb-5">
     <div class="container">
-      <div class="card shadow-soft border-0" style="background:var(--panel)">
-        <div class="card-body">
-          <h2 class="h5 fw-bold mb-3"><i class="bi bi-bar-chart-line me-1"></i>Ringkasan Interpretasi Grade</h2>
+      <div class="glass shadow-soft">
+        <div class="p-3 p-md-4">
+          <h2 class="h5 fw-bold mb-3">📊 Ringkasan Interpretasi Grade</h2>
           <div class="table-responsive">
-            <table class="table align-middle">
+            <table class="table table-lite align-middle mb-0">
               <thead>
                 <tr>
-                  <th>Grade</th>
+                  <th style="width:80px;">Grade</th>
                   <th>Deskripsi Ringkas</th>
                   <th>Contoh Indikasi</th>
                 </tr>
               </thead>
               <tbody>
-                <tr><td><span class="badge-grade bg-a">A</span></td><td>Penerapan <b>mature</b>, berkelanjutan.</td><td>Evaluasi berkala, dampak nyata.</td></tr>
-                <tr><td><span class="badge-grade bg-b">B</span></td><td>Penerapan baik & sudah dievaluasi.</td><td>Audit rutin, SOP diperbarui.</td></tr>
-                <tr><td><span class="badge-grade bg-c">C</span></td><td>Kebijakan berjalan, belum konsisten.</td><td>Pelatihan, sosialisasi berjalan.</td></tr>
-                <tr><td><span class="badge-grade bg-d">D</span></td><td>Kebijakan dikomunikasikan.</td><td>Dokumen ada, awareness dibangun.</td></tr>
-                <tr><td><span class="badge-grade bg-e">E</span></td><td>Kebijakan dasar tersedia.</td><td>Rencana awal, struktur PJ.</td></tr>
+                <tr>
+                  <td><span class="badge-grade bg-a">A</span></td>
+                  <td>Penerapan <strong>mature</strong>, perbaikan berkelanjutan, terdokumentasi.</td>
+                  <td>Evaluasi berkala & tindak lanjut, dampak nyata ke kinerja.</td>
+                </tr>
+                <tr>
+                  <td><span class="badge-grade bg-b">B</span></td>
+                  <td>Penerapan baik & sudah dievaluasi, sebagian perbaikan berjalan.</td>
+                  <td>Audit internal rutin, SOP diperbarui, ada monitoring.</td>
+                </tr>
+                <tr>
+                  <td><span class="badge-grade bg-c">C</span></td>
+                  <td>Kebijakan berjalan, bukti implementasi ada namun belum konsisten.</td>
+                  <td>Pelatihan, sosialisasi, & pelaksanaan mulai merata.</td>
+                </tr>
+                <tr>
+                  <td><span class="badge-grade bg-d">D</span></td>
+                  <td>Kebijakan sudah dikomunikasikan, implementasi masih awal.</td>
+                  <td>Dokumen kebijakan ada, awareness dibangun.</td>
+                </tr>
+                <tr>
+                  <td><span class="badge-grade bg-e">E</span></td>
+                  <td>Kebijakan dasar tersedia namun minim bukti praktik.</td>
+                  <td>Rencana awal disusun, struktur penanggung jawab ada.</td>
+                </tr>
               </tbody>
             </table>
+          </div>
+          <p class="small muted mt-3 mb-0">Catatan: Nilai akhir mempertimbangkan konsistensi bukti, relevansi, dan tindak lanjut atas temuan.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Timeline + Tips -->
+  <section class="pb-5">
+    <div class="container">
+      <div class="row g-4">
+        <div class="col-lg-7">
+          <div class="glass shadow-soft h-100">
+            <div class="p-3 p-md-4">
+              <h2 class="h5 fw-bold mb-3">🗓️ Alur Singkat Penugasan</h2>
+              <div class="timeline">
+                <div class="t-item">
+                  <span class="t-bullet"></span>
+                  <h6 class="mb-1">1. Persiapan & Akses</h6>
+                  <p class="muted mb-0">Pastikan akun aktif, unit dipilih, dan template/rujukan Sestama tersedia.</p>
+                </div>
+                <div class="t-item">
+                  <span class="t-bullet"></span>
+                  <h6 class="mb-1">2. Pengumpulan Bukti</h6>
+                  <p class="muted mb-0">Kumpulkan dokumen/tautan Drive sesuai grade A–E untuk setiap parameter.</p>
+                </div>
+                <div class="t-item">
+                  <span class="t-bullet"></span>
+                  <h6 class="mb-1">3. Penilaian Parameter</h6>
+                  <p class="muted mb-0">Isi simpulan, uraian hasil pengujian, dan AoI; rujuk contoh dari Sestama bila perlu.</p>
+                </div>
+                <div class="t-item">
+                  <span class="t-bullet"></span>
+                  <h6 class="mb-1">4. Review & Tindak Lanjut</h6>
+                  <p class="muted mb-0">Verifikasi silang, rapat klarifikasi, finalisasi grade unit.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tips -->
+        <div class="col-lg-5">
+          <div class="glass shadow-soft h-100">
+            <div class="p-3 p-md-4">
+              <h2 class="h5 fw-bold mb-3">🧩 Tips Praktis</h2>
+              <ul class="list-group list-group-flush">
+                <li class="list-group-item d-flex gap-2 align-items-start" style="background:var(--panel); color:var(--ink);">
+                  <i class="bi bi-check2-circle text-success"></i>
+                  <span><strong>Selaraskan</strong> bukti dengan kriteria parameter, bukan sebaliknya.</span>
+                </li>
+                <li class="list-group-item d-flex gap-2 align-items-start" style="background:var(--panel); color:var(--ink);">
+                  <i class="bi bi-cloud-arrow-up" style="color:#4f46e5"></i>
+                  <span>Gunakan <em>link</em> Drive “Anyone with the link – Viewer” agar mudah diakses reviewer.</span>
+                </li>
+                <li class="list-group-item d-flex gap-2 align-items-start" style="background:var(--panel); color:var(--ink);">
+                  <i class="bi bi-emoji-smile text-warning"></i>
+                  <span>Ringkas, tegas, dan gunakan contoh nyata (program/kegiatan) di uraian.</span>
+                </li>
+                <li class="list-group-item d-flex gap-2 align-items-start" style="background:var(--panel); color:var(--ink);">
+                  <i class="bi bi-diagram-2" style="color:#06b6d4"></i>
+                  <span>Tuliskan <em>AoI</em> spesifik: <em>owner</em>, target, tenggat.</span>
+                </li>
+              </ul>
+              <div class="mt-3 d-grid">
+                <a class="link-card" href="play.html">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <span><strong>Latihan cepat</strong> dengan mini-kuis SPIP (PLAY)</span>
+                    <i class="bi bi-arrow-right"></i>
+                  </div>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /row -->
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section id="faq" class="pb-5">
+    <div class="container">
+      <h2 class="h5 fw-bold mb-3">❓ Pertanyaan yang Sering Diajukan</h2>
+      <div class="accordion" id="faqAcc">
+        <div class="accordion-item" style="background:var(--panel); color:var(--ink); border:1px solid var(--border);">
+          <h2 class="accordion-header">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#f1" style="background:var(--panel); color:var(--ink);">
+              Apakah semua user boleh melihat unit lain?
+            </button>
+          </h2>
+          <div id="f1" class="accordion-collapse collapse show" data-bs-parent="#faqAcc">
+            <div class="accordion-body">
+              Ya, tampilan (read-only) bisa diizinkan untuk transparansi & pembelajaran; perubahan hanya untuk unit yang ditugaskan atau admin/monitor sesuai aturan Firestore.
+            </div>
+          </div>
+        </div>
+
+        <div class="accordion-item mt-2" style="background:var(--panel); color:var(--ink); border:1px solid var(--border);">
+          <h2 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#f2" style="background:var(--panel); color:var(--ink);">
+              Mengapa bukti grade harus dipisah per A–E?
+            </button>
+          </h2>
+          <div id="f2" class="accordion-collapse collapse" data-bs-parent="#faqAcc">
+            <div class="accordion-body">
+              Agar kurasi bukti selaras dengan kedalaman implementasi: dari kebijakan dasar (E) hingga perbaikan berkelanjutan (A).
+            </div>
+          </div>
+        </div>
+
+        <div class="accordion-item mt-2" style="background:var(--panel); color:var(--ink); border:1px solid var(--border);">
+          <h2 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#f3" style="background:var(--panel); color:var(--ink);">
+              Apa yang paling sering menurunkan grade?
+            </button>
+          </h2>
+          <div id="f3" class="accordion-collapse collapse" data-bs-parent="#faqAcc">
+            <div class="accordion-body">
+              Bukti tidak konsisten/terkini, tidak ada tindak lanjut, atau uraian tidak menjawab kriteria parameter secara spesifik.
+            </div>
           </div>
         </div>
       </div>
     </div>
   </section>
 
+  <!-- Footer -->
   <footer class="py-4">
-    <div class="container d-flex justify-content-between flex-wrap gap-2">
-      <div class="small">© 2025 READ · Edukasi SPIP</div>
+    <div class="container d-flex flex-column flex-md-row align-items-center justify-content-between gap-2">
+      <div class="small muted">© 2025 — READ · Edukasi SPIP</div>
       <div class="d-flex gap-2">
-        <a href="index.html" class="btn btn-sm btn-ghost"><i class="bi bi-speedometer2 me-1"></i>Dashboard</a>
-        <a href="play.html" class="btn btn-sm btn-success"><i class="bi bi-controller me-1"></i>PLAY</a>
+        <a href="index.html" class="btn btn-sm btn-ghost"><i class="bi bi-speedometer2 me-1"></i> Dashboard</a>
+        <a href="play.html" class="btn btn-sm btn-success"><i class="bi bi-controller me-1"></i> PLAY</a>
       </div>
     </div>
   </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- ================= Theme Script (Auto / Dark / Light with persist) ================= -->
+  <script>
+    (function(){
+      const html = document.documentElement;
+      const btn  = document.getElementById('themeToggle');
+      const icn  = document.getElementById('themeIcon');
+      const lbl  = document.getElementById('themeLabel');
+
+      // Apply saved preference or keep "auto"
+      const saved = localStorage.getItem('read.theme'); // 'light' | 'dark' | 'auto'
+      if (saved === 'light' || saved === 'dark') html.setAttribute('data-theme', saved);
+      else html.setAttribute('data-theme', 'auto');
+
+      function currentTheme(){
+        const mode = html.getAttribute('data-theme');
+        if (mode === 'auto') {
+          return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+        return mode;
+      }
+      function refreshIcon(){
+        const active = currentTheme();
+        if (active === 'dark'){ icn.className='bi bi-brightness-high'; lbl.textContent='Light'; }
+        else { icn.className='bi bi-moon-stars'; lbl.textContent='Dark'; }
+      }
+      function toggleTheme(){
+        const modeAttr = html.getAttribute('data-theme');
+        const active = currentTheme();
+
+        // cycle: auto -> dark -> light -> auto
+        let next = 'auto';
+        if (modeAttr === 'auto') next = 'dark';
+        else if (modeAttr === 'dark') next = 'light';
+        else if (modeAttr === 'light') next = 'auto';
+
+        html.setAttribute('data-theme', next);
+        localStorage.setItem('read.theme', next);
+        refreshIcon();
+      }
+
+      // live update when system theme changes and we're on "auto"
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+        if (html.getAttribute('data-theme') === 'auto') refreshIcon();
+      });
+
+      btn.addEventListener('click', toggleTheme);
+      refreshIcon();
+    })();
+  </script>
 </body>
-</html>
+</html
