@@ -3300,6 +3300,34 @@ c. Memberikan rekomendasi yang relevan.`
   })();
     // Render tabel setelah struktur siap
 renderAssessmentTable();
+    document.addEventListener("DOMContentLoaded", () => {
+  const tbody = document.getElementById("assessment-table-body");
+  if (!tbody) return;
+
+  // Bersihkan isi tbody dulu biar tidak duplikat
+  tbody.innerHTML = "";
+
+  const groups = {
+    1: "Lingkungan Pengendalian",
+    2: "Penilaian Risiko",
+    3: "Kegiatan Pengendalian",
+    4: "Informasi dan Komunikasi",
+    5: "Pemantauan Berkelanjutan"
+  };
+
+  // Buat heading group netral
+  for (const [num, title] of Object.entries(groups)) {
+    const row = document.createElement("tr");
+    row.className = "group-heading";
+    row.innerHTML = `
+      <td colspan="6">
+        <i class="bi bi-dot"></i> ${num}. ${title}
+      </td>`;
+    tbody.appendChild(row);
+  }
+
+  console.log("Group headings inserted!");
+});
   </script>
   <!-- ===== /TOC Add-on ===== -->
 
