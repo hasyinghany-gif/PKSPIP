@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>PKSPIP – Aim Trainer</title>
+<style>
+  html,body{margin:0;height:100%;overflow:hidden;background:#0f172a;color:#e2e8f0;font-family:Inter,system-ui,Segoe UI,Roboto}
+  #topbar{position:fixed;inset:12px 12px auto 12px;display:flex;gap:8px;z-index:3}
+  .btn{background:#111827;border:1px solid #1f2937;color:#e2e8f0;border-radius:10px;padding:8px 12px;cursor:pointer}
+  .btn:hover{border-color:#334155}
+  #hud{position:fixed;left:12px;bottom:12px;background:#0008;border:1px solid #1f2937;border-radius:12px;padding:10px 12px;font-variant-numeric:tabular-nums;z-index:3}
+  #summary{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:#000a;z-index:4}
+  #card{background:#0b1220;border:1px solid #1f2937;border-radius:16px;padding:18px;min-width:280px}
+  #card h2{margin:0 0 8px}
+  #card .row{display:flex;justify-content:space-between;margin:6px 0}
+  canvas{display:block;width:100vw;height:100vh;outline:none}
+</style>
+</head>
+<body>
+<div id="topbar">
+  <a class="btn" href="../main.html">⟵ Kembali</a>
+  <button id="startBtn" class="btn">Mulai</button>
+  <button id="restartBtn" class="btn">Restart (R)</button>
+  <button id="pauseBtn" class="btn">Pause (P)</button>
+  <button id="muteBtn" class="btn">Mute (M)</button>
+  <select id="countSel" class="btn">
+    <option value="30" selected>30 target</option>
+    <option value="20">20 target</option>
+    <option value="40">40 target</option>
+    <option value="60">60 target</option>
+  </select>
+  <select id="sizeSel" class="btn">
+    <option value="26">Kecil</option>
+    <option value="34" selected>Sedang</option>
+    <option value="46">Besar</option>
+  </select>
+</div>
+
+<canvas id="c"></canvas>
+
+<div id="hud">
+  <div><b>Sisa:</b> <span id="remaining">-</span> | <b>Hit:</b> <span id="hits">0</span> | <b>Miss:</b> <span id="miss">0</span> | <b>Acc:</b> <span id="acc">0%</span></div>
+  <div><b>Avg:</b> <span id="avg">0.000</span>s | <b>Best:</b> <span id="best">-</span>s | <b>Waktu:</b> <span id="elapsed">0.00</span>s</div>
+  <div class="muted" style="opacity:.75">Tembak lingkaran putih. R=Restart, P=Pause, M=Mute</div>
+</div>
+
+<div id="summary">
+  <div id="card">
+    <h2>Hasil</h2>
+    <div class="row"><span>Target</span><span id="s_targets">-</span></div>
+    <div class="row"><span>Hits / Miss</span><span id="s_hits">-</span></div>
+    <div class="row"><span>Akurasi</span><span id="s_acc">-</span></div>
+    <div class="row"><span>Avg time</span><span id="s_avg">-</span></div>
+    <div class="row"><span>Best time</span><span id="s_best">-</span></div>
+    <div class="row"><span>Total waktu</span><span id="s_elapsed">-</span></div>
+    <div class="row"><span>Personal Best (avg)</span><span id="s_pb">-</span></div>
+    <div style="margin-top:10px;display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn" id="closeSum">Tutup</button>
+      <button class="btn" id="again">Main Lagi</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d', { alpha:false });
+
+let DPR = 1;
+function resize(){
+  DPR = Math.min(devicePixelRatio || 1, 2);
+  canvas.width = Math.floor(innerWidth * DPR);
+  canvas.height = Math.floor(innerHeight * DPR);
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+}
+addEventListener('resize', resize); resize();
+
+/* ====== state ====== */
+let running = false, paused = false, muted = false;
+let targetRadius = 34;          // css px
+let totalTargets = 30;
+let remaining = 0, hits = 0, misses = 0;
+let spawnTime = 0, times = [];
+let current = null;             // {x,y}
+let startTime = 0, elapsed = 0; // total
+
+/* ====== ui els ====== */
+const elRem = document.getElementById('remaining');
+const elHits = document.getElementById('hits');
+const elMiss = document.getElementById('miss');
+const elAcc  = document.getElementById('acc');
+const elAvg  = document.getElementById('avg');
+const elBest = document.getElementById('best');
+const elElapsed = document.getElementById('elapsed');
+
+function beep(vol=0.2, freq=880, dur=40){
+  if(muted) return;
+  try{
+    const a = new (window.AudioContext||window.webkitAudioContext)();
+    const o = a.createOscillator(); const g=a.createGain();
+    o.type='square'; o.frequency.value=freq;
+    g.gain.value=vol;
+    o.connect(g); g.connect(a.destination);
+    o.start(); setTimeout(()=>{o.stop(); a.close();}, dur);
+  }catch(_){}
+}
+
+/* ====== game core ====== */
+function reset(){
+  times=[]; hits=misses=0; remaining=totalTargets; elapsed=0;
+  current=null; spawnTime=0; startTime=0;
+  updateHUD();
+}
+function start(){
+  totalTargets = parseInt(document.getElementById('countSel').value,10);
+  targetRadius = parseInt(document.getElementById('sizeSel').value,10);
+  paused=false; running=true; reset();
+  startTime = performance.now();
+  spawn();
+  loop();
+}
+function pauseToggle(){
+  if(!running) return;
+  paused = !paused;
+  if(!paused) { spawnTime = performance.now() - (pauseStamp - spawnTime); loop(); }
+}
+let pauseStamp=0;
+
+function end(){
+  running=false;
+  showSummary();
+}
+
+function spawn(){
+  // jaga jarak dari tepi
+  const margin = targetRadius + 12;
+  const x = Math.random() * (innerWidth - margin*2) + margin;
+  const y = Math.random() * (innerHeight - margin*2 - 70) + margin + 35; // hindari topbar
+  current = {x,y};
+  spawnTime = performance.now();
+}
+
+function updateHUD(){
+  elRem.textContent = remaining;
+  elHits.textContent = hits;
+  elMiss.textContent = misses;
+  const acc = hits + misses ? (hits/(hits+misses))*100 : 0;
+  elAcc.textContent = acc.toFixed(0)+'%';
+  const avg = times.length ? (times.reduce((a,b)=>a+b)/times.length)/1000 : 0;
+  const best = times.length ? Math.min(...times)/1000 : 0;
+  elAvg.textContent = avg.toFixed(3);
+  elBest.textContent = times.length?best.toFixed(3):'-';
+  elElapsed.textContent = (elapsed/1000).toFixed(2);
+}
+
+function draw(){
+  // background
+  ctx.fillStyle = '#0b1220'; ctx.fillRect(0,0,innerWidth,innerHeight);
+
+  // crosshair target
+  if(current){
+    const {x,y} = current;
+    ctx.strokeStyle = '#e5e7eb';
+    ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.arc(x,y,targetRadius,0,Math.PI*2); ctx.stroke();
+    ctx.beginPath(); ctx.arc(x,y, targetRadius*0.55,0,Math.PI*2); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x-targetRadius-6,y); ctx.lineTo(x+targetRadius+6,y); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x,y-targetRadius-6); ctx.lineTo(x,y+targetRadius+6); ctx.stroke();
+  }
+
+  // text remaining (besar)
+  ctx.fillStyle='#9ca3af'; ctx.font='bold 28px system-ui';
+  ctx.textAlign='center'; ctx.fillText('Remaining '+remaining, innerWidth/2, 52);
+}
+
+function loop(){
+  if(!running) return;
+  if(paused){ pauseStamp = performance.now(); requestAnimationFrame(loop); return; }
+
+  elapsed = performance.now() - startTime;
+  updateHUD();
+  draw();
+  requestAnimationFrame(loop);
+}
+
+/* ====== input ====== */
+canvas.addEventListener('mousedown', (e)=>{
+  if(!running || paused) return;
+  const r = canvas.getBoundingClientRect();
+  const x = e.clientX - r.left, y = e.clientY - r.top;
+  if(current){
+    const d = Math.hypot(x-current.x, y-current.y);
+    if(d <= targetRadius){ // HIT
+      const t = performance.now() - spawnTime;
+      times.push(t);
+      hits++; remaining--;
+      beep(0.08, 1100, 25);
+      if(remaining>0) spawn(); else end();
+    } else { // MISS
+      misses++; beep(0.05, 220, 45);
+    }
+  }
+});
+
+addEventListener('keydown', (e)=>{
+  const k = e.key.toLowerCase();
+  if(k==='r'){ reset(); start(); }
+  if(k==='p'){ pauseToggle(); }
+  if(k==='m'){ muted = !muted; document.getElementById('muteBtn').textContent = muted?'Unmute (M)':'Mute (M)'; }
+});
+
+/* ====== UI buttons ====== */
+document.getElementById('startBtn').onclick = ()=>{ start(); };
+document.getElementById('restartBtn').onclick = ()=>{ reset(); start(); };
+document.getElementById('pauseBtn').onclick = ()=>{ pauseToggle(); };
+document.getElementById('muteBtn').onclick  = ()=>{ muted=!muted; document.getElementById('muteBtn').textContent = muted?'Unmute (M)':'Mute (M)'; };
+
+/* ====== summary & PB ====== */
+function showSummary(){
+  const acc = hits + misses ? (hits/(hits+misses))*100 : 0;
+  const avg = times.length ? (times.reduce((a,b)=>a+b)/times.length)/1000 : 0;
+  const best = times.length ? Math.min(...times)/1000 : 0;
+  const total = elapsed/1000;
+
+  document.getElementById('s_targets').textContent = totalTargets;
+  document.getElementById('s_hits').textContent = `${hits} / ${misses}`;
+  document.getElementById('s_acc').textContent = acc.toFixed(0)+'%';
+  document.getElementById('s_avg').textContent = avg.toFixed(3)+'s';
+  document.getElementById('s_best').textContent = best.toFixed(3)+'s';
+  document.getElementById('s_elapsed').textContent = total.toFixed(2)+'s';
+
+  // Personal best (avg) di localStorage
+  const key = 'aim_pb_avg';
+  const prev = parseFloat(localStorage.getItem(key) || '999');
+  if(avg>0 && avg<prev){ localStorage.setItem(key, String(avg)); }
+  const pb = parseFloat(localStorage.getItem(key) || '0');
+  document.getElementById('s_pb').textContent = pb? (pb.toFixed(3)+'s') : '-';
+
+  document.getElementById('summary').style.display='flex';
+}
+document.getElementById('closeSum').onclick = ()=>{ document.getElementById('summary').style.display='none'; };
+document.getElementById('again').onclick    = ()=>{ document.getElementById('summary').style.display='none'; reset(); start(); };
+
+/* ====== auto start (opsional via query ?autostart=1) ====== */
+const qp = new URLSearchParams(location.search);
+if(qp.get('autostart')==='1'){ start(); }
+</script>
+</body>
+</html>
