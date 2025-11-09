@@ -244,7 +244,7 @@
 
   <!-- ================= Quiz Logic ================= -->
   <script>
-    // --- Question bank: 10 soal expert SPIP ---
+    // --- Question bank (SPIP basics; feel free to add more) ---
     const BANK = [
       {
         tag: "Maturitas",
@@ -545,11 +545,6 @@
     }
 
     // --- Wire events ---
-    const btnNext = document.getElementById('btnNext');
-    const btnPrev = document.getElementById('btnPrev');
-    const btnClear = document.getElementById('btnClear');
-    const btnRetry = document.getElementById('btnRetry');
-
     btnStart.addEventListener('click', startQuiz);
     btnNext.addEventListener('click', next);
     btnPrev.addEventListener('click', prev);
