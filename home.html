@@ -24,41 +24,68 @@
     /* Navbar */
     .navbar{backdrop-filter:saturate(160%) blur(6px); background:rgba(255,255,255,.9)!important; border-bottom:1px solid var(--border);}
 
-    /* HERO – ~30–35% layar, fokus agak turun biar meja/laptop terlihat */
+    /* HERO – ~1/3 layar, fokus diturunkan agar meja/laptop terlihat */
     .hero{
-      position:relative;
-      min-height:34vh;            /* ~ 1/3 layar */
-      display:flex; align-items:center;
+      min-height:34vh;
       background-image: var(--hero-overlay), url("hero.jpeg");
       background-size:cover;
-      background-position:center 58%; /* turunkan fokus */
+      background-position:center 60%;
       border-bottom:1px solid var(--border);
     }
-    .hero .headline{font-weight:800; letter-spacing:.2px; font-size:clamp(22px,2.6vw,28px);}
-    .hero .sub{color:#e5e7eb; opacity:.95; font-size:clamp(12px,1.8vw,14px);}
-    .underline-accent{position:relative; display:inline-block}
-    .underline-accent::after{content:""; position:absolute; left:0; right:0; bottom:-6px; height:6px; background:linear-gradient(90deg,var(--brand),var(--brand-2),var(--brand-3)); border-radius:8px; opacity:.95;}
 
-    /* TEAMS */
-    .section-title{font-weight:800; letter-spacing:.3px;}
+    /* TEAMS BLOCK */
+    .teams-wrap{padding-block:48px}
     .team-shot{
-      max-width:560px;
-      border-radius:16px;
+      width:100%;
+      max-width:420px;                 /* ≈ 50% dari sebelumnya */
+      border-radius:18px;
       box-shadow:0 20px 50px rgba(2,6,23,.12);
       border:1px solid rgba(2,6,23,.06);
     }
+    .eyebrow{
+      display:inline-block;
+      font-weight:700;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      font-size:.78rem;
+      color:#475569;
+      background:linear-gradient(90deg,#eef2ff,#e0f2fe);
+      border:1px solid #e6e9f5;
+      padding:.28rem .55rem;
+      border-radius:999px;
+    }
+    .title{
+      font-weight:800;
+      letter-spacing:.2px;
+      line-height:1.15;
+      font-size:clamp(22px,2.6vw,32px);
+      margin-top:.6rem;
+      margin-bottom:.35rem;
+      position:relative;
+    }
+    .title::after{
+      content:"";
+      display:block;
+      height:6px;
+      width:160px;
+      margin-top:.5rem;
+      border-radius:8px;
+      background:linear-gradient(90deg,var(--brand),var(--brand-2),var(--brand-3));
+    }
+    .subtitle{color:var(--muted); margin-bottom:1rem}
 
-    /* Name chips elegan */
+    /* Nama tim – chips */
     .names{
       display:grid;
       grid-template-columns: repeat(2, minmax(0,1fr));
       gap:.6rem .7rem;
+      margin-top:.6rem;
     }
     @media (min-width: 992px){
       .names{grid-template-columns: repeat(3, minmax(0,1fr));}
     }
     .chip{
-      display:flex; align-items:center; gap:.5rem;
+      display:flex; align-items:center; gap:.6rem;
       padding:.58rem .75rem;
       border-radius:999px;
       background:linear-gradient(180deg,#f8fafc,#eef2ff);
@@ -66,20 +93,26 @@
       box-shadow:0 2px 6px rgba(2,6,23,.06);
       font-weight:600;
       white-space:nowrap;
+      transition:transform .12s ease, box-shadow .12s ease;
     }
-    .chip i{font-size:14px; color:#64748b}
+    .chip:hover{ transform:translateY(-2px); box-shadow:0 6px 16px rgba(2,6,23,.10); }
+    .avatar-dot{
+      width:18px; height:18px; border-radius:50%;
+      background:conic-gradient(from 140deg,var(--brand),var(--brand-2),var(--brand-3));
+      box-shadow:0 0 0 3px #fff inset;
+      flex:0 0 18px;
+    }
 
-    /* Ribbon quote (dipindah ke bawah) */
+    /* Quote ribbon */
     .ribbon{background:linear-gradient(90deg,#ef4444,#f97316,#f59e0b); color:#fff; font-weight:800;}
-    .ribbon .inner{padding:14px 0;}
+    .ribbon .inner{padding:14px 0}
 
-    /* Ringkasan */
+    /* Ringkasan tabel */
     .card-soft{background:var(--panel); border:1px solid var(--border); border-radius:16px; box-shadow:0 12px 28px rgba(2,6,23,.06);}
     .table thead th{background:linear-gradient(90deg,#eef2ff,#e0f2fe); color:#111827; border-bottom:1px solid var(--border);}
     .badge-chip{font-weight:700; border-radius:999px; padding:.35rem .6rem;}
     .badge-up{background:#dcfce7; color:#166534;}
 
-    /* Footer */
     footer{color:var(--muted); border-top:1px solid var(--border); background:#ffffffc7;}
   </style>
 </head>
@@ -100,45 +133,41 @@
     </div>
   </nav>
 
-  <!-- HERO -->
-  <header class="hero">
-    <div class="container py-2">
-      <h1 class="headline mb-1"><span class="underline-accent">MEET OUR TEAMS</span></h1>
-      <div class="sub">Tim Penjamin Kualitas SPIP</div>
-    </div>
-  </header>
+  <!-- HERO (gambar saja) -->
+  <header class="hero"></header>
 
-  <!-- TEAMS (judul di kiri, foto di kanan) -->
-  <section class="py-5">
+  <!-- TEAMS: foto kiri, judul & nama di kanan -->
+  <section class="teams-wrap">
     <div class="container">
-      <div class="row align-items-start g-4">
-        <!-- LEFT: judul + nama -->
-        <div class="col-lg-6 order-1 order-lg-0">
-          <h2 class="section-title h3 mb-2">MEET OUR TEAMS</h2>
-          <p class="text-secondary mb-3">Tim Penjamin Kualitas SPIP</p>
-
-          <div class="names">
-            <div class="chip"><i class="bi bi-dot"></i> Muhammad Naim</div>
-            <div class="chip"><i class="bi bi-dot"></i> Anita Meilani</div>
-            <div class="chip"><i class="bi bi-dot"></i> Rahmah Febrina</div>
-            <div class="chip"><i class="bi bi-dot"></i> Raeihan Fadilla</div>
-            <div class="chip"><i class="bi bi-dot"></i> Theresia</div>
-            <div class="chip"><i class="bi bi-dot"></i> Dedi Sutrisna Syah Putra</div>
-            <div class="chip"><i class="bi bi-dot"></i> Ganis Purnaningtyas</div>
-            <div class="chip"><i class="bi bi-dot"></i> Hasyin Ghany</div>
-            <div class="chip"><i class="bi bi-dot"></i> Zikra Mardiyyah</div>
-          </div>
+      <div class="row align-items-center g-4">
+        <!-- Foto (kiri) -->
+        <div class="col-lg-5 text-center">
+          <img src="teams.jpeg" class="team-shot img-fluid" alt="Tim SPIP" onerror="this.style.display='none'">
         </div>
 
-        <!-- RIGHT: foto -->
-        <div class="col-lg-6 text-center order-0 order-lg-1">
-          <img src="teams.jpeg" alt="Tim SPIP" class="img-fluid team-shot" onerror="this.style.display='none'">
+        <!-- Konten (kanan) -->
+        <div class="col-lg-7">
+          <span class="eyebrow">Tim Penjamin Kualitas SPIP</span>
+          <h2 class="title">MEET OUR TEAMS</h2>
+          <p class="subtitle">Kolaborasi lintas fungsi untuk menghadirkan penjaminan kualitas SPIP yang konsisten, akuntabel, dan berdampak.</p>
+
+          <div class="names">
+            <div class="chip"><span class="avatar-dot"></span> Muhammad Naim</div>
+            <div class="chip"><span class="avatar-dot"></span> Anita Meilani</div>
+            <div class="chip"><span class="avatar-dot"></span> Rahmah Febrina</div>
+            <div class="chip"><span class="avatar-dot"></span> Raeihan Fadilla</div>
+            <div class="chip"><span class="avatar-dot"></span> Theresia</div>
+            <div class="chip"><span class="avatar-dot"></span> Dedi Sutrisna Syah Putra</div>
+            <div class="chip"><span class="avatar-dot"></span> Ganis Purnaningtyas</div>
+            <div class="chip"><span class="avatar-dot"></span> Hasyin Ghany</div>
+            <div class="chip"><span class="avatar-dot"></span> Zikra Mardiyyah</div>
+          </div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- QUOTE di bawah section Teams -->
+  <!-- QUOTE di bawah Teams -->
   <section class="ribbon">
     <div class="inner text-center">
       If the future is yours — <span style="text-decoration:underline">PROVE IT!</span>
