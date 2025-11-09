@@ -169,6 +169,74 @@
     @media (max-width: 576px){
       .law-item{ padding:.55rem .6rem; }
       .law-num{ width:28px;height:28px; }
+      /* ====== Table: Ringkasan Level Maturitas (anti "nyala putih" di dark mode) ====== */
+.table-lite{
+  --bs-table-bg: transparent;                 /* matikan putih default bootstrap */
+  --bs-table-striped-bg: rgba(255,255,255,.04);
+  --bs-table-striped-color: var(--ink);
+  --bs-table-hover-bg: rgba(99,102,241,.08);
+  --bs-table-hover-color: var(--ink);
+  --bs-table-border-color: #e9edf533;
+  color: var(--ink);
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+/* Header dengan kontras halus + rounded */
+.table-lite thead th{
+  background: linear-gradient(180deg, var(--table-head), transparent 140%);
+  color: var(--ink);
+  border-bottom: 1px solid var(--border);
+  font-weight: 700;
+  letter-spacing: .2px;
+}
+.table-lite thead th:first-child{border-top-left-radius: .75rem}
+.table-lite thead th:last-child{border-top-right-radius: .75rem}
+
+/* Baris isi: panel-transparan, bukan putih solid */
+.table-lite tbody tr{
+  background: linear-gradient(180deg, rgba(255,255,255,.045), rgba(0,0,0,.02));
+}
+.table-lite tbody td{
+  border-color: var(--bs-table-border-color);
+}
+
+/* Hover lembut */
+.table-lite tbody tr:hover{
+  background: var(--bs-table-hover-bg);
+}
+
+/* Zebra optional (aktifkan jika mau) */
+/* .table-lite tbody tr:nth-child(odd){ background: var(--bs-table-striped-bg); } */
+
+/* Footer/tepi bawah rounded rapi */
+.table-lite tbody tr:last-child td:first-child{border-bottom-left-radius:.75rem}
+.table-lite tbody tr:last-child td:last-child{border-bottom-right-radius:.75rem}
+
+/* Penyesuaian khusus dark mode */
+html[data-theme="dark"] .table-lite{
+  --bs-table-striped-bg: rgba(20,24,45,.35);
+  --bs-table-hover-bg: rgba(99,102,241,.12);
+  --bs-table-border-color: #22304a;
+}
+html[data-theme="dark"] .table-lite thead th{
+  background: linear-gradient(180deg, #121a2e, #0f1426);
+  border-bottom-color: #1e2a45;
+}
+html[data-theme="dark"] .table-lite tbody tr{
+  background: linear-gradient(180deg, rgba(20,24,45,.42), rgba(10,14,28,.22));
+}
+
+/* Lencana level biar lebih "pop" tapi tetap selaras tema */
+.badge-grade{
+  display:inline-flex; align-items:center; justify-content:center;
+  min-width:34px; height:28px; padding:.25rem .6rem;
+  border-radius:999px; font-weight:800; letter-spacing:.3px;
+  box-shadow: 0 6px 16px rgba(0,0,0,.12);
+}
+html[data-theme="dark"] .badge-grade{
+  box-shadow: 0 8px 18px rgba(0,0,0,.35);
+}
     }
   </style>
 </head>
