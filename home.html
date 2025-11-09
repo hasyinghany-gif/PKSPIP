@@ -8,8 +8,9 @@
   <!-- Bootstrap & Icons -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
-  <!-- Font -->
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Bebas+Neue&display=swap" rel="stylesheet">
 
   <style>
     :root{
@@ -24,7 +25,7 @@
     /* Navbar */
     .navbar{backdrop-filter:saturate(160%) blur(6px); background:rgba(255,255,255,.9)!important; border-bottom:1px solid var(--border);}
 
-    /* HERO – ~1/3 layar, fokus diturunkan agar meja/laptop terlihat */
+    /* HERO */
     .hero{
       min-height:34vh;
       background-image: var(--hero-overlay), url("hero.jpeg");
@@ -33,85 +34,92 @@
       border-bottom:1px solid var(--border);
     }
 
-    /* TEAMS BLOCK */
+    /* TEAMS */
     .teams-wrap{padding-block:48px}
-    .team-shot{
-      width:100%;
-      max-width:420px;                 /* ≈ 50% dari sebelumnya */
-      border-radius:18px;
-      box-shadow:0 20px 50px rgba(2,6,23,.12);
-      border:1px solid rgba(2,6,23,.06);
+    .team-shot{width:100%; max-width:420px; border-radius:18px; box-shadow:0 20px 50px rgba(2,6,23,.12); border:1px solid rgba(2,6,23,.06);}
+    .eyebrow{display:inline-block; font-weight:700; letter-spacing:.08em; text-transform:uppercase; font-size:.78rem; color:#475569; background:linear-gradient(90deg,#eef2ff,#e0f2fe); border:1px solid #e6e9f5; padding:.28rem .55rem; border-radius:999px;}
+    .title{font-weight:800; letter-spacing:.2px; line-height:1.15; font-size:clamp(22px,2.6vw,32px); margin-top:.6rem; margin-bottom:.35rem; position:relative;}
+    .title::after{content:""; display:block; height:6px; width:160px; margin-top:.5rem; border-radius:8px; background:linear-gradient(90deg,var(--brand),var(--brand-2),var(--brand-3));}
+    .subtitle{color:var(--muted); margin-bottom:1rem}
+    .names{display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:.6rem .7rem; margin-top:.6rem;}
+    @media (min-width: 992px){ .names{grid-template-columns: repeat(3, minmax(0,1fr));} }
+    .chip{display:flex; align-items:center; gap:.6rem; padding:.58rem .75rem; border-radius:999px; background:linear-gradient(180deg,#f8fafc,#eef2ff); border:1px solid #e6e9f5; box-shadow:0 2px 6px rgba(2,6,23,.06); font-weight:600; white-space:nowrap; transition:transform .12s ease, box-shadow .12s ease;}
+    .chip:hover{ transform:translateY(-2px); box-shadow:0 6px 16px rgba(2,6,23,.10); }
+    .avatar-dot{width:18px; height:18px; border-radius:50%; background:conic-gradient(from 140deg,var(--brand),var(--brand-2),var(--brand-3)); box-shadow:0 0 0 3px #fff inset; flex:0 0 18px;}
+
+    /* ===== QUOTE HERO (lebih eye-catching) ===== */
+    .quote-hero{
+      position:relative;
+      overflow:hidden;
+      background:linear-gradient(90deg,#ef4444,#f97316,#f59e0b);
+      color:#fff;
+      border-top:1px solid rgba(255,255,255,.15);
+      border-bottom:1px solid rgba(255,255,255,.15);
     }
-    .eyebrow{
-      display:inline-block;
-      font-weight:700;
-      letter-spacing:.08em;
+    .quote-hero .layer{
+      position:absolute; inset:-20%;
+      background:
+        radial-gradient(500px 120px at -10% 50%, rgba(255,255,255,.13), transparent 60%),
+        radial-gradient(500px 120px at 110% 50%, rgba(255,255,255,.13), transparent 60%);
+      animation:floatX 10s linear infinite;
+      pointer-events:none;
+    }
+    @keyframes floatX { 0%{transform:translateX(-8%)} 50%{transform:translateX(8%)} 100%{transform:translateX(-8%)} }
+    .quote-text{
+      font-family:"Bebas Neue", system-ui;
+      letter-spacing:.02em;
+      font-size:clamp(26px,4.2vw,48px);
+      line-height:1;
+    }
+    .quote-text .accent{
+      padding-inline:.35rem;
+      border-radius:.4rem;
+      background:rgba(255,255,255,.16);
+      border:1px solid rgba(255,255,255,.35);
+      box-shadow:inset 0 0 0 1px rgba(255,255,255,.2);
+      text-decoration:underline;
+      text-underline-offset: .08em;
+    }
+    .quote-sub{
+      opacity:.9;
+      font-weight:600;
+      letter-spacing:.12em;
       text-transform:uppercase;
       font-size:.78rem;
-      color:#475569;
-      background:linear-gradient(90deg,#eef2ff,#e0f2fe);
-      border:1px solid #e6e9f5;
-      padding:.28rem .55rem;
-      border-radius:999px;
+      margin-top:.4rem;
     }
-    .title{
-      font-weight:800;
-      letter-spacing:.2px;
-      line-height:1.15;
-      font-size:clamp(22px,2.6vw,32px);
-      margin-top:.6rem;
-      margin-bottom:.35rem;
+    .quote-inner{ padding:18px 0; }
+
+    /* ===== SECTION TITLE (Rincian Hasil) ===== */
+    .section-eyebrow{display:inline-block; font-weight:700; letter-spacing:.1em; text-transform:uppercase; font-size:.76rem; color:#64748b; background:#eef2ff; border:1px solid #e6e9f5; padding:.28rem .55rem; border-radius:999px;}
+    .section-title{font-weight:800; letter-spacing:.2px; line-height:1.12; font-size:clamp(22px,2.4vw,30px); margin:.6rem 0 1.25rem;}
+    .section-title::after{content:""; display:block; height:5px; width:140px; margin-top:.5rem; border-radius:8px; background:linear-gradient(90deg,var(--brand),var(--brand-2));}
+
+    /* ===== TABLE CARD baru ===== */
+    .metric-card{
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:20px;
+      box-shadow:0 30px 60px rgba(2,6,23,.08), 0 2px 8px rgba(2,6,23,.04);
       position:relative;
     }
-    .title::after{
-      content:"";
-      display:block;
-      height:6px;
-      width:160px;
-      margin-top:.5rem;
-      border-radius:8px;
-      background:linear-gradient(90deg,var(--brand),var(--brand-2),var(--brand-3));
+    .metric-card::before{
+      content:""; position:absolute; inset:-8px;
+      border-radius:26px;
+      background:linear-gradient(180deg,rgba(37,99,235,.12),rgba(124,58,237,.08));
+      filter:blur(20px); z-index:-1;
     }
-    .subtitle{color:var(--muted); margin-bottom:1rem}
-
-    /* Nama tim – chips */
-    .names{
-      display:grid;
-      grid-template-columns: repeat(2, minmax(0,1fr));
-      gap:.6rem .7rem;
-      margin-top:.6rem;
+    .table thead th{
+      background:linear-gradient(90deg,#eef2ff,#e0f2fe);
+      color:#0f172a; border-bottom:1px solid var(--border);
+      font-weight:700;
     }
-    @media (min-width: 992px){
-      .names{grid-template-columns: repeat(3, minmax(0,1fr));}
-    }
-    .chip{
-      display:flex; align-items:center; gap:.6rem;
-      padding:.58rem .75rem;
-      border-radius:999px;
-      background:linear-gradient(180deg,#f8fafc,#eef2ff);
-      border:1px solid #e6e9f5;
-      box-shadow:0 2px 6px rgba(2,6,23,.06);
-      font-weight:600;
-      white-space:nowrap;
-      transition:transform .12s ease, box-shadow .12s ease;
-    }
-    .chip:hover{ transform:translateY(-2px); box-shadow:0 6px 16px rgba(2,6,23,.10); }
-    .avatar-dot{
-      width:18px; height:18px; border-radius:50%;
-      background:conic-gradient(from 140deg,var(--brand),var(--brand-2),var(--brand-3));
-      box-shadow:0 0 0 3px #fff inset;
-      flex:0 0 18px;
-    }
-
-    /* Quote ribbon */
-    .ribbon{background:linear-gradient(90deg,#ef4444,#f97316,#f59e0b); color:#fff; font-weight:800;}
-    .ribbon .inner{padding:14px 0}
-
-    /* Ringkasan tabel */
-    .card-soft{background:var(--panel); border:1px solid var(--border); border-radius:16px; box-shadow:0 12px 28px rgba(2,6,23,.06);}
-    .table thead th{background:linear-gradient(90deg,#eef2ff,#e0f2fe); color:#111827; border-bottom:1px solid var(--border);}
+    .table tbody tr{ transition: background-color .12s ease;}
+    .table tbody tr:hover{ background:#f8fafc;}
+    .pk-num{ font-variant-numeric: tabular-nums; }
     .badge-chip{font-weight:700; border-radius:999px; padding:.35rem .6rem;}
-    .badge-up{background:#dcfce7; color:#166534;}
+    .badge-up{background:#dcfce7; color:#166534; border:1px solid #bbf7d0;}
+    .hint{ color:#64748b; }
 
     footer{color:var(--muted); border-top:1px solid var(--border); background:#ffffffc7;}
   </style>
@@ -123,7 +131,7 @@
     <div class="container">
       <a class="navbar-brand fw-bold d-flex align-items-center gap-2" href="#">
         <img src="logo.png" alt="Logo" height="28" onerror="this.style.display='none'">
-        INSPEKTORAT LKPP
+        WEB-BASED SPIP 
       </a>
       <div class="ms-auto">
         <a href="index.html" class="btn btn-dark rounded-pill">
@@ -133,24 +141,20 @@
     </div>
   </nav>
 
-  <!-- HERO (gambar saja) -->
+  <!-- HERO -->
   <header class="hero"></header>
 
-  <!-- TEAMS: foto kiri, judul & nama di kanan -->
+  <!-- TEAMS -->
   <section class="teams-wrap">
     <div class="container">
       <div class="row align-items-center g-4">
-        <!-- Foto (kiri) -->
         <div class="col-lg-5 text-center">
           <img src="teams.jpeg" class="team-shot img-fluid" alt="Tim SPIP" onerror="this.style.display='none'">
         </div>
-
-        <!-- Konten (kanan) -->
         <div class="col-lg-7">
           <span class="eyebrow">Tim Penjamin Kualitas SPIP</span>
           <h2 class="title">MEET OUR TEAMS</h2>
-          <p class="subtitle">Kolaborasi lintas fungsi untuk menghadirkan penjaminan kualitas SPIP yang konsisten, akuntabel, dan berdampak.</p>
-
+          <p class="subtitle">Kolaborasi untuk menghadirkan penjaminan kualitas SPIP yang konsisten, akuntabel, dan berdampak.</p>
           <div class="names">
             <div class="chip"><span class="avatar-dot"></span> Muhammad Naim</div>
             <div class="chip"><span class="avatar-dot"></span> Anita Meilani</div>
@@ -167,27 +171,32 @@
     </div>
   </section>
 
-  <!-- QUOTE di bawah Teams -->
-  <section class="ribbon">
-    <div class="inner text-center">
-      If the future is yours — <span style="text-decoration:underline">PROVE IT!</span>
+  <!-- QUOTE HERO (lebih bold) -->
+  <section class="quote-hero">
+    <div class="layer"></div>
+    <div class="container quote-inner text-center">
+      <div class="quote-text">
+        If the future is yours — <span class="accent">PROVE IT!</span>
+      </div>
+      <div class="quote-sub">berani berproses · berani bertanggung jawab · berani memberi bukti</div>
     </div>
   </section>
 
   <!-- RINGKASAN NILAI SPIP -->
-  <main class="pb-5">
+  <main class="py-5">
     <div class="container">
-      <div class="mb-4 text-center">
-        <h3 class="h4 fw-800 mb-1">Rincian Hasil Evaluasi Penilaian Mandiri SPIP</h3>
+      <div class="text-center mb-3">
+        <span class="section-eyebrow">Rincian Hasil</span>
+        <h3 class="section-title">Evaluasi Penilaian Mandiri SPIP</h3>
         <div class="text-secondary">Tahun <strong>2024</strong> &amp; <strong>2025</strong></div>
       </div>
 
-      <div class="card-soft p-3 p-md-4">
+      <div class="metric-card p-3 p-md-4">
         <div class="table-responsive">
           <table class="table align-middle mb-0">
             <thead>
               <tr>
-                <th style="width:56px">No</th>
+                <th style="width:64px">No</th>
                 <th>Fokus Penilaian</th>
                 <th class="text-center" style="width:180px">Hasil PK 2024</th>
                 <th class="text-center" style="width:180px">Hasil PK 2025</th>
@@ -198,28 +207,29 @@
               <tr>
                 <td>1</td>
                 <td>Maturitas Penyelenggaraan SPIP</td>
-                <td class="text-center">4,170</td>
-                <td class="text-center fw-600">4,238</td>
-                <td class="text-center"><span class="badge badge-chip badge-up">+0,068</span></td>
+                <td class="text-center pk-num">4,170</td>
+                <td class="text-center pk-num fw-600">4,238</td>
+                <td class="text-center"><span class="badge badge-chip badge-up"><i class="bi bi-arrow-up-right me-1"></i>+0,068</span></td>
               </tr>
               <tr>
                 <td>2</td>
                 <td>Manajemen Risiko Indeks (MRI)</td>
-                <td class="text-center">3,558</td>
-                <td class="text-center fw-600">3,747</td>
-                <td class="text-center"><span class="badge badge-chip badge-up">+0,189</span></td>
+                <td class="text-center pk-num">3,558</td>
+                <td class="text-center pk-num fw-600">3,747</td>
+                <td class="text-center"><span class="badge badge-chip badge-up"><i class="bi bi-arrow-up-right me-1"></i>+0,189</span></td>
               </tr>
               <tr>
                 <td>3</td>
                 <td>Indeks Efektivitas Pengendalian Korupsi (IEPK)</td>
-                <td class="text-center">3,248</td>
-                <td class="text-center fw-600">3,908</td>
-                <td class="text-center"><span class="badge badge-chip badge-up">+0,660</span></td>
+                <td class="text-center pk-num">3,248</td>
+                <td class="text-center pk-num fw-600">3,908</td>
+                <td class="text-center"><span class="badge badge-chip badge-up"><i class="bi bi-arrow-up-right me-1"></i>+0,660</span></td>
               </tr>
             </tbody>
           </table>
         </div>
-        <div class="small text-secondary mt-3">
+
+        <div class="hint mt-3">
           Keterangan: Angka menunjukkan skor Penjaminan Kualitas (PK). Badge hijau menandakan terjadi peningkatan dibanding tahun sebelumnya.
         </div>
       </div>
