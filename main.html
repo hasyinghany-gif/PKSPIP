@@ -3093,8 +3093,11 @@ c. Memberikan rekomendasi yang relevan.`
 
   <!-- ===== TOC Add-on (pakai Web App kamu & text/plain anti-preflight) ===== -->
   <script>
-    function insertGroupHeadings() {
+    function renderAssessmentTable() {
   const tbody = document.getElementById("assessment-table-body");
+  tbody.innerHTML = "";
+
+  // Definisi grup
   const groups = {
     1: "Lingkungan Pengendalian",
     2: "Penilaian Risiko",
@@ -3102,14 +3105,40 @@ c. Memberikan rekomendasi yang relevan.`
     4: "Informasi dan Komunikasi",
     5: "Pemantauan Berkelanjutan"
   };
-  for (const [num, title] of Object.entries(groups)) {
-    const row = document.createElement("tr");
-    row.className = "group-heading";
-    row.innerHTML = `<td colspan="6"><i class="bi bi-dot"></i> ${num}. ${title}</td>`;
-    tbody.appendChild(row);
-  }
+
+  // Kelompokkan data berdasarkan angka awal kode
+  const grouped = {};
+  ASSESSMENT_STRUCTURE.forEach(item => {
+    const groupNum = parseInt(item.kode.split(".")[0]);
+    if (!grouped[groupNum]) grouped[groupNum] = [];
+    grouped[groupNum].push(item);
+  });
+
+  // Render tiap grup
+  Object.keys(groups).forEach(num => {
+    // Tambahkan baris heading grup
+    const headingRow = document.createElement("tr");
+    headingRow.className = "group-heading";
+    headingRow.innerHTML = `<td colspan="6"><i class="bi bi-diagram-3"></i> ${num}. ${groups[num]}</td>`;
+    tbody.appendChild(headingRow);
+
+    // Render item di dalam grup
+    (grouped[num] || []).forEach(item => {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td class="px-3">${item.kode}</td>
+        <td class="px-3">${item.uraian_parameter}</td>
+        <td class="text-center">Belum Diisi</td>
+        <td class="text-center">TOC</td>
+        <td class="text-center">
+          <button class="btn btn-primary btn-sm">Isi Penilaian</button>
+        </td>
+        <td class="text-center">-</td>
+      `;
+      tbody.appendChild(row);
+    });
+  });
 }
-insertGroupHeadings();
     
   (function(){
     'use strict';
@@ -3269,6 +3298,8 @@ insertGroupHeadings();
       m && m.hide();
     });
   })();
+    // Render tabel setelah struktur siap
+renderAssessmentTable();
   </script>
   <!-- ===== /TOC Add-on ===== -->
 
