@@ -27,7 +27,7 @@ h1{margin:0 0 6px;color:var(--brand)}
 .current{background:#334155;border-radius:4px}
 .correct{color:var(--good)}
 .wrong{color:var(--bad);text-decoration:underline}
-#input{width:100%;padding:12px 14px;border-radius:12px;border:1px solid #182131;background:#0b1220;color:var(--ink);font-size:16px;outline:none}
+#input{width:100%;padding:12px 14px;border-radius:12px;border:1px solid #182131;background:#0b1220;color:#fff;font-size:16px;outline:none}
 .row{display:flex;gap:10px;justify-content:space-between;align-items:center}
 .progress{height:10px;background:#132033;border-radius:999px;overflow:hidden;border:1px solid #182131}
 .bar-a{height:100%;width:0;background:#93c5fd}
@@ -38,7 +38,7 @@ h1{margin:0 0 6px;color:var(--brand)}
 #overlay{position:fixed;inset:0;background:#000a;display:none;align-items:center;justify-content:center;z-index:5}
 #card{background:#0b1220;border:1px solid #182131;padding:18px 20px;border-radius:16px;min-width:280px;text-align:center}
 #countdown{font-size:40px;font-weight:700;margin:10px 0 0;text-align:center}
-@media(min-width:980px){ #arena{grid-template-columns:1fr 1fr} }
+@media(min-width:980px){#arena{grid-template-columns:1fr 1fr}}
 </style>
 </head>
 <body>
@@ -82,7 +82,7 @@ h1{margin:0 0 6px;color:var(--brand)}
     <p id="result">–</p>
     <div style="display:flex;gap:8px;justify-content:center;margin-top:10px">
       <button class="btn" id="again">Main Lagi</button>
-      <button class="btn" onclick="location.reload()">Refresh</button>
+      <button class="btn" id="refreshBtn">Refresh</button>
     </div>
   </div>
 </div>
@@ -108,151 +108,254 @@ const roomId = qp.get('room') || 'room-1';
 const base   = db.ref(`rooms/${roomId}/arenaTyping`);
 const seats  = base.child('seats');
 const state  = base.child('state');
-const progress= base.child('progress');
-document.getElementById('roomBadge').textContent='room: '+roomId;
+const progress = base.child('progress');
+document.getElementById('roomBadge').textContent = 'room: ' + roomId;
+
+// === UI refs (selalu pakai getElementById) ===
+const UI = {
+  timer: document.getElementById('timer'),
+  wpm: document.getElementById('wpm'),
+  acc: document.getElementById('acc'),
+  phase: document.getElementById('phase'),
+  countdown: document.getElementById('countdown'),
+  input: document.getElementById('input'),
+  overlay: document.getElementById('overlay'),
+  result: document.getElementById('result'),
+  title: document.getElementById('title'),
+  seatInfo: document.getElementById('seatInfo'),
+  barA: document.getElementById('barA'),
+  barB: document.getElementById('barB'),
+  barC: document.getElementById('barC'),
+  barD: document.getElementById('barD'),
+  nameA: document.getElementById('nameA'),
+  nameB: document.getElementById('nameB'),
+  nameC: document.getElementById('nameC'),
+  nameD: document.getElementById('nameD'),
+  btnAgain: document.getElementById('again'),
+  btnRefresh: document.getElementById('refreshBtn'),
+  btnStart: document.getElementById('startBtn'),
+  btnReset: document.getElementById('resetBtn'),
+  btnQuick: document.getElementById('quickBtn'),
+};
 
 // === State ===
-let uid, meName='Player', mySeat=null, phase='lobby';
-let duration=60, startedAt=0, words=[], curIdx=0, typed=0, correct=0, wrong=0, totalChars=0, myChars=0;
+let uid, meName='Player', phase='lobby';
+let duration=60, startedAt=0, words=[], curIdx=0, typed=0, correct=0, totalChars=0, myChars=0;
 let raceInterval=null, cdInterval=null;
 
 // === Text samples ===
-const texts=[
-`Typing fast is not just about speed; accuracy and rhythm matter too.`,
-`Practice every day to build muscle memory and consistency.`,
-`Light hands and steady breathing help you type more smoothly.`,
-`Be patient; small progress every session compounds over time.`
+const texts = [
+  `Typing fast is not just about speed; accuracy and rhythm matter too.`,
+  `Practice every day to build muscle memory and consistency.`,
+  `Light hands and steady breathing help you type more smoothly.`,
+  `Be patient; small progress every session compounds over time.`
+  `The summer evenings were long. It was not dark, yet. Presently Tom checked his whistle. A stranger was before him - a boy a shade larger than himself. A newcomer of any age or either gender was an impressive curiosity in the poor little shabby village of St. Petersburg. This boy was well dressed, too well dressed on a weekday. This was simply astounding. His cap was a dainty thing, his close-buttoned blue cloth roundabout was new and natty, and so were his pantaloons.`
+  `Giraffes are the tallest animals on Earth, and their neck is the reason why. This beautiful part of their body has many different purposes, from spotting predators to reaching the sweetest leaves, even being used to duel with other giraffes. Neck fighting can be intense, going from gently rubbing against another male to establish who's in charge, to swinging heads like a mace and hitting hard. But it's all in good sport! Giraffes will make up after most fights, rarely getting hurt in a serious way.`
+  `Whales are not fish, and they must regularly get back to the surface to breathe. There are many types of whales, each with their own characteristics and vastly different sizes. The most famous by far is the blue whale, the largest animal to have ever lived on this planet. Longer than a tennis court, it also holds the record for the most powerful call in the animal kingdom, which is louder than a jet engine.`
 ];
+
 function loadText(){
-  const text=texts[Math.floor(Math.random()*texts.length)];
-  words=text.split(' ');
-  totalChars=text.length;
-  document.getElementById('text').innerHTML=words.map((w,i)=>`<span class="word" id="w${i}">${w}</span>`).join(' ');
-  curIdx=typed=correct=wrong=myChars=0;
+  const t = texts[Math.floor(Math.random()*texts.length)];
+  words = t.split(' ');
+  totalChars = t.length;
+  document.getElementById('text').innerHTML = words.map((w,i)=>`<span class="word" id="w${i}">${w}</span>`).join(' ');
+  curIdx=typed=correct=myChars=0;
   highlight();
 }
 
-// === UI refs ===
-const el={timer:timer,wpm:wpm,acc:acc,phase:phase,overlay:overlay,result:result,title:title,
-          countdown:countdown,barA:barA,barB:barB,barC:barC,barD:barD,
-          nameA:nameA,nameB:nameB,nameC:nameC,nameD:nameD,seatInfo:seatInfo};
+function highlight(){
+  document.querySelectorAll('.word').forEach(n=>n.classList.remove('current'));
+  const cur=document.getElementById('w'+curIdx);
+  if(cur) cur.classList.add('current');
+}
 
-// === Auth ===
+function mark(cls){
+  const n=document.getElementById('w'+curIdx);
+  if(n) n.classList.add(cls);
+}
+
+// === Timers ===
+function clearTimers(){
+  if(raceInterval){clearInterval(raceInterval); raceInterval=null;}
+  if(cdInterval){clearInterval(cdInterval); cdInterval=null;}
+}
+
+// === Reset UI lokal ===
+function resetLocalUI(){
+  UI.input.value='';
+  UI.input.disabled=true;
+  UI.countdown.textContent='';
+  UI.wpm.textContent='0';
+  UI.acc.textContent='0%';
+  UI.timer.textContent=String(duration);
+  UI.barA.style.width = UI.barB.style.width = UI.barC.style.width = UI.barD.style.width = '0%';
+  UI.overlay.style.display='none';
+}
+
+// === Auth & listeners ===
 auth.onAuthStateChanged(async u=>{
   if(!u) await auth.signInAnonymously();
-  uid=auth.currentUser.uid;
-  meName='User-'+uid.slice(0,4);
-  seats.on('value',s=>updateSeatsUI(s.val()||{}));
-  state.on('value',s=>handleState(s.val()));
-  progress.on('value',s=>updateProgressUI(s.val()||{}));
-});
+  uid = auth.currentUser.uid;
+  meName = 'User-'+uid.slice(0,4);
 
-// === Seat controls ===
-['A','B','C','D'].forEach(seat=>{
-  document.getElementById('seat'+seat).onclick=()=>claimSeat(seat);
-});
-document.getElementById('startBtn').onclick=()=>startMatch();
-document.getElementById('resetBtn').onclick=()=>resetRoom();
-document.getElementById('again').onclick=()=>resetRoom();
-
-async function claimSeat(s){
-  await seats.transaction(cur=>{cur=cur||{};if(!cur[s])cur[s]={uid,name:meName};return cur;});
-}
-function updateSeatsUI(v){
-  const list=['A','B','C','D'];
-  list.forEach(seat=>{
-    document.getElementById('name'+seat).textContent=v[seat]?.name||'-';
+  seats.on('value', s => {
+    const v=s.val()||{};
+    UI.nameA.textContent=v.A?.name||'-';
+    UI.nameB.textContent=v.B?.name||'-';
+    UI.nameC.textContent=v.C?.name||'-';
+    UI.nameD.textContent=v.D?.name||'-';
+    UI.seatInfo.textContent=`A:${UI.nameA.textContent} | B:${UI.nameB.textContent} | C:${UI.nameC.textContent} | D:${UI.nameD.textContent}`;
   });
-  el.seatInfo.textContent=list.map(seat=>`${seat}:${v[seat]?.name||'-'}`).join(' | ');
+
+  state.on('value', s => handleState(s.val()));
+
+  progress.on('value', s => updateProgressUI(s.val()||{}));
+});
+
+// === Seat buttons ===
+document.getElementById('seatA').onclick=()=>claimSeat('A');
+document.getElementById('seatB').onclick=()=>claimSeat('B');
+document.getElementById('seatC').onclick=()=>claimSeat('C');
+document.getElementById('seatD').onclick=()=>claimSeat('D');
+
+async function claimSeat(seat){
+  await seats.transaction(cur=>{
+    cur=cur||{};
+    if(!cur[seat]) cur[seat]={uid,name:meName};
+    return cur;
+  });
 }
 
-// === Input logic ===
-document.getElementById('input').addEventListener('keydown',e=>{
-  if(phase!=='running')return;
+// === Controls ===
+UI.btnStart.onclick = ()=>startMatch();
+UI.btnReset.onclick = ()=>resetRoom();
+UI.btnQuick.onclick = ()=>startMatch();
+UI.btnAgain.onclick = ()=>resetRoom();
+UI.btnRefresh.onclick = ()=>location.reload();
+
+// === Input typing ===
+UI.input.addEventListener('keydown', e=>{
+  if(phase!=='running') return;
   if(e.key===' '){
     e.preventDefault();
-    const val=e.target.value.trim(),target=words[curIdx]||'';
+    const typedWord = e.target.value.trim();
+    const target = words[curIdx]||'';
     typed++;
-    if(val===target){correct++;mark('correct');myChars+=target.length+1;}
-    else{wrong++;mark('wrong');myChars+=Math.max(val.length,target.length)+1;}
-    curIdx++;e.target.value='';highlight();updateHUD();pushProgress(false);
-    if(curIdx>=words.length){pushProgress(true);finishRace('Selesai lebih dulu!');state.update({phase:'ended'});}
+    if(typedWord===target){ correct++; mark('correct'); myChars += target.length+1; }
+    else { mark('wrong'); myChars += Math.max(typedWord.length, target.length)+1; }
+    curIdx++; e.target.value=''; highlight(); updateHUD(); pushProgress(false);
+    if(curIdx>=words.length){
+      pushProgress(true);
+      finishRace('Selesai lebih dulu!');
+      state.update({phase:'ended'});
+    }
   }
 });
-function mark(cls){const n=document.getElementById('w'+curIdx);if(n)n.classList.add(cls);}
-function highlight(){document.querySelectorAll('.word').forEach(n=>n.classList.remove('current'));const c=document.getElementById('w'+curIdx);if(c)c.classList.add('current');}
 
-// === Progress ===
+function updateHUD(){
+  const elapsedSec = Math.max(1, (Date.now() - startedAt)/1000);
+  const wpm = Math.round((correct / (elapsedSec/60)) || 0);
+  const acc = typed ? Math.round((correct/typed)*100) : 0;
+  UI.wpm.textContent = wpm;
+  UI.acc.textContent = acc + '%';
+}
+
+// === Progress sync ===
 async function pushProgress(finished){
-  const wpm=parseInt(el.wpm.textContent)||0;
-  const acc=parseInt(el.acc.textContent)||0;
-  await progress.child(uid).set({name:meName,chars:myChars,total:totalChars,wpm,acc,finished,ts:Date.now()});
-}
-async function updateProgressUI(val){
-  const s=await seats.get();const seatMap=s.val()||{};
-  const uidA=seatMap.A?.uid,uidB=seatMap.B?.uid,uidC=seatMap.C?.uid,uidD=seatMap.D?.uid;
-  const pct=u=>{const p=u?val[u]:null;if(!p||!p.total)return 0;return Math.min(100,Math.round((p.chars||0)/p.total*100));};
-  el.barA.style.width=pct(uidA)+'%';el.barB.style.width=pct(uidB)+'%';el.barC.style.width=pct(uidC)+'%';el.barD.style.width=pct(uidD)+'%';
+  const wpm = parseInt(UI.wpm.textContent) || 0;
+  const acc = parseInt(UI.acc.textContent) || 0;
+  await progress.child(uid).set({name:meName, chars:myChars, total:totalChars, wpm, acc, finished, ts:Date.now()});
 }
 
-// === State / match ===
-function clearTimers(){if(raceInterval){clearInterval(raceInterval);}if(cdInterval){clearInterval(cdInterval);}raceInterval=cdInterval=null;}
-function resetLocalUI(){
-  document.getElementById('input').value='';
-  document.getElementById('input').disabled=true;
-  el.countdown.textContent='';el.wpm.textContent='0';el.acc.textContent='0%';el.timer.textContent='60';
-  el.barA.style.width=el.barB.style.width=el.barC.style.width=el.barD.style.width='0%';
-  el.overlay.style.display='none';
+async function updateProgressUI(val){
+  const snap = await seats.get(); const sm = snap.val()||{};
+  const uidA = sm.A?.uid, uidB = sm.B?.uid, uidC = sm.C?.uid, uidD = sm.D?.uid;
+  const pct = u => {
+    const p = u ? val[u] : null;
+    if(!p || !p.total) return 0;
+    return Math.min(100, Math.round((p.chars||0)/p.total*100));
+  };
+  UI.barA.style.width = pct(uidA)+'%';
+  UI.barB.style.width = pct(uidB)+'%';
+  UI.barC.style.width = pct(uidC)+'%';
+  UI.barD.style.width = pct(uidD)+'%';
 }
+
+// === Match flow ===
 async function resetRoom(){
   clearTimers();
   await progress.remove();
-  await state.set({textIndex:0,startedAt:0,duration:60,phase:'lobby',ts:firebase.database.ServerValue.TIMESTAMP});
-  resetLocalUI();
+  await state.set({textIndex:0, startedAt:0, duration:60, phase:'lobby', ts:firebase.database.ServerValue.TIMESTAMP});
   loadText();
+  resetLocalUI();
 }
+
 async function startMatch(){
-  clearTimers();await progress.remove();
-  const now=Date.now();
-  await state.update({textIndex:0,startedAt:now+5000,duration:60,phase:'countdown',ts:firebase.database.ServerValue.TIMESTAMP});
+  clearTimers();
+  await progress.remove();
+  const now = Date.now();
+  await state.update({textIndex:0, startedAt: now+5000, duration:60, phase:'countdown', ts:firebase.database.ServerValue.TIMESTAMP});
 }
 
 function handleState(s){
-  if(!s){state.set({textIndex:0,startedAt:0,duration:60,phase:'lobby'});loadText();return;}
-  phase=s.phase||'lobby';duration=s.duration||60;el.phase.textContent=phase;
-  if(phase==='lobby'){clearTimers();loadText();resetLocalUI();}
-  if(phase==='countdown'){loadText();resetLocalUI();startCountdown(s.startedAt);}
-  if(phase==='running'){loadText();el.countdown.textContent='';startRun(s.startedAt);}
-  if(phase==='ended'){clearTimers();finishRace('Sesi selesai.');}
-}
-function startCountdown(ts){
-  clearTimers();cdInterval=setInterval(()=>{
-    const diff=Math.max(0,Math.ceil((ts-Date.now())/1000));
-    el.countdown.textContent=diff;
-    if(diff<=0){clearInterval(cdInterval);cdInterval=null;state.update({phase:'running'});}
-  },250);
-}
-function startRun(startMs){
-  clearTimers();startedAt=startMs;phase='running';
-  document.getElementById('input').disabled=false;
-  document.getElementById('input').focus();
-  raceInterval=setInterval(()=>{
-    const rem=Math.max(0,Math.ceil(duration-((Date.now()-startedAt)/1000)));
-    el.timer.textContent=rem;updateHUD();
-    if(rem<=0){clearInterval(raceInterval);raceInterval=null;pushProgress(false);finishRace('Waktu habis.');state.update({phase:'ended'});}
-  },250);
-}
-function updateHUD(){
-  const elapsed=Math.max(1,(Date.now()-startedAt)/1000);
-  const wpm=Math.round((correct/(elapsed/60))||0);
-  const acc=typed?Math.round((correct/typed)*100):0;
-  el.wpm.textContent=wpm;el.acc.textContent=acc+'%';
-}
-function finishRace(msg){
-  document.getElementById('input').disabled=true;
-  el.title.textContent='Hasil';el.result.textContent=msg;el.overlay.style.display='flex';
+  if(!s){
+    state.set({textIndex:0, startedAt:0, duration:60, phase:'lobby', ts:firebase.database.ServerValue.TIMESTAMP});
+    loadText(); return;
+  }
+  phase = s.phase || 'lobby';
+  duration = s.duration || 60;
+  UI.phase.textContent = phase;
+
+  if(phase==='lobby'){
+    clearTimers(); loadText(); resetLocalUI();
+  } else if(phase==='countdown'){
+    loadText(); resetLocalUI(); startCountdown(s.startedAt || (Date.now()+5000));
+  } else if(phase==='running'){
+    UI.countdown.textContent=''; startRun(s.startedAt || Date.now());
+  } else if(phase==='ended'){
+    clearTimers(); finishRace('Sesi selesai.');
+  }
 }
 
+function startCountdown(ts){
+  clearTimers();
+  cdInterval = setInterval(()=>{
+    const diff = Math.max(0, Math.ceil((ts - Date.now())/1000));
+    UI.countdown.textContent = diff;
+    if(diff<=0){
+      clearInterval(cdInterval); cdInterval=null;
+      state.update({phase:'running'});
+    }
+  }, 250);
+}
+
+function startRun(startMs){
+  clearTimers();
+  startedAt = startMs;
+  phase = 'running';
+  UI.input.disabled = false;
+  UI.input.focus();
+  raceInterval = setInterval(()=>{
+    const rem = Math.max(0, Math.ceil(duration - ((Date.now()-startedAt)/1000)));
+    UI.timer.textContent = rem;
+    updateHUD();
+    if(rem<=0){
+      clearInterval(raceInterval); raceInterval=null;
+      pushProgress(false);
+      finishRace('Waktu habis.');
+      state.update({phase:'ended'});
+    }
+  }, 250);
+}
+
+function finishRace(msg){
+  UI.input.disabled = true;
+  UI.title.textContent = 'Hasil';
+  UI.result.textContent = msg;
+  UI.overlay.style.display = 'flex';
+}
+
+// init
 loadText();
 </script>
 </body>
