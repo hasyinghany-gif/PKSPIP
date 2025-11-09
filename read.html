@@ -36,7 +36,6 @@
     }
 
     /* ================ Dark Theme Overrides ================ */
-    /* html[data-theme="dark"] is forced dark; "auto" follows system (script below will set) */
     @media (prefers-color-scheme: dark){
       html[data-theme="auto"]{
         --ink:#e5e7eb;
@@ -136,6 +135,41 @@
 
     footer{background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.02));border-top:1px solid var(--border)}
     .muted{color:var(--muted)}
+
+    /* ==== Dasar Hukum (Law Card) ===================================== */
+    .law-card{ border:1px solid var(--border); background:var(--panel-glass); border-radius:1rem; }
+    .law-head{ display:flex; align-items:center; gap:.75rem; margin-bottom:.5rem; }
+    .law-icon{
+      width:42px; height:42px; display:grid; place-items:center; border-radius:.9rem;
+      background:var(--icon-bg-1); border:1px solid var(--icon-bd-1); color:var(--icon-1);
+    }
+    .law-title{ margin:0; font-weight:800; letter-spacing:.2px; }
+    .law-sub{ color:var(--muted); font-size:.9rem; margin:0; }
+
+    .law-list{ list-style:none; padding:0; margin:.75rem 0 0; display:grid; gap:.5rem; }
+    .law-item{ display:grid; grid-template-columns:auto 1fr; gap:.75rem; align-items:start;
+      padding:.6rem .75rem; border-radius:.75rem; background:rgba(255,255,255,.04); }
+    html[data-theme="dark"] .law-item{ background:rgba(20,24,45,.35); }
+
+    .law-num{
+      width:32px; height:32px; display:grid; place-items:center; border-radius:10px;
+      font-weight:800; color:#fff;
+      background:linear-gradient(135deg,var(--brand),var(--brand-2));
+      box-shadow:0 6px 18px rgba(99,102,241,.18);
+    }
+    .law-text{ margin:0; color:var(--ink); }
+
+    .law-actions{ display:flex; gap:.5rem; margin-top:.25rem; }
+    .law-chip{
+      border:1px solid var(--border); background:var(--panel); color:var(--ink);
+      padding:.25rem .55rem; border-radius:999px; font-size:.8rem; text-decoration:none;
+    }
+    .law-chip:hover{ box-shadow:var(--ring); border-color:#cdd6ff33; }
+
+    @media (max-width: 576px){
+      .law-item{ padding:.55rem .6rem; }
+      .law-num{ width:28px;height:28px; }
+    }
   </style>
 </head>
 <body>
@@ -159,9 +193,51 @@
       <div class="row align-items-center mt-3">
         <div class="col-lg-7">
           <h1 class="display-6 fw-extrabold text-gradient mb-2">Fakta & Edukasi Singkat tentang SPIP</h1>
-          <p class="muted mb-3"><strong>Dasar Hukum:</strong> 
-            1. Peraturan Pemerintah Republik Indonesia Nomor 60 Tahun 2008 tentang Sistem Pengendalian Intern Pemerintah 
-            2. Peraturan Badan Pengawasan Keuangan dan Pembangunan Nomor 5 Tahun 2021 tentang Penilaian Maturitas Penyelenggaraan Sistem Pengendalian Intern Pemerintah Terintegrasi pada Kementerian/Lembaga/ Pemerintah Daerah.</p>
+
+          <!-- === REPLACED: Paragraf lama -> Law Card === -->
+          <div class="law-card p-3 p-md-4 mb-3">
+            <div class="law-head">
+              <div class="law-icon"><i class="bi bi-balance-scale"></i></div>
+              <div>
+                <h3 class="law-title">Dasar Hukum</h3>
+                <p class="law-sub">Rujukan utama penyelenggaraan dan penilaian SPIP</p>
+              </div>
+            </div>
+
+            <ol class="law-list">
+              <li class="law-item">
+                <div class="law-num">1</div>
+                <div>
+                  <p class="law-text">
+                    Peraturan Pemerintah Republik Indonesia <strong>Nomor 60 Tahun 2008</strong>
+                    tentang Sistem Pengendalian Intern Pemerintah.
+                  </p>
+                  <div class="law-actions">
+                    <a class="law-chip" href="#" target="_blank" rel="noopener">
+                      <i class="bi bi-box-arrow-up-right me-1"></i> Lihat dokumen
+                    </a>
+                  </div>
+                </div>
+              </li>
+
+              <li class="law-item">
+                <div class="law-num">2</div>
+                <div>
+                  <p class="law-text">
+                    Peraturan BPKP <strong>Nomor 5 Tahun 2021</strong> tentang Penilaian Maturitas
+                    Penyelenggaraan SPIP Terintegrasi pada K/L/Pemda.
+                  </p>
+                  <div class="law-actions">
+                    <a class="law-chip" href="#" target="_blank" rel="noopener">
+                      <i class="bi bi-box-arrow-up-right me-1"></i> Lihat dokumen
+                    </a>
+                  </div>
+                </div>
+              </li>
+            </ol>
+          </div>
+          <!-- === /Law Card === -->
+
           <div class="d-flex flex-wrap gap-2">
             <a href="#fakta" class="btn btn-primary"><i class="bi bi-lightbulb me-1"></i> Fakta Ringkas</a>
             <a href="#faq" class="btn btn-ghost">FAQ</a>
@@ -239,95 +315,94 @@
   </section>
 
   <!-- Ringkasan Level Maturitas SPIP (1–5) -->
-<section class="pb-5">
-  <div class="container">
-    <div class="glass shadow-soft">
-      <div class="p-3 p-md-4">
-        <h2 class="h5 fw-bold mb-3">📊 Ringkasan Level Maturitas SPIP (1–5)</h2>
+  <section class="pb-5">
+    <div class="container">
+      <div class="glass shadow-soft">
+        <div class="p-3 p-md-4">
+          <h2 class="h5 fw-bold mb-3">📊 Ringkasan Level Maturitas SPIP (1–5)</h2>
 
-        <div class="table-responsive">
-          <table class="table table-lite align-middle mb-0">
-            <thead>
-              <tr>
-                <th style="width:90px;">Level</th>
-                <th style="width:220px;">Nama Level</th>
-                <th>Karakteristik Umum</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>
-                  <span class="badge-grade" style="background:var(--grade-e);color:#fff;">1</span>
-                </td>
-                <td>Rintisan</td>
-                <td>
-                  Organisasi <b>belum mampu mendefinisikan kinerjanya</b>, termasuk <b>strategi pencapaian 
-                  kinerja dan pengendaliannya</b>
-                </td>
-              </tr>
+          <div class="table-responsive">
+            <table class="table table-lite align-middle mb-0">
+              <thead>
+                <tr>
+                  <th style="width:90px;">Level</th>
+                  <th style="width:220px;">Nama Level</th>
+                  <th>Karakteristik Umum</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>
+                    <span class="badge-grade" style="background:var(--grade-e);color:#fff;">1</span>
+                  </td>
+                  <td>Rintisan</td>
+                  <td>
+                    Organisasi <b>belum mampu mendefinisikan kinerjanya</b>, termasuk <b>strategi pencapaian 
+                    kinerja dan pengendaliannya</b>
+                  </td>
+                </tr>
 
-              <tr>
-                <td>
-                  <span class="badge-grade" style="background:var(--grade-d);color:#fff;">2</span>
-                </td>
-                <td>Berkembang</td>
-                <td>
-                  Organisasi telah mampu mendefinisikan <b>kinerjanya dengan baik</b>, namun <b>strategi 
-                  pencapaian kinerjanya masih belum relevan</b> serta pelaksanaan <b>pengendalian 
-                  masih sebatas pemenuhan</b>
-                </td>
-              </tr>
+                <tr>
+                  <td>
+                    <span class="badge-grade" style="background:var(--grade-d);color:#fff;">2</span>
+                  </td>
+                  <td>Berkembang</td>
+                  <td>
+                    Organisasi telah mampu mendefinisikan <b>kinerjanya dengan baik</b>, namun <b>strategi 
+                    pencapaian kinerjanya masih belum relevan</b> serta pelaksanaan <b>pengendalian 
+                    masih sebatas pemenuhan</b>
+                  </td>
+                </tr>
 
-              <tr>
-                <td>
-                  <span class="badge-grade" style="background:var(--grade-c);color:#111;">3</span>
-                </td>
-                <td>Terdefinisi</td>
-                <td>
-                  Organisasi telah mampu mendefinisikan <b>kinerjanya dengan baik</b> dan <b>strategi
-                  pencapaian kinerjanya telah relevan dan terintegrasi</b>, serta pelaksanaan
-                  <b>pengendalian telah dilaksanakan</b> <b>namun belum efektif</b>
-                </td>
-              </tr>
+                <tr>
+                  <td>
+                    <span class="badge-grade" style="background:var(--grade-c);color:#111;">3</span>
+                  </td>
+                  <td>Terdefinisi</td>
+                  <td>
+                    Organisasi telah mampu mendefinisikan <b>kinerjanya dengan baik</b> dan <b>strategi
+                    pencapaian kinerjanya telah relevan dan terintegrasi</b>, serta pelaksanaan
+                    <b>pengendalian telah dilaksanakan</b> <b>namun belum efektif</b>
+                  </td>
+                </tr>
 
-              <tr>
-                <td>
-                  <span class="badge-grade" style="background:var(--grade-b);color:#111;">4</span>
-                </td>
-                <td>Terkelola & Terukur</td>
-                <td>
-                  Organisasi telah mampu mendefinisikan <b>kinerjanya dengan baik</b> dan <b>strategi
-                  pencapaian kinerjanya telah relevan dan terintegrasi</b>, struktur dan proses
-                  <b>pengendalian telah efektif</b> namun <b>belum adaptif</b> terhadap perubahan lingkungan
-                  organisasi
-                </td>
-              </tr>
+                <tr>
+                  <td>
+                    <span class="badge-grade" style="background:var(--grade-b);color:#111;">4</span>
+                  </td>
+                  <td>Terkelola & Terukur</td>
+                  <td>
+                    Organisasi telah mampu mendefinisikan <b>kinerjanya dengan baik</b> dan <b>strategi
+                    pencapaian kinerjanya telah relevan dan terintegrasi</b>, struktur dan proses
+                    <b>pengendalian telah efektif</b> namun <b>belum adaptif</b> terhadap perubahan lingkungan
+                    organisasi
+                  </td>
+                </tr>
 
-              <tr>
-                <td>
-                  <span class="badge-grade" style="background:var(--grade-a);color:#fff;">5</span>
-                </td>
-                <td>Optimum</td>
-                <td>
-                  Organisasi telah mampu mendefinisikan <b>kinerjanya dengan baik</b> dan <b>strategi
-                  pencapaian kinerja telah relevan dan terintegrasi</b>, dengan struktur dan proses 
-                  <b>pengendalian telah efektif</b> untuk memastikan pencapaian tujuan organisasi serta
-                  <b>adaptif terhadap perubahan</b> lingkungan organisasi
-                </td>
-              </tr>
-            </tbody>
-          </table>
+                <tr>
+                  <td>
+                    <span class="badge-grade" style="background:var(--grade-a);color:#fff;">5</span>
+                  </td>
+                  <td>Optimum</td>
+                  <td>
+                    Organisasi telah mampu mendefinisikan <b>kinerjanya dengan baik</b> dan <b>strategi
+                    pencapaian kinerja telah relevan dan terintegrasi</b>, dengan struktur dan proses 
+                    <b>pengendalian telah efektif</b> untuk memastikan pencapaian tujuan organisasi serta
+                    <b>adaptif terhadap perubahan</b> lingkungan organisasi
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <p class="small muted mt-3 mb-0">
+            Catatan: Penetapan level mempertimbangkan konsistensi bukti, relevansi, pengukuran kinerja pengendalian,
+            serta tindak lanjut dan perbaikan berkelanjutan.
+          </p>
         </div>
-
-        <p class="small muted mt-3 mb-0">
-          Catatan: Penetapan level mempertimbangkan konsistensi bukti, relevansi, pengukuran kinerja pengendalian,
-          serta tindak lanjut dan perbaikan berkelanjutan.
-        </p>
       </div>
     </div>
-  </div>
-</section>
-
+  </section>
 
   <!-- Timeline + Tips -->
   <section class="pb-5">
@@ -489,9 +564,6 @@
       }
       function toggleTheme(){
         const modeAttr = html.getAttribute('data-theme');
-        const active = currentTheme();
-
-        // cycle: auto -> dark -> light -> auto
         let next = 'auto';
         if (modeAttr === 'auto') next = 'dark';
         else if (modeAttr === 'dark') next = 'light';
@@ -512,4 +584,4 @@
     })();
   </script>
 </body>
-</html
+</html>
