@@ -127,71 +127,75 @@
     .table tbody td{border-color:#e9edf533}
     html[data-theme="dark"] .table tbody td{border-color:#22304a}
 
-    /* ==== Ringkasan Level Maturitas — Table 'table-lite' (dark-mode friendly) ==== */
+    /* ===== Ringkasan Level Maturitas — Table 'table-lite' (stabil L/D mode) ===== */
+
+/* Wrapper jangan memberi latar apa pun */
+.table-responsive{
+  background: transparent !important;
+}
+
+/* Matikan default Bootstrap untuk table */
 .table.table-lite{
-  /* matikan warna default Bootstrap */
   --bs-table-bg: transparent;
-  --bs-table-striped-bg: rgba(255,255,255,.04);
-  --bs-table-striped-color: var(--ink);
-  --bs-table-hover-bg: rgba(99,102,241,.10);
-  --bs-table-hover-color: var(--ink);
-  --bs-table-border-color: #e9edf533;
+  --bs-table-striped-bg: transparent;
+  --bs-table-hover-bg: transparent;
+  --bs-table-border-color: var(--border);
   color: var(--ink);
-  border-collapse: separate;
+  border-collapse: separate;   /* agar radius ujung rapi */
   border-spacing: 0;
 }
 
-/* Header: kontras halus + rounded */
+/* HEADER: warna solid dengan kontras halus */
 .table.table-lite thead th{
-  background: linear-gradient(180deg, var(--table-head), transparent 140%) !important;
+  background-color: var(--table-head) !important;
   color: var(--ink);
-  border-bottom: 1px solid var(--border);
-  font-weight: 700; letter-spacing: .2px;
+  border-bottom: 1px solid var(--border) !important;
+  font-weight: 700;
+  letter-spacing: .2px;
 }
-.table.table-lite thead th:first-child{ border-top-left-radius:.75rem }
-.table.table-lite thead th:last-child{  border-top-right-radius:.75rem }
+.table.table-lite thead th:first-child{ border-top-left-radius: .75rem }
+.table.table-lite thead th:last-child { border-top-right-radius: .75rem }
 
-/* Body: panel transparan, bukan putih solid */
+/* BODY ROW: warna solid menyesuaikan var(--panel) (sudah beda untuk dark/light) */
 .table.table-lite tbody tr{
-  background: linear-gradient(180deg, rgba(255,255,255,.045), rgba(0,0,0,.02)) !important;
+  background-color: var(--panel) !important;
 }
-.table.table-lite tbody td{ border-color: var(--bs-table-border-color) }
-.table.table-lite tbody tr:hover{ background: var(--bs-table-hover-bg) !important }
+.table.table-lite tbody td{
+  border-color: var(--bs-table-border-color) !important;
+}
 
-/* Footer/tepi bawah rounded */
-.table.table-lite tbody tr:last-child td:first-child{ border-bottom-left-radius:.75rem }
-.table.table-lite tbody tr:last-child td:last-child{  border-bottom-right-radius:.75rem }
+/* HOVER lembut (sedikit terang di atas var(--panel)) */
+.table.table-lite tbody tr:hover{
+  background-color: rgba(255,255,255,.04) !important; /* light: hampir tak terlihat; dark: sedikit “lift” */
+}
+html[data-theme="dark"] .table.table-lite tbody tr:hover{
+  background-color: rgba(99,102,241,.10) !important; /* dark: indigo subtle */
+}
 
-/* Dark theme tuning */
+/* ZEBRA optional — aktifkan bila mau */
+/* .table.table-lite tbody tr:nth-child(odd){ background-color: rgba(255,255,255,.025) !important; } */
+
+/* RADIUS bawah rapi */
+.table.table-lite tbody tr:last-child td:first-child{ border-bottom-left-radius: .75rem }
+.table.table-lite tbody tr:last-child td:last-child { border-bottom-right-radius: .75rem }
+
+/* Dark mode tuning spesifik */
 html[data-theme="dark"] .table.table-lite{
-  --bs-table-striped-bg: rgba(20,24,45,.35);
-  --bs-table-hover-bg: rgba(99,102,241,.14);
   --bs-table-border-color: #22304a;
 }
 html[data-theme="dark"] .table.table-lite thead th{
-  background: linear-gradient(180deg, #121a2e, #0f1426) !important;
-  border-bottom-color:#1e2a45;
-}
-html[data-theme="dark"] .table.table-lite tbody tr{
-  background: linear-gradient(180deg, rgba(20,24,45,.42), rgba(10,14,28,.22)) !important;
+  background-color: #121a2e !important;  /* header gelap matte */
+  border-bottom-color: #1e2a45 !important;
 }
 
-/* Badge level biar lebih ‘pop’ tapi selaras tema */
+/* Badge level: tetap “pop” tapi menyatu tema */
 .badge-grade{
   display:inline-flex; align-items:center; justify-content:center;
   min-width:34px; height:28px; padding:.25rem .6rem;
   border-radius:999px; font-weight:800; letter-spacing:.3px;
-  box-shadow: 0 6px 16px rgba(0,0,0,.12);
+  box-shadow: 0 6px 16px rgba(0,0,0,.10);
 }
-html[data-theme="dark"] .badge-grade{ box-shadow:0 8px 18px rgba(0,0,0,.35) }
-
-/* Card pembungkus agar tidak terlalu terang di dark mode */
-.maturity-card{
-  background: var(--panel-glass);
-  border:1px solid var(--border);
-  border-radius:1rem;
-  box-shadow: var(--ring);
-}
+html[data-theme="dark"] .badge-grade{ box-shadow: 0 8px 18px rgba(0,0,0,.35) }
 
     .btn-ghost{border:1px solid #dbeafe55;color:var(--ink);background:var(--panel)}
     .btn-ghost:hover{border-color:#c7d2fe55;box-shadow:var(--ring)}
