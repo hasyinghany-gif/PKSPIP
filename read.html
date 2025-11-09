@@ -121,74 +121,82 @@
     .t-bullet{position:absolute;left:10px;top:2px;width:18px;height:18px;background:linear-gradient(135deg,var(--brand),var(--brand-2));border:3px solid var(--panel);border-radius:50%;box-shadow:0 0 0 2px #dbe4ff33}
 
     .table-lite td, .table-lite th{vertical-align:middle}
-    .table thead th{background:var(--table-head); color:var(--ink)}
     .table{color:var(--ink)}
-    .table tbody tr{background:var(--panel)}
-    .table tbody td{border-color:#e9edf533}
-    html[data-theme="dark"] .table tbody td{border-color:#22304a}
+    /* ===================== TABLE FIX: scope & styling khusus table-lite ===================== */
 
-    /* ===== Ringkasan Level Maturitas — Table 'table-lite' (stabil L/D mode) ===== */
-
-/* Wrapper jangan memberi latar apa pun */
-.table-responsive{
-  background: transparent !important;
+/* 1) Batasi rule generik agar TIDAK mengenai table-lite */
+.table:not(.table-lite) thead th{
+  background: var(--table-head);
+  color: var(--ink);
+}
+.table:not(.table-lite) tbody tr{
+  background: var(--panel);
+}
+.table:not(.table-lite) tbody td{
+  border-color:#e9edf533;
+}
+html[data-theme="dark"] .table:not(.table-lite) tbody td{
+  border-color:#22304a;
 }
 
-/* Matikan default Bootstrap untuk table */
+/* 2) Wrapper table-lite: jangan punya latar sendiri */
+.table-responsive{ background: transparent !important; }
+
+/* 3) Reset Bootstrap default untuk table-lite */
 .table.table-lite{
   --bs-table-bg: transparent;
   --bs-table-striped-bg: transparent;
   --bs-table-hover-bg: transparent;
   --bs-table-border-color: var(--border);
+
   color: var(--ink);
-  border-collapse: separate;   /* agar radius ujung rapi */
+  border-collapse: separate;  /* supaya radius sudut rapi */
   border-spacing: 0;
 }
 
-/* HEADER: warna solid dengan kontras halus */
+/* 4) Header table-lite: kontras halus + radius */
 .table.table-lite thead th{
   background-color: var(--table-head) !important;
   color: var(--ink);
   border-bottom: 1px solid var(--border) !important;
-  font-weight: 700;
-  letter-spacing: .2px;
+  font-weight: 700; letter-spacing:.2px;
 }
-.table.table-lite thead th:first-child{ border-top-left-radius: .75rem }
-.table.table-lite thead th:last-child { border-top-right-radius: .75rem }
+.table.table-lite thead th:first-child{ border-top-left-radius:.75rem }
+.table.table-lite thead th:last-child { border-top-right-radius:.75rem }
 
-/* BODY ROW: warna solid menyesuaikan var(--panel) (sudah beda untuk dark/light) */
+/* 5) Body table-lite: “soft panel”, menyatu di dark/light */
 .table.table-lite tbody tr{
-  background-color: var(--panel) !important;
+  background-color: rgba(255,255,255,.018) !important;   /* light: nyaris tak terlihat */
+}
+html[data-theme="dark"] .table.table-lite tbody tr{
+  background-color: rgba(20,24,45,.32) !important;       /* dark: soft glassy */
 }
 .table.table-lite tbody td{
   border-color: var(--bs-table-border-color) !important;
 }
 
-/* HOVER lembut (sedikit terang di atas var(--panel)) */
+/* 6) Hover lembut */
 .table.table-lite tbody tr:hover{
-  background-color: rgba(255,255,255,.04) !important; /* light: hampir tak terlihat; dark: sedikit “lift” */
+  background-color: rgba(99,102,241,.08) !important;
 }
 html[data-theme="dark"] .table.table-lite tbody tr:hover{
-  background-color: rgba(99,102,241,.10) !important; /* dark: indigo subtle */
+  background-color: rgba(99,102,241,.12) !important;
 }
 
-/* ZEBRA optional — aktifkan bila mau */
-/* .table.table-lite tbody tr:nth-child(odd){ background-color: rgba(255,255,255,.025) !important; } */
+/* 7) Radius bawah rapi */
+.table.table-lite tbody tr:last-child td:first-child{ border-bottom-left-radius:.75rem }
+.table.table-lite tbody tr:last-child td:last-child { border-bottom-right-radius:.75rem }
 
-/* RADIUS bawah rapi */
-.table.table-lite tbody tr:last-child td:first-child{ border-bottom-left-radius: .75rem }
-.table.table-lite tbody tr:last-child td:last-child { border-bottom-right-radius: .75rem }
-
-/* Dark mode tuning spesifik */
+/* 8) Tuning dark-mode */
 html[data-theme="dark"] .table.table-lite{
-  --bs-table-border-color: #22304a;
+  --bs-table-border-color:#22304a;
 }
 html[data-theme="dark"] .table.table-lite thead th{
-  background-color: #121a2e !important;  /* header gelap matte */
-  border-bottom-color: #1e2a45 !important;
+  background-color:#121a2e !important;
+  border-bottom-color:#1e2a45 !important;
 }
 
-/* Badge level: tetap “pop” tapi menyatu tema */
+/* 9) Badge level: tetap “pop” tapi selaras tema */
 .badge-grade{
   display:inline-flex; align-items:center; justify-content:center;
   min-width:34px; height:28px; padding:.25rem .6rem;
@@ -196,30 +204,6 @@ html[data-theme="dark"] .table.table-lite thead th{
   box-shadow: 0 6px 16px rgba(0,0,0,.10);
 }
 html[data-theme="dark"] .badge-grade{ box-shadow: 0 8px 18px rgba(0,0,0,.35) }
-
-    .btn-ghost{border:1px solid #dbeafe55;color:var(--ink);background:var(--panel)}
-    .btn-ghost:hover{border-color:#c7d2fe55;box-shadow:var(--ring)}
-    .btn-primary{background:linear-gradient(92deg,var(--brand),var(--brand-2)); border:0}
-    .btn-primary:hover{filter:brightness(1.05)}
-    .btn-success{background:linear-gradient(92deg,#10b981,#22c55e);border:0}
-
-    footer{background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.02));border-top:1px solid var(--border)}
-    .muted{color:var(--muted)}
-
-    /* ==== Dasar Hukum (Law Card) ===================================== */
-    .law-card{ border:1px solid var(--border); background:var(--panel-glass); border-radius:1rem; }
-    .law-head{ display:flex; align-items:center; gap:.75rem; margin-bottom:.5rem; }
-    .law-icon{
-      width:42px; height:42px; display:grid; place-items:center; border-radius:.9rem;
-      background:var(--icon-bg-1); border:1px solid var(--icon-bd-1); color:var(--icon-1);
-    }
-    .law-title{ margin:0; font-weight:800; letter-spacing:.2px; }
-    .law-sub{ color:var(--muted); font-size:.9rem; margin:0; }
-
-    .law-list{ list-style:none; padding:0; margin:.75rem 0 0; display:grid; gap:.5rem; }
-    .law-item{ display:grid; grid-template-columns:auto 1fr; gap:.75rem; align-items:start;
-      padding:.6rem .75rem; border-radius:.75rem; background:rgba(255,255,255,.04); }
-    html[data-theme="dark"] .law-item{ background:rgba(20,24,45,.35); }
 
     .law-num{
       width:32px; height:32px; display:grid; place-items:center; border-radius:10px;
