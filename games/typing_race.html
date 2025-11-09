@@ -107,15 +107,12 @@ const roomId = qp.get('room') || 'room-1';
 UI.roomBadge.textContent = 'room: ' + roomId;
 
 const texts = [
-  `Typing fast is not just about speed; accuracy and rhythm matter too.`,
-  `Practice every day to build muscle memory and consistency.`,
-  `Light hands and steady breathing help you type more smoothly.`,
-  `Be patient; small progress every session compounds over time.`
-  `The summer evenings were long. It was not dark, yet. Presently Tom checked his whistle. A stranger was before him - a boy a shade larger than himself. A newcomer of any age or either gender was an impressive curiosity in the poor little shabby village of St. Petersburg. This boy was well dressed, too well dressed on a weekday. This was simply astounding. His cap was a dainty thing, his close-buttoned blue cloth roundabout was new and natty, and so were his pantaloons.`
-  `Giraffes are the tallest animals on Earth, and their neck is the reason why. This beautiful part of their body has many different purposes, from spotting predators to reaching the sweetest leaves, even being used to duel with other giraffes. Neck fighting can be intense, going from gently rubbing against another male to establish who's in charge, to swinging heads like a mace and hitting hard. But it's all in good sport! Giraffes will make up after most fights, rarely getting hurt in a serious way.`
-  `Whales are not fish, and they must regularly get back to the surface to breathe. There are many types of whales, each with their own characteristics and vastly different sizes. The most famous by far is the blue whale, the largest animal to have ever lived on this planet. Longer than a tennis court, it also holds the record for the most powerful call in the animal kingdom, which is louder than a jet engine.`
+  'Typing fast is not just about speed; accuracy and rhythm matter too.',
+  'Practice every day to build muscle memory and consistency.',
+  'Light hands and steady breathing help you type more smoothly.',
+  'Be patient; small progress every session compounds over time.'
 ];
-  
+
 let words=[], totalChars=0, curIdx=0, typed=0, correct=0, myChars=0;
 let phase='lobby', duration=60, startedAt=0;
 let raceInterval=null, cdInterval=null;
