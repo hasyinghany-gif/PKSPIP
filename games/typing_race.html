@@ -47,7 +47,7 @@ h1{margin:0 0 6px;color:var(--brand)}
 <div class="wrap">
   <div class="top">
     <h1>Typing Race Arena</h1>
-    <span class="badge" id="roomBadge">room: -</span>
+    <span class="badge" id="roomBadge">room: room-1</span>
     <button class="btn" id="seatA">A</button>
     <button class="btn" id="seatB">B</button>
     <button class="btn" id="seatC">C</button>
@@ -88,62 +88,24 @@ h1{margin:0 0 6px;color:var(--brand)}
 </div>
 
 <script>
-// === Firebase ===
-const firebaseConfig = {
-  apiKey: "AIzaSyDl-YQJ7gQuOZ0QXtdjIxLGlv2AwBTj0dU",
-  authDomain: "shooter-fd9ba.firebaseapp.com",
-  databaseURL: "https://shooter-fd9ba-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "shooter-fd9ba",
-  storageBucket: "shooter-fd9ba.appspot.com",
-  messagingSenderId: "735948321115",
-  appId: "1:735948321115:web:aab8d41e506535bf5eea7e"
+/* -------------------- UTIL DOM -------------------- */
+function $(id){ return document.getElementById(id); }
+const UI={
+  timer: $('timer'), wpm: $('wpm'), acc: $('acc'), phaseEl: $('phase'),
+  countdown: $('countdown'), input: $('input'), overlay: $('overlay'),
+  result: $('result'), title: $('title'), seatInfo: $('seatInfo'),
+  barA: $('barA'), barB: $('barB'), barC: $('barC'), barD: $('barD'),
+  nameA: $('nameA'), nameB: $('nameB'), nameC: $('nameC'), nameD: $('nameD'),
+  btnAgain: $('again'), btnRefresh: $('refreshBtn'),
+  btnStart: $('startBtn'), btnReset: $('resetBtn'), btnQuick: $('quickBtn'),
+  roomBadge: $('roomBadge')
 };
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db   = firebase.database();
 
-// === Paths ===
+/* -------------------- ROOM & TEXT -------------------- */
 const qp = new URLSearchParams(location.search);
 const roomId = qp.get('room') || 'room-1';
-const base   = db.ref(`rooms/${roomId}/arenaTyping`);
-const seats  = base.child('seats');
-const state  = base.child('state');
-const progress = base.child('progress');
-document.getElementById('roomBadge').textContent = 'room: ' + roomId;
+UI.roomBadge.textContent = 'room: ' + roomId;
 
-// === UI refs (selalu pakai getElementById) ===
-const UI = {
-  timer: document.getElementById('timer'),
-  wpm: document.getElementById('wpm'),
-  acc: document.getElementById('acc'),
-  phase: document.getElementById('phase'),
-  countdown: document.getElementById('countdown'),
-  input: document.getElementById('input'),
-  overlay: document.getElementById('overlay'),
-  result: document.getElementById('result'),
-  title: document.getElementById('title'),
-  seatInfo: document.getElementById('seatInfo'),
-  barA: document.getElementById('barA'),
-  barB: document.getElementById('barB'),
-  barC: document.getElementById('barC'),
-  barD: document.getElementById('barD'),
-  nameA: document.getElementById('nameA'),
-  nameB: document.getElementById('nameB'),
-  nameC: document.getElementById('nameC'),
-  nameD: document.getElementById('nameD'),
-  btnAgain: document.getElementById('again'),
-  btnRefresh: document.getElementById('refreshBtn'),
-  btnStart: document.getElementById('startBtn'),
-  btnReset: document.getElementById('resetBtn'),
-  btnQuick: document.getElementById('quickBtn'),
-};
-
-// === State ===
-let uid, meName='Player', phase='lobby';
-let duration=60, startedAt=0, words=[], curIdx=0, typed=0, correct=0, totalChars=0, myChars=0;
-let raceInterval=null, cdInterval=null;
-
-// === Text samples ===
 const texts = [
   `Typing fast is not just about speed; accuracy and rhythm matter too.`,
   `Practice every day to build muscle memory and consistency.`,
@@ -153,210 +115,233 @@ const texts = [
   `Giraffes are the tallest animals on Earth, and their neck is the reason why. This beautiful part of their body has many different purposes, from spotting predators to reaching the sweetest leaves, even being used to duel with other giraffes. Neck fighting can be intense, going from gently rubbing against another male to establish who's in charge, to swinging heads like a mace and hitting hard. But it's all in good sport! Giraffes will make up after most fights, rarely getting hurt in a serious way.`
   `Whales are not fish, and they must regularly get back to the surface to breathe. There are many types of whales, each with their own characteristics and vastly different sizes. The most famous by far is the blue whale, the largest animal to have ever lived on this planet. Longer than a tennis court, it also holds the record for the most powerful call in the animal kingdom, which is louder than a jet engine.`
 ];
+  
+let words=[], totalChars=0, curIdx=0, typed=0, correct=0, myChars=0;
+let phase='lobby', duration=60, startedAt=0;
+let raceInterval=null, cdInterval=null;
 
+/* -------------------- DRAW / RESET -------------------- */
 function loadText(){
   const t = texts[Math.floor(Math.random()*texts.length)];
   words = t.split(' ');
   totalChars = t.length;
-  document.getElementById('text').innerHTML = words.map((w,i)=>`<span class="word" id="w${i}">${w}</span>`).join(' ');
-  curIdx=typed=correct=myChars=0;
+  $('text').innerHTML = words.map(function(w,i){
+    return '<span class="word" id="w'+i+'">'+w+'</span>';
+  }).join(' ');
+  curIdx=0; typed=0; correct=0; myChars=0;
   highlight();
 }
-
 function highlight(){
-  document.querySelectorAll('.word').forEach(n=>n.classList.remove('current'));
-  const cur=document.getElementById('w'+curIdx);
-  if(cur) cur.classList.add('current');
+  var all = document.querySelectorAll('.word');
+  for(var i=0;i<all.length;i++){ all[i].classList.remove('current'); }
+  var cur = $('w'+curIdx); if(cur){ cur.classList.add('current'); }
 }
-
 function mark(cls){
-  const n=document.getElementById('w'+curIdx);
-  if(n) n.classList.add(cls);
+  var n = $('w'+curIdx); if(n){ n.classList.add(cls); }
 }
-
-// === Timers ===
-function clearTimers(){
-  if(raceInterval){clearInterval(raceInterval); raceInterval=null;}
-  if(cdInterval){clearInterval(cdInterval); cdInterval=null;}
-}
-
-// === Reset UI lokal ===
+function clearTimers(){ if(raceInterval){clearInterval(raceInterval);} if(cdInterval){clearInterval(cdInterval);} raceInterval=null; cdInterval=null; }
 function resetLocalUI(){
-  UI.input.value='';
-  UI.input.disabled=true;
-  UI.countdown.textContent='';
-  UI.wpm.textContent='0';
-  UI.acc.textContent='0%';
-  UI.timer.textContent=String(duration);
-  UI.barA.style.width = UI.barB.style.width = UI.barC.style.width = UI.barD.style.width = '0%';
-  UI.overlay.style.display='none';
+  UI.input.value=''; UI.input.disabled=true;
+  UI.countdown.textContent=''; UI.wpm.textContent='0'; UI.acc.textContent='0%';
+  UI.timer.textContent=String(duration); UI.overlay.style.display='none';
+  UI.barA.style.width=UI.barB.style.width=UI.barC.style.width=UI.barD.style.width='0%';
 }
 
-// === Auth & listeners ===
-auth.onAuthStateChanged(async u=>{
-  if(!u) await auth.signInAnonymously();
-  uid = auth.currentUser.uid;
-  meName = 'User-'+uid.slice(0,4);
+/* -------------------- LOCAL MODE (fallback) -------------------- */
+let RTDB = null;       // nanti diisi Firebase; kalau null -> lokal mode
+let seatsRef, stateRef, progressRef;
+let uid='local-'+Math.random().toString(36).slice(2,6), meName='User-'+uid.slice(0,4);
 
-  seats.on('value', s => {
-    const v=s.val()||{};
-    UI.nameA.textContent=v.A?.name||'-';
-    UI.nameB.textContent=v.B?.name||'-';
-    UI.nameC.textContent=v.C?.name||'-';
-    UI.nameD.textContent=v.D?.name||'-';
-    UI.seatInfo.textContent=`A:${UI.nameA.textContent} | B:${UI.nameB.textContent} | C:${UI.nameC.textContent} | D:${UI.nameD.textContent}`;
-  });
+/* -------------------- FIREBASE INIT (safe) -------------------- */
+(function initFirebase(){
+  try{
+    const firebaseConfig = {
+      apiKey: "AIzaSyDl-YQJ7gQuOZ0QXtdjIxLGlv2AwBTj0dU",
+      authDomain: "shooter-fd9ba.firebaseapp.com",
+      databaseURL: "https://shooter-fd9ba-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "shooter-fd9ba",
+      storageBucket: "shooter-fd9ba.appspot.com",
+      messagingSenderId: "735948321115",
+      appId: "1:735948321115:web:aab8d41e506535bf5eea7e"
+    };
+    firebase.initializeApp(firebaseConfig);
+    RTDB = firebase.database();
+    seatsRef    = RTDB.ref('rooms/'+roomId+'/arenaTyping/seats');
+    stateRef    = RTDB.ref('rooms/'+roomId+'/arenaTyping/state');
+    progressRef = RTDB.ref('rooms/'+roomId+'/arenaTyping/progress');
 
-  state.on('value', s => handleState(s.val()));
+    firebase.auth().onAuthStateChanged(function(u){
+      if(!u){ firebase.auth().signInAnonymously(); return; }
+      uid = u.uid; meName = 'User-'+uid.slice(0,4);
 
-  progress.on('value', s => updateProgressUI(s.val()||{}));
-});
+      // listeners
+      seatsRef.on('value', function(s){
+        var v = s.val() || {};
+        UI.nameA.textContent = v.A && v.A.name ? v.A.name : '-';
+        UI.nameB.textContent = v.B && v.B.name ? v.B.name : '-';
+        UI.nameC.textContent = v.C && v.C.name ? v.C.name : '-';
+        UI.nameD.textContent = v.D && v.D.name ? v.D.name : '-';
+        UI.seatInfo.textContent = 'A:'+UI.nameA.textContent+' | B:'+UI.nameB.textContent+' | C:'+UI.nameC.textContent+' | D:'+UI.nameD.textContent;
+      });
 
-// === Seat buttons ===
-document.getElementById('seatA').onclick=()=>claimSeat('A');
-document.getElementById('seatB').onclick=()=>claimSeat('B');
-document.getElementById('seatC').onclick=()=>claimSeat('C');
-document.getElementById('seatD').onclick=()=>claimSeat('D');
+      stateRef.on('value', function(s){ handleState(s.val()); });
 
-async function claimSeat(seat){
-  await seats.transaction(cur=>{
-    cur=cur||{};
-    if(!cur[seat]) cur[seat]={uid,name:meName};
+      progressRef.on('value', function(s){ updateProgressUI(s.val()||{}); });
+    });
+  }catch(e){
+    // kalau gagal, biarkan RTDB tetap null -> jalan sebagai latihan lokal
+    console.warn('Firebase init gagal. Jalan di mode lokal.', e);
+  }
+})();
+
+/* -------------------- SEAT & CONTROLS -------------------- */
+$('seatA').onclick=function(){ claimSeat('A'); };
+$('seatB').onclick=function(){ claimSeat('B'); };
+$('seatC').onclick=function(){ claimSeat('C'); };
+$('seatD').onclick=function(){ claimSeat('D'); };
+
+UI.btnStart.onclick=function(){ startMatch(); };
+UI.btnReset.onclick=function(){ resetRoom(); };
+UI.btnQuick.onclick=function(){ startMatch(); };
+UI.btnAgain.onclick=function(){ resetRoom(); };
+UI.btnRefresh.onclick=function(){ location.reload(); };
+
+function claimSeat(letter){
+  if(!RTDB || !seatsRef){ return; } // lokal: abaikan
+  seatsRef.transaction(function(cur){
+    cur = cur || {};
+    if(!cur[letter]) cur[letter] = {uid: uid, name: meName};
     return cur;
   });
 }
 
-// === Controls ===
-UI.btnStart.onclick = ()=>startMatch();
-UI.btnReset.onclick = ()=>resetRoom();
-UI.btnQuick.onclick = ()=>startMatch();
-UI.btnAgain.onclick = ()=>resetRoom();
-UI.btnRefresh.onclick = ()=>location.reload();
-
-// === Input typing ===
-UI.input.addEventListener('keydown', e=>{
+/* -------------------- INPUT -------------------- */
+UI.input.addEventListener('keydown', function(e){
   if(phase!=='running') return;
   if(e.key===' '){
     e.preventDefault();
-    const typedWord = e.target.value.trim();
-    const target = words[curIdx]||'';
+    var typedWord = UI.input.value.trim();
+    var target = words[curIdx] || '';
     typed++;
     if(typedWord===target){ correct++; mark('correct'); myChars += target.length+1; }
     else { mark('wrong'); myChars += Math.max(typedWord.length, target.length)+1; }
-    curIdx++; e.target.value=''; highlight(); updateHUD(); pushProgress(false);
+    curIdx++; UI.input.value=''; highlight(); updateHUD(); pushProgress(false);
     if(curIdx>=words.length){
       pushProgress(true);
       finishRace('Selesai lebih dulu!');
-      state.update({phase:'ended'});
+      if(stateRef) stateRef.update({phase:'ended'});
+      else { phase='ended'; finishRace('Sesi selesai.'); }
     }
   }
 });
 
 function updateHUD(){
-  const elapsedSec = Math.max(1, (Date.now() - startedAt)/1000);
-  const wpm = Math.round((correct / (elapsedSec/60)) || 0);
-  const acc = typed ? Math.round((correct/typed)*100) : 0;
-  UI.wpm.textContent = wpm;
-  UI.acc.textContent = acc + '%';
+  var elapsedSec = Math.max(1, (Date.now()-startedAt)/1000);
+  var wpm = Math.round((correct/(elapsedSec/60))||0);
+  var acc = typed ? Math.round((correct/typed)*100) : 0;
+  UI.wpm.textContent = String(wpm);
+  UI.acc.textContent = String(acc)+'%';
 }
 
-// === Progress sync ===
-async function pushProgress(finished){
-  const wpm = parseInt(UI.wpm.textContent) || 0;
-  const acc = parseInt(UI.acc.textContent) || 0;
-  await progress.child(uid).set({name:meName, chars:myChars, total:totalChars, wpm, acc, finished, ts:Date.now()});
+/* -------------------- PROGRESS -------------------- */
+function pushProgress(finished){
+  if(!progressRef) return; // lokal: abaikan
+  var wpm = parseInt(UI.wpm.textContent,10) || 0;
+  var acc = parseInt(UI.acc.textContent,10) || 0;
+  progressRef.child(uid).set({name:meName, chars:myChars, total:totalChars, wpm:wpm, acc:acc, finished:finished, ts:Date.now()});
+}
+function updateProgressUI(val){
+  if(!seatsRef){ // lokal: bar A diisi milik sendiri
+    var pctLocal = totalChars? Math.min(100, Math.round((myChars/totalChars)*100)) : 0;
+    UI.barA.style.width = pctLocal+'%';
+    return;
+  }
+  seatsRef.get().then(function(s){
+    var m = s.val() || {};
+    var uidA = m.A && m.A.uid ? m.A.uid : null;
+    var uidB = m.B && m.B.uid ? m.B.uid : null;
+    var uidC = m.C && m.C.uid ? m.C.uid : null;
+    var uidD = m.D && m.D.uid ? m.D.uid : null;
+    function pct(u){
+      var p = u && val[u] ? val[u] : null;
+      if(!p || !p.total) return 0;
+      return Math.min(100, Math.round(( (p.chars||0) / p.total )*100));
+    }
+    UI.barA.style.width = pct(uidA)+'%';
+    UI.barB.style.width = pct(uidB)+'%';
+    UI.barC.style.width = pct(uidC)+'%';
+    UI.barD.style.width = pct(uidD)+'%';
+  });
 }
 
-async function updateProgressUI(val){
-  const snap = await seats.get(); const sm = snap.val()||{};
-  const uidA = sm.A?.uid, uidB = sm.B?.uid, uidC = sm.C?.uid, uidD = sm.D?.uid;
-  const pct = u => {
-    const p = u ? val[u] : null;
-    if(!p || !p.total) return 0;
-    return Math.min(100, Math.round((p.chars||0)/p.total*100));
-  };
-  UI.barA.style.width = pct(uidA)+'%';
-  UI.barB.style.width = pct(uidB)+'%';
-  UI.barC.style.width = pct(uidC)+'%';
-  UI.barD.style.width = pct(uidD)+'%';
-}
-
-// === Match flow ===
-async function resetRoom(){
+/* -------------------- MATCH FLOW -------------------- */
+function resetRoom(){
   clearTimers();
-  await progress.remove();
-  await state.set({textIndex:0, startedAt:0, duration:60, phase:'lobby', ts:firebase.database.ServerValue.TIMESTAMP});
-  loadText();
-  resetLocalUI();
+  if(progressRef) progressRef.remove();
+  if(stateRef){
+    stateRef.set({textIndex:0, startedAt:0, duration:60, phase:'lobby', ts:firebase.database.ServerValue.TIMESTAMP});
+  }else{
+    phase='lobby';
+  }
+  loadText(); resetLocalUI();
 }
-
-async function startMatch(){
-  clearTimers();
-  await progress.remove();
-  const now = Date.now();
-  await state.update({textIndex:0, startedAt: now+5000, duration:60, phase:'countdown', ts:firebase.database.ServerValue.TIMESTAMP});
+function startMatch(){
+  clearTimers(); if(progressRef) progressRef.remove();
+  var now = Date.now();
+  if(stateRef){
+    stateRef.update({textIndex:0, startedAt: now+5000, duration:60, phase:'countdown', ts:firebase.database.ServerValue.TIMESTAMP});
+  }else{
+    // lokal mode
+    phase='countdown'; handleState({phase:'countdown', startedAt: now+5000, duration:60});
+  }
 }
-
 function handleState(s){
   if(!s){
-    state.set({textIndex:0, startedAt:0, duration:60, phase:'lobby', ts:firebase.database.ServerValue.TIMESTAMP});
+    if(stateRef) stateRef.set({textIndex:0, startedAt:0, duration:60, phase:'lobby', ts:firebase.database.ServerValue.TIMESTAMP});
     loadText(); return;
   }
   phase = s.phase || 'lobby';
   duration = s.duration || 60;
-  UI.phase.textContent = phase;
+  UI.phaseEl.textContent = phase;
 
-  if(phase==='lobby'){
-    clearTimers(); loadText(); resetLocalUI();
-  } else if(phase==='countdown'){
-    loadText(); resetLocalUI(); startCountdown(s.startedAt || (Date.now()+5000));
-  } else if(phase==='running'){
-    UI.countdown.textContent=''; startRun(s.startedAt || Date.now());
-  } else if(phase==='ended'){
-    clearTimers(); finishRace('Sesi selesai.');
-  }
+  if(phase==='lobby'){ clearTimers(); loadText(); resetLocalUI(); }
+  else if(phase==='countdown'){ loadText(); resetLocalUI(); startCountdown(s.startedAt || (Date.now()+5000)); }
+  else if(phase==='running'){ UI.countdown.textContent=''; startRun(s.startedAt || Date.now()); }
+  else if(phase==='ended'){ clearTimers(); finishRace('Sesi selesai.'); }
 }
-
 function startCountdown(ts){
   clearTimers();
-  cdInterval = setInterval(()=>{
-    const diff = Math.max(0, Math.ceil((ts - Date.now())/1000));
-    UI.countdown.textContent = diff;
+  cdInterval = setInterval(function(){
+    var diff = Math.max(0, Math.ceil((ts - Date.now())/1000));
+    UI.countdown.textContent = String(diff);
     if(diff<=0){
       clearInterval(cdInterval); cdInterval=null;
-      state.update({phase:'running'});
+      if(stateRef) stateRef.update({phase:'running'});
+      else { handleState({phase:'running', startedAt: Date.now(), duration: duration}); }
     }
   }, 250);
 }
-
 function startRun(startMs){
-  clearTimers();
-  startedAt = startMs;
-  phase = 'running';
-  UI.input.disabled = false;
-  UI.input.focus();
-  raceInterval = setInterval(()=>{
-    const rem = Math.max(0, Math.ceil(duration - ((Date.now()-startedAt)/1000)));
-    UI.timer.textContent = rem;
-    updateHUD();
+  clearTimers(); startedAt = startMs; phase='running';
+  UI.input.disabled=false; UI.input.focus();
+  raceInterval = setInterval(function(){
+    var rem = Math.max(0, Math.ceil(duration - ((Date.now()-startedAt)/1000)));
+    UI.timer.textContent = String(rem); updateHUD();
     if(rem<=0){
       clearInterval(raceInterval); raceInterval=null;
-      pushProgress(false);
-      finishRace('Waktu habis.');
-      state.update({phase:'ended'});
+      pushProgress(false); finishRace('Waktu habis.');
+      if(stateRef) stateRef.update({phase:'ended'});
+      else { handleState({phase:'ended'}); }
     }
   }, 250);
 }
-
 function finishRace(msg){
-  UI.input.disabled = true;
-  UI.title.textContent = 'Hasil';
-  UI.result.textContent = msg;
-  UI.overlay.style.display = 'flex';
+  UI.input.disabled=true;
+  UI.title.textContent='Hasil'; UI.result.textContent=msg; UI.overlay.style.display='flex';
 }
 
-// init
-loadText();
+/* -------------------- START -------------------- */
+loadText(); resetLocalUI();
 </script>
 </body>
 </html>
