@@ -2,26 +2,26 @@
 <html lang="id">
 <head>
 <meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
 <title>PKSPIP – Mini Shooter</title>
 <style>
-  html,body{margin:0;height:100%;background:#0f172a;color:#e2e8f0;font-family:system-ui,Inter}
-  #hud{position:fixed;left:12px;top:12px;background:#0008;padding:10px 12px;border-radius:12px}
-  canvas{display:block;margin:0 auto}
-  a.btn{position:fixed;right:12px;top:12px;background:#0008;padding:8px 12px;border-radius:10px;color:#e2e8f0;text-decoration:none}
+  html,body{margin:0;height:100%;overflow:hidden;background:#0f172a;color:#e2e8f0;font-family:system-ui,Inter}
+  #hud{position:fixed;left:12px;top:12px;background:#0008;padding:10px 12px;border-radius:12px;z-index:3}
+  canvas{display:block;width:100vw;height:100vh;outline:none} /* selalu penuh layar */
+  a.btn{position:fixed;right:12px;top:12px;background:#0008;padding:8px 12px;border-radius:10px;color:#e2e8f0;text-decoration:none;z-index:3}
 </style>
 </head>
 <body>
-<a class="btn" href="./main.html">⟵ Kembali</a>
-<canvas id="c" width="1200" height="675"></canvas>
-<div id="hud">WASD bergerak, Mouse menembak. Hanya untuk akun yang login.</div>
+<a class="btn" href="../main.html">⟵ Kembali</a>
+<canvas id="c"></canvas>
+<div id="hud">WASD bergerak, Mouse arah & klik untuk menembak. (Login wajib)</div>
 
 <!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-database-compat.js"></script>
 <script>
-  // TODO: pakai config project kamu
+  // TODO: ganti dengan config project Firebase kamu
   const firebaseConfig = {
     apiKey: "AIza...YOURKEY",
     authDomain: "YOURPROJECT.firebaseapp.com",
@@ -31,64 +31,62 @@
   };
   firebase.initializeApp(firebaseConfig);
   const auth = firebase.auth();
-  const db = firebase.database();
+  const db   = firebase.database();
 
-  // --- Guard: wajib login ---
-  // Jika web-base kamu sudah login di halaman lain, ini akan reuse sesi.
-  // Untuk uji cepat, boleh pakai signInAnonymously kalau belum ada login.
+  // ======= UTIL =======
+  const params = new URLSearchParams(location.search);
+  const roomId = params.get('room') || "room-1";  // bisa kirim ?room=inspektorat
+  const canvas = document.getElementById("c");
+  const ctx = canvas.getContext("2d", { alpha:false });
+  function resizeCanvas(){
+    const dpr = Math.min(window.devicePixelRatio||1, 2);
+    canvas.width  = Math.floor(innerWidth  * dpr);
+    canvas.height = Math.floor(innerHeight * dpr);
+    ctx.setTransform(dpr,0,0,dpr,0,0); // agar koordinat tetap berbasis CSS px
+  }
+  addEventListener('resize', resizeCanvas); resizeCanvas();
+
+  // ======= AUTH GUARD =======
   auth.onAuthStateChanged(async (user) => {
-    if (!user) {
-      // sementara: login anonim agar bisa dites
-      await auth.signInAnonymously();
-    }
+    if (!user) await auth.signInAnonymously(); // untuk uji; ganti dengan flow loginmu jika perlu
     startGame();
   });
 
-  // --- Game state ---
-  let uid, roomId = "room-1";   // bisa kamu buat dinamis (per UNOR/kelas)
-  let me = { x: 600, y: 340, hp: 100, angle: 0, name: "", color: "" };
+  // ======= GAME STATE =======
+  let uid, me = { x: 600, y: 340, hp: 100, angle: 0, name: "", color: "" };
   let keys = {}, mouse = {down:false, x:0, y:0};
   let players = {};   // snapshot dari RTDB
-  let bullets = [];   // lokal (opsional: sinkron via RTDB)
+  let bullets = [];   // lokal
 
-  // util warna acak
-  function randColor(){
-    return `hsl(${Math.floor(Math.random()*360)},70%,60%)`;
-  }
+  function randColor(){ return `hsl(${Math.floor(Math.random()*360)},70%,60%)`; }
 
-  // --- Masuk room & presence ---
+  // ======= PRESENCE & ROOM =======
   async function joinRoom() {
     uid = auth.currentUser.uid;
-    me.name = (auth.currentUser.displayName || ("Player-"+uid.slice(0,4)));
+    me.name  = (auth.currentUser.displayName || ("Player-"+uid.slice(0,4)));
     me.color = randColor();
 
     const myRef = db.ref(`rooms/${roomId}/players/${uid}`);
-    // set presence
     await myRef.set({ x: me.x, y: me.y, hp: me.hp, angle: me.angle, name: me.name, color: me.color, ts: firebase.database.ServerValue.TIMESTAMP });
     myRef.onDisconnect().remove();
 
-    // dengarkan pemain lain
     db.ref(`rooms/${roomId}/players`).on("value", snap => {
       players = snap.val() || {};
     });
   }
 
-  // --- Loop tulis posisiku (throttle agar hemat) ---
   function startWriters(){
     setInterval(()=>{
       if (!uid) return;
-      me.ts = firebase.database.ServerValue.TIMESTAMP;
       db.ref(`rooms/${roomId}/players/${uid}`).update({
         x: me.x, y: me.y, angle: me.angle, hp: me.hp, ts: firebase.database.ServerValue.TIMESTAMP
       });
-    }, 80); // ~12.5 updates/detik
+    }, 80); // ~12.5 Hz hemat bandwidth
   }
 
-  // --- Input ---
+  // ======= INPUT =======
   addEventListener("keydown", e => keys[e.key.toLowerCase()] = true);
   addEventListener("keyup",   e => keys[e.key.toLowerCase()] = false);
-  const canvas = document.getElementById("c");
-  const ctx = canvas.getContext("2d");
   canvas.addEventListener("mousemove", e=>{
     const r = canvas.getBoundingClientRect();
     mouse.x = e.clientX - r.left; mouse.y = e.clientY - r.top;
@@ -96,43 +94,35 @@
   canvas.addEventListener("mousedown", ()=> mouse.down = true);
   addEventListener("mouseup", ()=> mouse.down = false);
 
-  // --- Game loop ---
-  function loop(){
-    requestAnimationFrame(loop);
-    update(); draw();
-  }
+  // ======= GAME LOOP =======
+  function loop(){ requestAnimationFrame(loop); update(); draw(); }
   function update(){
-    const speed = 3.4;
-    let dx = (keys['d']?1:0) - (keys['a']?1:0);
-    let dy = (keys['s']?1:0) - (keys['w']?1:0);
-    const len = Math.hypot(dx,dy)||1;
+    const speed = 3.6;
+    const dx = (keys['d']?1:0) - (keys['a']?1:0);
+    const dy = (keys['s']?1:0) - (keys['w']?1:0);
+    const len = Math.hypot(dx,dy) || 1;
     me.x += (dx/len)*speed;
     me.y += (dy/len)*speed;
 
-    const cx = canvas.width/2, cy = canvas.height/2;
+    const cx = innerWidth/2, cy = innerHeight/2;
     me.angle = Math.atan2(mouse.y - cy, mouse.x - cx);
 
-    // contoh peluru lokal (tidak disimpan ke RTDB untuk hemat)
     if (mouse.down){
       bullets.push({x: me.x, y: me.y, vx: Math.cos(me.angle)*10, vy: Math.sin(me.angle)*10, ttl: 60});
-      mouse.down = false; // single-shot; ubah untuk auto
+      mouse.down = false; // single shot; hapus baris ini untuk auto-fire
     }
     bullets.forEach(b=>{ b.x+=b.vx; b.y+=b.vy; b.ttl--; });
     bullets = bullets.filter(b=> b.ttl>0);
   }
+
   function draw(){
-    // kamera: center ke aku
     const cam = { x: me.x, y: me.y };
-    ctx.fillStyle = "#0b1220"; ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.fillStyle = "#0b1220"; ctx.fillRect(0,0,innerWidth,innerHeight);
 
     // grid
-    ctx.strokeStyle = "#1f2a44";
-    for(let x=-2000; x<=2000; x+=100){
-      line(x, -2000, x, 2000);
-    }
-    for(let y=-2000; y<=2000; y+=100){
-      line(-2000, y, 2000, y);
-    }
+    ctx.strokeStyle = "#1f2a44"; ctx.lineWidth = 1;
+    for(let x=-2000; x<=2000; x+=100){ line(x,-2000,x,2000,cam); }
+    for(let y=-2000; y<=2000; y+=100){ line(-2000,y,2000,y,cam); }
 
     // bullets
     ctx.fillStyle = "#fef08a";
@@ -142,47 +132,33 @@
     });
 
     // players
-    const ps = players || {};
-    Object.keys(ps).forEach(id=>{
-      const p = ps[id];
+    Object.entries(players||{}).forEach(([id,p])=>{
       const s = worldToScreen(p.x,p.y,cam);
-      // body
-      ctx.fillStyle = p.color || "#60a5fa";
-      circle(s.x,s.y,16,true);
-      // cannon
+      ctx.fillStyle = p.color || "#60a5fa"; circle(s.x,s.y,16,true);
       ctx.strokeStyle = "#e5e7eb"; ctx.lineWidth = 4;
       ctx.beginPath(); ctx.moveTo(s.x,s.y);
-      ctx.lineTo(s.x + Math.cos(p.angle)*24, s.y + Math.sin(p.angle)*24);
-      ctx.stroke();
-      // label
+      ctx.lineTo(s.x+Math.cos(p.angle)*24, s.y+Math.sin(p.angle)*24); ctx.stroke();
       ctx.fillStyle = "#e2e8f0"; ctx.font = "12px system-ui";
       const label = (p.name||"Player");
       ctx.fillText(label, s.x - ctx.measureText(label).width/2, s.y - 22);
     });
 
-    // aku di atas (agar terlihat)
-    const meS = worldToScreen(me.x,me.y,cam);
-    ctx.fillStyle = me.color || "#22d3ee";
-    circle(meS.x,meS.y,18,true);
+    // me on top
+    const s = worldToScreen(me.x,me.y,cam);
+    ctx.fillStyle = me.color || "#22d3ee"; circle(s.x,s.y,18,true);
     ctx.strokeStyle="#fff"; ctx.lineWidth=4;
-    ctx.beginPath(); ctx.moveTo(meS.x,meS.y);
-    ctx.lineTo(meS.x + Math.cos(me.angle)*28, meS.y + Math.sin(me.angle)*28);
-    ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(s.x,s.y);
+    ctx.lineTo(s.x+Math.cos(me.angle)*28, s.y+Math.sin(me.angle)*28); ctx.stroke();
   }
 
-  function worldToScreen(x,y,cam){ return { x: x - cam.x + canvas.width/2, y: y - cam.y + canvas.height/2 }; }
+  function worldToScreen(x,y,cam){ return { x: x - cam.x + innerWidth/2, y: y - cam.y + innerHeight/2 }; }
   function circle(x,y,r,fill){ ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); fill?ctx.fill():ctx.stroke(); }
-  function line(x1,y1,x2,y2){
-    const a = worldToScreen(x1,y1,{x:me.x,y:me.y});
-    const b = worldToScreen(x2,y2,{x:me.x,y:me.y});
+  function line(x1,y1,x2,y2,cam){
+    const a = worldToScreen(x1,y1,cam), b = worldToScreen(x2,y2,cam);
     ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();
   }
 
-  async function startGame(){
-    await joinRoom();
-    startWriters();
-    requestAnimationFrame(loop);
-  }
+  async function startGame(){ await joinRoom(); startWriters(); requestAnimationFrame(loop); }
 </script>
 </body>
 </html>
