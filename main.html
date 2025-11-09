@@ -31,6 +31,21 @@
       background:#f8f9fa;
     }
 
+    /* ==== Group Heading Style ==== */
+.group-heading {
+  background: #e9ecef;
+  color: #212529;
+  font-weight: 600;
+  padding: 8px 12px;
+  border-top: 2px solid #dee2e6;
+  border-bottom: 2px solid #dee2e6;
+  font-size: 0.95rem;
+}
+.group-heading i {
+  color: #0d6efd;
+  margin-right: 6px;
+}
+
     /* LOGIN */
     #login-section{
       display:flex;align-items:center;justify-content:center;min-height:100vh;
@@ -198,7 +213,22 @@
                   <th scope="col" class="px-3 text-center">Grade</th>
                 </tr>
               </thead>
-              <tbody id="assessment-table-body"></tbody>
+              <<tbody id="assessment-table-body">
+                    <!-- Grup 1 -->
+                    <tr class="group-heading"><td colspan="6"><i class="bi bi-diagram-3"></i> 1. Lingkungan Pengendalian</td></tr>
+                  
+                    <!-- Grup 2 -->
+                    <tr class="group-heading"><td colspan="6"><i class="bi bi-exclamation-triangle"></i> 2. Penilaian Risiko</td></tr>
+                  
+                    <!-- Grup 3 -->
+                    <tr class="group-heading"><td colspan="6"><i class="bi bi-check2-square"></i> 3. Kegiatan Pengendalian</td></tr>
+                  
+                    <!-- Grup 4 -->
+                    <tr class="group-heading"><td colspan="6"><i class="bi bi-chat-dots"></i> 4. Informasi dan Komunikasi</td></tr>
+                  
+                    <!-- Grup 5 -->
+                    <tr class="group-heading"><td colspan="6"><i class="bi bi-repeat"></i> 5. Pemantauan Berkelanjutan</td></tr>
+                  </tbody>
             </table>
           </div>
         </div>
@@ -3063,6 +3093,24 @@ c. Memberikan rekomendasi yang relevan.`
 
   <!-- ===== TOC Add-on (pakai Web App kamu & text/plain anti-preflight) ===== -->
   <script>
+    function insertGroupHeadings() {
+  const tbody = document.getElementById("assessment-table-body");
+  const groups = {
+    1: "Lingkungan Pengendalian",
+    2: "Penilaian Risiko",
+    3: "Kegiatan Pengendalian",
+    4: "Informasi dan Komunikasi",
+    5: "Pemantauan Berkelanjutan"
+  };
+  for (const [num, title] of Object.entries(groups)) {
+    const row = document.createElement("tr");
+    row.className = "group-heading";
+    row.innerHTML = `<td colspan="6"><i class="bi bi-dot"></i> ${num}. ${title}</td>`;
+    tbody.appendChild(row);
+  }
+}
+insertGroupHeadings();
+    
   (function(){
     'use strict';
 
