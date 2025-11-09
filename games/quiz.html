@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="auto">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PLAY — Kuis SPIP</title>
+  <meta name="description" content="Mini-kuis interaktif bertema SPIP dengan skor dan review jawaban.">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    /* ================= Base Tokens (match READ) ================= */
+    :root{
+      --brand:#16a085;        /* teal */
+      --brand-2:#6366f1;      /* indigo */
+      --ink:#0f172a;          /* slate-900 */
+      --muted:#64748b;        /* slate-500 */
+      --bg: #fbfcff;
+      --bg-soft-1: #eaf3ff;
+      --bg-soft-2: #e7fff7;
+      --panel:#ffffff;
+      --border: rgba(99,102,241,.12);
+      --panel-glass: rgba(255,255,255,.72);
+      --ring: 0 10px 30px rgba(99,102,241,.12);
+      --table-head:#f8fbff;
+      --correct:#16a34a;
+      --wrong:#ef4444;
+    }
+    @media (prefers-color-scheme: dark){
+      html[data-theme="auto"]{
+        --ink:#e5e7eb; --muted:#a3aab6;
+        --bg:#0b1020; --bg-soft-1:#0f1730; --bg-soft-2:#0a1f1a;
+        --panel:#0f1426; --border: rgba(99,102,241,.25);
+        --panel-glass: rgba(20,24,45,.72); --ring: 0 10px 36px rgba(99,102,241,.22);
+        --table-head:#121a2e;
+      }
+    }
+    html[data-theme="dark"]{
+      --ink:#e5e7eb; --muted:#a3aab6;
+      --bg:#0b1020; --bg-soft-1:#0f1730; --bg-soft-2:#0a1f1a;
+      --panel:#0f1426; --border: rgba(99,102,241,.25);
+      --panel-glass: rgba(20,24,45,.72); --ring: 0 10px 36px rgba(99,102,241,.22);
+      --table-head:#121a2e;
+    }
+
+    /* ================= Layout & Components ================= */
+    html,body{height:100%}
+    body{
+      font-family:"Plus Jakarta Sans",system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Noto Sans";
+      color:var(--ink);
+      background:
+        radial-gradient(900px 500px at 120% -10%, var(--bg-soft-1) 0%, transparent 60%),
+        radial-gradient(700px 400px at -10% -10%, var(--bg-soft-2) 0%, transparent 60%),
+        linear-gradient(180deg,var(--bg), var(--bg) 60%, var(--bg-soft-1));
+    }
+    .text-gradient{
+      background:linear-gradient(92deg,var(--brand),var(--brand-2));
+      -webkit-background-clip:text;background-clip:text;color:transparent;
+    }
+    .glass{background:var(--panel-glass);border:1px solid var(--border);backdrop-filter:saturate(160%) blur(6px);border-radius:1rem;}
+    .card-soft{background:var(--panel);border:1px solid var(--border);border-radius:1rem;}
+    .muted{color:var(--muted)}
+    .btn-ghost{border:1px solid #dbeafe55;color:var(--ink);background:var(--panel)}
+    .btn-ghost:hover{border-color:#c7d2fe55;box-shadow:var(--ring)}
+    .btn-primary{background:linear-gradient(92deg,var(--brand),var(--brand-2)); border:0}
+    .btn-primary:hover{filter:brightness(1.05)}
+    .hero{padding:3rem 0 2rem;}
+
+    .option{
+      border:1px solid var(--border); border-radius:.9rem; padding:.9rem 1rem; cursor:pointer; user-select:none;
+      background:var(--panel); transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+    }
+    .option:hover{transform:translateY(-1px); box-shadow:var(--ring)}
+    .option.selected{border-color:#93c5fd66; box-shadow:0 0 0 3px #93c5fd33 inset}
+    .option.correct{border-color:var(--correct); background:color-mix(in srgb,var(--correct) 10%, transparent)}
+    .option.wrong{border-color:var(--wrong); background:color-mix(in srgb,var(--wrong) 10%, transparent)}
+
+    .progress{height:.75rem;border-radius:1rem;background:#e5e9f633}
+    html[data-theme="dark"] .progress{background:#182342}
+    .progress-bar{background:linear-gradient(90deg,var(--brand),var(--brand-2))}
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="hero">
+    <div class="container">
+      <div class="d-flex flex-wrap align-items-center gap-2">
+        <a class="btn btn-ghost btn-sm" href="index.html"><i class="bi bi-speedometer2"></i> Dashboard</a>
+        <a class="btn btn-ghost btn-sm" href="read.html"><i class="bi bi-journal-text"></i> READ</a>
+        <div class="ms-auto d-flex align-items-center gap-2">
+          <button id="themeToggle" class="btn btn-ghost btn-sm" type="button" title="Ganti tema">
+            <i class="bi bi-moon-stars" id="themeIcon"></i>
+            <span class="ms-1 d-none d-sm-inline" id="themeLabel">Dark</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="row align-items-center mt-3">
+        <div class="col-lg-7">
+          <h1 class="display-6 fw-extrabold text-gradient mb-2">PLAY — Kuis SPIP</h1>
+          <p class="muted mb-0">Jawab beberapa soal singkat. Lihat skor dan review jawabanmu. High score disimpan di perangkat.</p>
+        </div>
+        <div class="col-lg-5 mt-3 mt-lg-0">
+          <div class="glass p-3 p-md-4">
+            <div class="d-flex align-items-center justify-content-between">
+              <div>
+                <div class="muted small">High Score</div>
+                <div class="h3 mb-0" id="bestScore">0 / 0</div>
+              </div>
+              <button id="btnResetHS" class="btn btn-outline-danger btn-sm"><i class="bi bi-x-circle"></i> Reset</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Quiz -->
+  <main class="pb-5">
+    <div class="container">
+      <div class="card-soft p-3 p-md-4 mb-3">
+        <div class="d-flex align-items-center justify-content-between gap-3">
+          <div class="d-flex align-items-center gap-2">
+            <span class="muted small">Soal</span>
+            <span class="badge text-bg-light" id="counter">0/0</span>
+          </div>
+          <div class="flex-grow-1">
+            <div class="progress">
+              <div class="progress-bar" id="bar" style="width:0%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-soft p-3 p-md-4">
+        <div id="screenStart">
+          <h2 class="h5 fw-bold mb-2"><i class="bi bi-controller"></i> Mulai Latihan</h2>
+          <p class="muted mb-3">Pilih jumlah soal, lalu klik <em>Mulai</em>. Pertanyaan acak dari bank soal SPIP.</p>
+          <div class="row g-3">
+            <div class="col-sm-6 col-md-4">
+              <label class="form-label">Jumlah soal</label>
+              <select id="numQuestions" class="form-select">
+                <option selected>6</option>
+                <option>8</option>
+                <option>10</option>
+              </select>
+            </div>
+          </div>
+          <div class="mt-3 d-flex gap-2">
+            <button id="btnStart" class="btn btn-primary"><i class="bi bi-play-fill"></i> Mulai</button>
+          </div>
+        </div>
+
+        <div id="screenQuiz" class="d-none">
+          <div class="d-flex align-items-start justify-content-between mb-2">
+            <h2 class="h5 fw-bold" id="qTitle">Pertanyaan</h2>
+            <span class="badge text-bg-secondary" id="qTag"></span>
+          </div>
+          <p class="mb-3" id="qText">…</p>
+          <div class="vstack gap-2" id="options"></div>
+
+          <div class="d-flex justify-content-between align-items-center mt-4">
+            <button class="btn btn-ghost" id="btnPrev" disabled><i class="bi bi-arrow-left"></i> Sebelumnya</button>
+            <div class="d-flex gap-2">
+              <button class="btn btn-ghost" id="btnClear"><i class="bi bi-eraser"></i> Hapus Jawaban</button>
+              <button class="btn btn-primary" id="btnNext">Berikutnya <i class="bi bi-arrow-right"></i></button>
+            </div>
+          </div>
+        </div>
+
+        <div id="screenResult" class="d-none">
+          <h2 class="h5 fw-bold mb-2"><i class="bi bi-trophy"></i> Hasil</h2>
+          <p class="muted mb-3">Skor kamu:</p>
+          <div class="display-6 fw-bold mb-2" id="scoreText">0 / 0</div>
+          <div class="progress mb-3">
+            <div class="progress-bar" id="scoreBar" style="width:0%"></div>
+          </div>
+          <p class="muted mb-4" id="remark">—</p>
+
+          <h3 class="h6 fw-bold">Review Jawaban</h3>
+          <div id="review" class="mt-2"></div>
+
+          <div class="d-flex gap-2 mt-4">
+            <button class="btn btn-primary" id="btnRetry"><i class="bi bi-arrow-repeat"></i> Coba Lagi</button>
+            <a class="btn btn-ghost" href="read.html"><i class="bi bi-journal-text"></i> Baca READ</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="py-4">
+    <div class="container d-flex flex-column flex-md-row align-items-center justify-content-between gap-2">
+      <div class="small muted">© 2025 — PLAY · Kuis SPIP</div>
+      <div class="d-flex gap-2">
+        <a href="index.html" class="btn btn-sm btn-ghost"><i class="bi bi-speedometer2 me-1"></i> Dashboard</a>
+        <a href="read.html" class="btn btn-sm btn-ghost"><i class="bi bi-journal-text me-1"></i> READ</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- ================= Theme Toggle (same as READ) ================= -->
+  <script>
+    (function(){
+      const html = document.documentElement;
+      const btn  = document.getElementById('themeToggle');
+      const icn  = document.getElementById('themeIcon');
+      const lbl  = document.getElementById('themeLabel');
+      const saved = localStorage.getItem('read.theme');
+      if (saved === 'light' || saved === 'dark') html.setAttribute('data-theme', saved);
+      else html.setAttribute('data-theme', 'auto');
+
+      function currentTheme(){
+        const mode = html.getAttribute('data-theme');
+        if (mode === 'auto') return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        return mode;
+      }
+      function refreshIcon(){
+        const active = currentTheme();
+        if (active === 'dark'){ icn.className='bi bi-brightness-high'; lbl.textContent='Light'; }
+        else { icn.className='bi bi-moon-stars'; lbl.textContent='Dark'; }
+      }
+      function toggleTheme(){
+        const modeAttr = html.getAttribute('data-theme');
+        let next = 'auto';
+        if (modeAttr === 'auto') next = 'dark';
+        else if (modeAttr === 'dark') next = 'light';
+        else if (modeAttr === 'light') next = 'auto';
+        html.setAttribute('data-theme', next);
+        localStorage.setItem('read.theme', next);
+        refreshIcon();
+      }
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+        if (html.getAttribute('data-theme') === 'auto') refreshIcon();
+      });
+      btn.addEventListener('click', toggleTheme);
+      refreshIcon();
+    })();
+  </script>
+
+  <!-- ================= Quiz Logic ================= -->
+  <script>
+    // --- Question bank (SPIP basics; feel free to add more) ---
+    const BANK = [
+      {
+        tag: "Maturitas",
+        q: "Dalam Penilaian Maturitas SPIP, perbedaan paling mendasar antara Level 4 (Terkelola & Terukur) dan Level 5 (Optimum) adalah…",
+        a: 1,
+        opts: [
+          "Level 5 telah mendokumentasikan seluruh SOP, sedangkan Level 4 belum",
+          "Level 5 menekankan adaptivitas terhadap perubahan lingkungan organisasi",
+          "Level 4 hanya berfokus pada kepatuhan regulasi, bukan efektivitas",
+          "Level 5 menggunakan auditor eksternal untuk pengujian efektivitas"
+        ],
+        explain: "Level 5 (Optimum) bukan hanya efektif, tetapi juga adaptif terhadap perubahan lingkungan organisasi."
+      },
+      {
+        tag: "Maturitas",
+        q: "Strategi sudah relevan & terintegrasi namun implementasi pengendalian belum efektif. Level maturitas yang paling tepat adalah…",
+        a: 1,
+        opts: [
+          "Level 2 — Berkembang",
+          "Level 3 — Terdefinisi",
+          "Level 4 — Terkelola & Terukur",
+          "Level 5 — Optimum"
+        ],
+        explain: "Level 3: strategi relevan & terintegrasi, pengendalian sudah dilaksanakan namun belum efektif."
+      },
+      {
+        tag: "Bukti",
+        q: "Dalam penilaian SPIP, ‘konsistensi bukti’ terutama digunakan untuk…",
+        a: 1,
+        opts: [
+          "Mengukur ketepatan waktu laporan pengendalian",
+          "Menilai keandalan dan keberlanjutan praktik pengendalian",
+          "Menilai kelengkapan administrasi dokumen bukti",
+          "Menentukan validitas laporan keuangan"
+        ],
+        explain: "Konsistensi bukti = praktik yang andal dan berkelanjutan, bukan sekadar ada dokumen."
+      },
+      {
+        tag: "Bukti",
+        q: "Mengapa bukti grade A–E harus dipisahkan dalam pengumpulan dokumen?",
+        a: 2,
+        opts: [
+          "Karena setiap grade merepresentasikan kategori risiko yang berbeda",
+          "Karena reviewer hanya menilai grade A dan B",
+          "Karena pemisahan bukti menjaga keterlacakan dan akurasi penilaian per parameter",
+          "Karena peraturan mewajibkan satu folder per indikator kinerja"
+        ],
+        explain: "Pemisahan bukti memudahkan keterlacakan & validasi kecocokan bukti terhadap tingkat kematangan."
+      },
+      {
+        tag: "Tujuan & Efektivitas",
+        q: "Dalam konteks SPIP, ‘Efektivitas dan Efisiensi’ paling terkait dengan…",
+        a: 1,
+        opts: [
+          "Pengendalian atas pelaporan keuangan dan aset negara",
+          "Pencapaian tujuan organisasi melalui pemanfaatan sumber daya secara optimal",
+          "Penyesuaian struktur organisasi dengan perubahan lingkungan",
+          "Pemenuhan audit eksternal sesuai siklus tahunan"
+        ],
+        explain: "Efektivitas/efisiensi = tujuan tercapai dengan sumber daya optimal."
+      },
+      {
+        tag: "Maturitas",
+        q: "Struktur & proses pengendalian telah efektif, namun belum adaptif terhadap perubahan regulasi dan konteks. Ini mencerminkan…",
+        a: 1,
+        opts: [
+          "Level 3 — Terdefinisi",
+          "Level 4 — Terkelola & Terukur",
+          "Level 5 — Optimum",
+          "Level 2 — Berkembang"
+        ],
+        explain: "Level 4: efektif tapi belum adaptif. Level 5: efektif dan adaptif."
+      },
+      {
+        tag: "AoI",
+        q: "Elemen yang paling menentukan kredibilitas AoI (Area of Improvement) adalah…",
+        a: 1,
+        opts: [
+          "Banyaknya program yang disebutkan",
+          "Spesifikasi owner, target, dan tenggat yang jelas & terukur",
+          "Penggunaan format/templat dari Sestama",
+          "Tautan Drive yang bersifat “Anyone can view”"
+        ],
+        explain: "AoI harus spesifik: penanggung jawab, target terukur, dan tenggat waktu."
+      },
+      {
+        tag: "Komponen",
+        q: "Komponen ‘Penetapan Tujuan’ dalam SPIP terutama digunakan untuk menilai…",
+        a: 0,
+        opts: [
+          "Konsistensi perencanaan dengan indikator kinerja (IKU)",
+          "Keterpaduan laporan audit dengan laporan keuangan tahunan",
+          "Keandalan sistem pelaporan realisasi anggaran",
+          "Efektivitas mekanisme klarifikasi hasil reviu"
+        ],
+        explain: "Penetapan Tujuan menilai kesinambungan tujuan–strategi–IKU sebagai fondasi pengendalian."
+      },
+      {
+        tag: "Penurunan Grade",
+        q: "Apa konsekuensi umum yang paling sering menyebabkan grade unit turun dalam penilaian SPIP?",
+        a: 1,
+        opts: [
+          "Dokumen bukti belum ditandatangani pimpinan",
+          "Ketidaksesuaian antara bukti dengan kriteria parameter yang dinilai",
+          "Format laporan berbeda dari templat Sestama",
+          "Tidak ada tautan Drive aktif di setiap parameter"
+        ],
+        explain: "Kesesuaian bukti terhadap kriteria parameter adalah penentu utama kualitas penilaian."
+      },
+      {
+        tag: "Integrasi",
+        q: "Hubungan SPIP, MRI, dan IEPK dalam kerangka penilaian integratif adalah…",
+        a: 2,
+        opts: [
+          "SPIP menilai efektivitas manajemen risiko, MRI menilai pengendalian korupsi, IEPK menilai efisiensi anggaran",
+          "Ketiganya berdiri sendiri tanpa keterkaitan langsung",
+          "SPIP fokus pengendalian internal, MRI fokus risiko, IEPK fokus pengendalian korupsi — saling melengkapi",
+          "MRI adalah turunan SPIP yang menggantikan IEPK sejak 2021"
+        ],
+        explain: "Ketiganya saling melengkapi: pengendalian internal (SPIP), risiko (MRI), dan anti-korupsi (IEPK)."
+      }
+    ];
+
+    // --- State ---
+    let quiz = [];          // selected questions
+    let answers = [];       // -1 not answered, else index
+    let index = 0;
+
+    // --- Elements ---
+    const screenStart = document.getElementById('screenStart');
+    const screenQuiz  = document.getElementById('screenQuiz');
+    const screenResult= document.getElementById('screenResult');
+
+    const btnStart = document.getElementById('btnStart');
+    const numSelect= document.getElementById('numQuestions');
+    const counter  = document.getElementById('counter');
+    const bar      = document.getElementById('bar');
+
+    const qText = document.getElementById('qText');
+    const qTitle= document.getElementById('qTitle');
+    const qTag  = document.getElementById('qTag');
+    const optionsBox = document.getElementById('options');
+
+    const btnPrev = document.getElementById('btnPrev');
+    const btnNext = document.getElementById('btnNext');
+    const btnClear= document.getElementById('btnClear');
+
+    const scoreText = document.getElementById('scoreText');
+    const scoreBar  = document.getElementById('scoreBar');
+    const reviewBox = document.getElementById('review');
+    const remark    = document.getElementById('remark');
+    const btnRetry  = document.getElementById('btnRetry');
+
+    const bestScore = document.getElementById('bestScore');
+    const btnResetHS= document.getElementById('btnResetHS');
+
+    // --- High Score helpers ---
+    function loadHS(){
+      const hs = JSON.parse(localStorage.getItem('play.hs') || '{"best":0,"total":0}');
+      bestScore.textContent = `${hs.best} / ${hs.total}`;
+    }
+    function saveHS(score, total){
+      const curr = JSON.parse(localStorage.getItem('play.hs') || '{"best":0,"total":0}');
+      if (score > curr.best || total !== curr.total){
+        localStorage.setItem('play.hs', JSON.stringify({best: score, total}));
+      }
+      loadHS();
+    }
+    btnResetHS.addEventListener('click', ()=>{ localStorage.removeItem('play.hs'); loadHS(); });
+    loadHS();
+
+    // --- Utilities ---
+    const shuffle = arr => arr.map(v=>({v, r:Math.random()})).sort((a,b)=>a.r-b.r).map(o=>o.v);
+
+    function startQuiz(){
+      const n = parseInt(numSelect.value,10);
+      quiz = shuffle(BANK).slice(0,n);
+      answers = Array(n).fill(-1);
+      index = 0;
+
+      screenStart.classList.add('d-none');
+      screenResult.classList.add('d-none');
+      screenQuiz.classList.remove('d-none');
+      renderQuestion();
+      updateHUD();
+    }
+
+    function renderQuestion(){
+      const item = quiz[index];
+      qTitle.textContent = `Pertanyaan ${index+1}`;
+      qTag.textContent = item.tag;
+      qText.textContent = item.q;
+
+      optionsBox.innerHTML = '';
+      item.opts.forEach((opt, i)=>{
+        const div = document.createElement('div');
+        div.className = 'option';
+        div.tabIndex = 0;
+        div.setAttribute('role','button');
+        div.innerHTML = `<div class="d-flex align-items-start gap-2">
+            <div class="fw-bold">${String.fromCharCode(65+i)}.</div>
+            <div>${opt}</div>
+          </div>`;
+        if (answers[index] === i) div.classList.add('selected');
+        div.addEventListener('click', ()=>selectAnswer(i));
+        div.addEventListener('keypress', (e)=>{ if(e.key==='Enter' || e.key===' ') selectAnswer(i); });
+        optionsBox.appendChild(div);
+      });
+
+      btnPrev.disabled = index===0;
+      btnNext.textContent = index === quiz.length-1 ? 'Selesai' : 'Berikutnya ';
+      if (index !== quiz.length-1) btnNext.innerHTML = 'Berikutnya <i class="bi bi-arrow-right"></i>';
+    }
+
+    function selectAnswer(i){
+      answers[index] = i;
+      [...optionsBox.children].forEach((el, idx)=>{
+        el.classList.toggle('selected', idx===i);
+      });
+    }
+
+    function updateHUD(){
+      const done = answers.filter(a=>a>=0).length;
+      counter.textContent = `${index+1}/${quiz.length}`;
+      const pct = Math.round(done/Math.max(1,quiz.length)*100);
+      bar.style.width = pct + '%';
+    }
+
+    function next(){
+      if (index < quiz.length-1){
+        index++;
+        renderQuestion();
+        updateHUD();
+      } else {
+        finish();
+      }
+    }
+    function prev(){
+      if (index>0){
+        index--;
+        renderQuestion();
+        updateHUD();
+      }
+    }
+    function clearAnswer(){
+      answers[index] = -1;
+      renderQuestion();
+      updateHUD();
+    }
+
+    function finish(){
+      // score
+      let score = 0;
+      quiz.forEach((q,i)=>{ if (answers[i]===q.a) score++; });
+
+      screenQuiz.classList.add('d-none');
+      screenResult.classList.remove('d-none');
+
+      scoreText.textContent = `${score} / ${quiz.length}`;
+      const pct = Math.round(score/quiz.length*100);
+      scoreBar.style.width = pct + '%';
+      remark.textContent = pct>=85 ? "Solid! Penerapan & konsep SPIP kamu mantap." :
+                           pct>=60 ? "Cukup baik. Baca ulang ringkasan READ untuk menguatkan area tertentu." :
+                                     "Yuk ulangi lagi — cek READ dan fokus pada makna grade serta bukti.";
+
+      // review
+      reviewBox.innerHTML = '';
+      quiz.forEach((q,i)=>{
+        const block = document.createElement('div');
+        block.className = 'p-3 mb-2 rounded';
+        block.style.border = '1px solid var(--border)';
+        block.style.background = 'var(--panel)';
+
+        const your = answers[i];
+        const correct = q.a;
+
+        let header = `<div class="d-flex align-items-start justify-content-between">
+            <div><strong>Q${i+1}.</strong> ${q.q}</div>
+            <span class="badge ${your===correct ? 'text-bg-success' : 'text-bg-danger'}">
+              ${your===correct?'Benar':'Salah'}
+            </span>
+          </div>`;
+
+        let list = '<ul class="mt-2 mb-2">';
+        q.opts.forEach((opt,idx)=>{
+          const mark = idx===correct ? '<i class="bi bi-check-circle-fill me-1"></i>' :
+                        (idx===your ? '<i class="bi bi-x-circle-fill me-1"></i>' : '');
+          const cls  = idx===correct ? 'text-success' : (idx===your ? 'text-danger' : 'muted');
+          list += `<li class="${cls}">${mark}${String.fromCharCode(65+idx)}. ${opt}</li>`;
+        });
+        list += '</ul>';
+
+        block.innerHTML = header + list + `<div class="small muted">${q.explain}</div>`;
+        reviewBox.appendChild(block);
+      });
+
+      saveHS(score, quiz.length);
+    }
+
+    // --- Wire events ---
+    btnStart.addEventListener('click', startQuiz);
+    btnNext.addEventListener('click', next);
+    btnPrev.addEventListener('click', prev);
+    btnClear.addEventListener('click', clearAnswer);
+    btnRetry.addEventListener('click', ()=>{
+      screenResult.classList.add('d-none');
+      screenStart.classList.remove('d-none');
+      bar.style.width = '0%';
+      counter.textContent = '0/0';
+    });
+  </script>
+</body>
+</html>
