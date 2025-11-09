@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>PKSPIP – Game Musik (Tebak Lagu, Sambung Lirik, Tebak Penyanyi)</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+<style>
+:root{--ink:#e5e7eb;--muted:#9aa9c2;--brand:#38bdf8;--good:#34d399;--bad:#ef4444;--panel:#0b1220;--border:#182131;--bg:#0f172a}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:Inter,system-ui}
+a.back{position:fixed;left:12px;top:12px;color:#38bdf8;text-decoration:none;z-index:3}
+.wrap{max-width:940px;margin:70px auto 40px;padding:0 16px}
+h1{margin:0;color:var(--brand)}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:16px}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.select{display:flex;gap:8px;flex-wrap:wrap}
+.btn{background:#111827;border:1px solid var(--border);color:var(--ink);border-radius:10px;padding:8px 12px;cursor:pointer}
+.btn:hover{border-color:#334155}
+.btn-pill{border-radius:999px}
+.badge{padding:4px 8px;border-radius:999px;border:1px solid var(--border);color:var(--muted)}
+input[type="text"]{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--border);background:#0b1220;color:var(--ink);font-size:16px;outline:none}
+.progress{height:8px;background:#101826;border-radius:999px;overflow:hidden;border:1px solid var(--border)}
+.bar{height:100%;width:0;background:linear-gradient(90deg,#38bdf8,#60a5fa)}
+.center{display:flex;justify-content:center;align-items:center}
+h2{margin:0 0 6px}
+.subtle{color:var(--muted);font-size:14px;margin:0}
+.kbd{font-family:ui-monospace,Menlo,monospace;background:#111827;border:1px solid var(--border);padding:2px 6px;border-radius:6px;color:#cbd5e1}
+.grid{display:grid;grid-template-columns:1fr;gap:12px}
+@media(min-width:860px){.grid{grid-template-columns:1fr 1fr}}
+#status{display:flex;gap:10px;flex-wrap:wrap}
+#status .pill{padding:6px 10px;border:1px solid var(--border);border-radius:999px;background:#0b1220}
+.ok{color:var(--good)}
+.no{color:var(--bad)}
+.big{font-size:18px}
+#lyric-prompt{font-size:18px;line-height:1.7}
+.hint{font-style:italic;color:var(--muted)}
+audio{width:100%}
+.hidden{display:none}
+</style>
+</head>
+<body>
+<a class="back" href="../main.html">⟵ Kembali</a>
+<div class="wrap">
+  <div class="row" style="justify-content:space-between;align-items:flex-end;margin-bottom:8px">
+    <div>
+      <h1><i class="bi bi-music-note-beamed"></i> Game Musik</h1>
+      <p class="subtle">Pilih mode: Tebak Lagu · Sambung Lirik · Tebak Penyanyi</p>
+    </div>
+    <div id="status">
+      <span class="pill">Skor: <b id="score">0</b></span>
+      <span class="pill">Streak: <b id="streak">0</b></span>
+      <span class="pill">Waktu: <b id="time">-</b>s</span>
+      <span class="pill">High Score: <b id="best">0</b></span>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:12px">
+    <div class="row" style="justify-content:space-between">
+      <div class="select">
+        <button class="btn btn-pill" data-mode="guessSong">Tebak Lagu</button>
+        <button class="btn btn-pill" data-mode="finishLyric">Sambung Lirik</button>
+        <button class="btn btn-pill" data-mode="guessArtist">Tebak Penyanyi</button>
+      </div>
+      <div class="row">
+        <button class="btn" id="btnPlay"><i class="bi bi-play-fill"></i> Play</button>
+        <button class="btn" id="btnHint"><i class="bi bi-lightbulb"></i> Hint</button>
+        <button class="btn" id="btnSkip"><i class="bi bi-skip-forward-fill"></i> Lewati</button>
+        <button class="btn" id="btnReveal"><i class="bi bi-eye"></i> Jawaban</button>
+        <button class="btn" id="btnNext"><i class="bi bi-arrow-right"></i> Next</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <h2 id="title">Soal</h2>
+      <p id="subtitle" class="subtle">—</p>
+      <div id="block-audio" class="">
+        <audio id="audio" preload="metadata" controls></audio>
+      </div>
+      <div id="block-lyric" class="hidden">
+        <div id="lyric-prompt" class="card" style="margin-top:8px;background:#0b1220"></div>
+      </div>
+      <div style="margin-top:10px">
+        <div class="progress"><div id="bar" class="bar"></div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Jawab</h2>
+      <p class="subtle" id="guide">Ketik jawabanmu lalu Enter.</p>
+      <input id="answer" type="text" placeholder="Ketik di sini... (Enter untuk kirim)"/>
+      <p id="feedback" class="subtle" style="min-height:22px;margin-top:8px"></p>
+      <p id="hint" class="hint"></p>
+      <p id="reveal" class="hidden big"></p>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ================== DATASET ==================
+  Ganti/extend sesuai kebutuhanmu. Pastikan path audio benar.
+  Untuk keamanan hak cipta, gunakan audio milikmu sendiri.
+  Lirik di bawah ini adalah kalimat sintetis/parafrase.
+*/
+const SONGS = [
+  {
+    id:'s1',
+    title:'Senja di Kota',
+    artist:['Aurora Band','Aurora'],
+    audio:'assets/audio/senja-kota.mp3',
+    lyricPrompt:'Kau datang membawa pagi; kota pun pelan berdenyut…',
+    lyricNext:'kutangkap hangatmu di sela-sela hiruk senyum yang baru.'
+  },
+  {
+    id:'s2',
+    title:'Berjalan Bersama',
+    artist:['Langkah Kita','LangkahKita'],
+    audio:'assets/audio/berjalan-bersama.mp3',
+    lyricPrompt:'Langit cerah, jejak menyatu di trotoar berdebu…',
+    lyricNext:'kita tak lekang, melangkah tanpa ragu.'
+  },
+  {
+    id:'s3',
+    title:'Hujan Rahasia',
+    artist:['Embun Pagi'],
+    audio:'assets/audio/hujan-rahasia.mp3',
+    lyricPrompt:'Di antara suara rintik, ada pesan kecil untukmu…',
+    lyricNext:'diam-diam kutitipkan rinduku.'
+  }
+];
+
+/* ============== UTIL & NORMALIZER ============== */
+const $ = sel => document.querySelector(sel);
+function norm(s){
+  return (s||'')
+    .toLowerCase()
+    .normalize('NFD').replace(/\p{Diacritic}/gu,'')
+    .replace(/[^a-z0-9 ]/g,' ')
+    .replace(/\s+/g,' ')
+    .trim();
+}
+function includesAny(ans, arr){ const a=norm(ans); return arr.some(x=>a.includes(norm(x))); }
+function similarTokens(a,b){
+  const A=norm(a).split(' ').filter(Boolean), B=norm(b).split(' ').filter(Boolean);
+  if(!A.length||!B.length) return 0;
+  let hit=0; A.forEach(t=>{ if(B.includes(t)) hit++; });
+  return hit/Math.max(A.length,B.length);
+}
+
+/* ============== STATE ============== */
+let mode = 'guessSong'; // guessSong | finishLyric | guessArtist
+let index = 0;
+let order = [];
+let score = 0, streak = 0, best = parseInt(localStorage.getItem('music_best')||'0',10);
+let timer = 0, tick=null;
+const perQuestion = 25; // detik
+
+/* ============== UI REFS ============== */
+const ui = {
+  score: $('#score'), streak: $('#streak'), best: $('#best'), time: $('#time'),
+  title: $('#title'), subtitle: $('#subtitle'), guide: $('#guide'),
+  audio: $('#audio'), bar: $('#bar'),
+  blockAudio: $('#block-audio'), blockLyric: $('#block-lyric'),
+  prompt: $('#lyric-prompt'), ans: $('#answer'), fb: $('#feedback'),
+  hint: $('#hint'), reveal: $('#reveal'),
+  buttons: {
+    play: $('#btnPlay'), hint: $('#btnHint'), skip: $('#btnSkip'),
+    reveal: $('#btnReveal'), next: $('#btnNext')
+  }
+};
+ui.best.textContent = best;
+
+/* ============== FLOW ============== */
+function shuffleIds(){
+  order = SONGS.map((s,i)=>i);
+  for(let i=order.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [order[i], order[j]] = [order[j], order[i]];
+  }
+  index = 0;
+}
+function setMode(m){
+  mode = m; shuffleIds(); score=0; streak=0;
+  ui.score.textContent=0; ui.streak.textContent=0;
+  ui.fb.textContent=''; ui.hint.textContent=''; ui.reveal.classList.add('hidden');
+  nextQuestion();
+}
+function nextQuestion(){
+  if(index>=order.length) shuffleIds();
+  const s = SONGS[order[index]];
+  ui.ans.value=''; ui.ans.focus();
+  ui.fb.textContent=''; ui.hint.textContent=''; ui.reveal.classList.add('hidden'); ui.reveal.textContent='';
+  ui.bar.style.width='0%';
+
+  if(mode==='guessSong'){
+    ui.title.textContent='Tebak Lagu';
+    ui.subtitle.textContent='Dengarkan potongan audio, tebak judul lagunya.';
+    ui.blockAudio.classList.remove('hidden');
+    ui.blockLyric.classList.add('hidden');
+    ui.audio.src=s.audio;
+    ui.guide.textContent='Ketik judul lagu lalu tekan Enter. Contoh: "Senja di Kota".';
+  }
+  if(mode==='finishLyric'){
+    ui.title.textContent='Sambung Lirik';
+    ui.subtitle.textContent='Lanjutkan baris berikutnya.';
+    ui.blockAudio.classList.add('hidden');
+    ui.blockLyric.classList.remove('hidden');
+    ui.prompt.textContent = s.lyricPrompt;
+    ui.guide.textContent='Tulis sambungan baris berikutnya (kemiripan ≥ 60% dianggap benar).';
+  }
+  if(mode==='guessArtist'){
+    ui.title.textContent='Tebak Penyanyi';
+    ui.subtitle.textContent='Dengarkan potongan audio, tebak nama penyanyinya.';
+    ui.blockAudio.classList.remove('hidden');
+    ui.blockLyric.classList.add('hidden');
+    ui.audio.src=s.audio;
+    ui.guide.textContent='Ketik nama artis/penyanyi lalu tekan Enter.';
+  }
+
+  // timer
+  clearInterval(tick);
+  timer = perQuestion;
+  ui.time.textContent = timer;
+  tick = setInterval(()=>{
+    timer--; ui.time.textContent = timer;
+    const pct = Math.round(((perQuestion-timer)/perQuestion)*100);
+    ui.bar.style.width = Math.min(100,Math.max(0,pct))+'%';
+    if(timer<=0){ clearInterval(tick); wrongReveal('Waktu habis.'); }
+  },1000);
+}
+
+function correct(msg){
+  streak++; score += 10 + Math.max(0, timer); // bonus dari sisa waktu
+  ui.streak.textContent = streak; ui.score.textContent = score;
+  ui.fb.innerHTML = `<span class="ok">✔ ${msg}</span>`;
+  clearInterval(tick);
+  if(score>best){ best=score; localStorage.setItem('music_best', String(best)); ui.best.textContent=best; }
+}
+function wrong(msg){
+  streak=0; ui.streak.textContent = 0;
+  ui.fb.innerHTML = `<span class="no">✖ ${msg}</span>`;
+}
+function wrongReveal(msg){
+  wrong(msg);
+  const s = SONGS[order[index]];
+  ui.reveal.classList.remove('hidden');
+  ui.reveal.innerHTML = `
+    <b>Jawaban:</b> <br>
+    Judul: <span class="ok">${s.title}</span><br>
+    Penyanyi: <span class="ok">${s.artist[0]}</span><br>
+    Sambung lirik: <span class="ok">${s.lyricNext}</span>
+  `;
+}
+
+function submitAnswer(){
+  const s = SONGS[order[index]];
+  const val = ui.ans.value.trim();
+  if(!val) return;
+
+  if(mode==='guessSong'){
+    const pass = norm(val)===norm(s.title) || includesAny(val,[s.title]);
+    if(pass){ correct('Betul! Judul: '+s.title); }
+    else { wrong('Kurang tepat. Coba lagi.'); return; }
+  }
+
+  if(mode==='finishLyric'){
+    const sim = similarTokens(val, s.lyricNext);
+    if(sim>=0.6){ correct('Mantap! Sambungan lirik diterima.'); }
+    else { wrong('Masih kurang mirip (≥60%).'); return; }
+  }
+
+  if(mode==='guessArtist'){
+    const pass = s.artist.some(a=> norm(a)===norm(val) || includesAny(val,[a]));
+    if(pass){ correct('Benar! Penyanyi: '+s.artist[0]); }
+    else { wrong('Bukan itu. Coba lagi.'); return; }
+  }
+}
+
+function afterAnswered(){
+  // jeda singkat sebelum lanjut
+  setTimeout(()=>{ index++; nextQuestion(); }, 800);
+}
+
+/* ============== HINTS ============== */
+function showHint(){
+  const s = SONGS[order[index]];
+  if(mode==='guessSong'){
+    const first = s.title.split(' ')[0];
+    ui.hint.textContent = `Hint: judul mulai dengan “${first}…” (${s.title.length} huruf).`;
+  }
+  if(mode==='finishLyric'){
+    ui.hint.textContent = `Hint: ${s.lyricNext.split(' ').slice(0,2).join(' ')} …`;
+  }
+  if(mode==='guessArtist'){
+    const a = s.artist[0];
+    ui.hint.textContent = `Hint: inisial penyanyi “${a[0]}${a.includes(' ')?' '+a.split(' ')[1][0]:''}”.`;
+  }
+}
+
+/* ============== BINDINGS ============== */
+document.querySelectorAll('[data-mode]').forEach(btn=>{
+  btn.addEventListener('click', ()=> setMode(btn.dataset.mode));
+});
+
+ui.buttons.play.addEventListener('click', ()=>{
+  if(mode==='finishLyric') return; // nothing to play
+  ui.audio.currentTime=0; ui.audio.play();
+});
+ui.buttons.hint.addEventListener('click', showHint);
+ui.buttons.skip.addEventListener('click', ()=>{ wrongReveal('Dilewati.'); });
+ui.buttons.reveal.addEventListener('click', ()=>{ wrongReveal('Ditampilkan.'); });
+ui.buttons.next.addEventListener('click', ()=>{ index++; nextQuestion(); });
+
+ui.ans.addEventListener('keydown', (e)=>{
+  if(e.key==='Enter'){
+    submitAnswer();
+    if(ui.fb.textContent.includes('✔')) afterAnswered();
+  }
+});
+
+/* start default */
+setMode('guessSong');
+</script>
+</body>
+</html>
