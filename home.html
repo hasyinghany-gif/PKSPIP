@@ -16,7 +16,7 @@
       --ink:#0f172a; --muted:#6b7280;
       --brand:#2563eb; --brand-2:#7c3aed; --brand-3:#06b6d4;
       --panel:#ffffff; --border:#e5e7eb;
-      --hero-overlay: linear-gradient(180deg, rgba(15,23,42,.08), rgba(15,23,42,.25));
+      --hero-overlay: linear-gradient(180deg, rgba(15,23,42,.06), rgba(15,23,42,.22));
     }
     html,body{height:100%}
     body{font-family:"Plus Jakarta Sans", system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial; color:var(--ink); background:#f7fafc;}
@@ -24,58 +24,63 @@
     /* Navbar */
     .navbar{backdrop-filter:saturate(160%) blur(6px); background:rgba(255,255,255,.9)!important; border-bottom:1px solid var(--border);}
 
-    /* HERO – tinggi ~1/4 layar, wajah tetap terlihat */
+    /* HERO – ~30–35% layar, fokus agak turun biar meja/laptop terlihat */
     .hero{
       position:relative;
-      min-height:28vh;            /* ~¼ layar */
+      min-height:34vh;            /* ~ 1/3 layar */
       display:flex; align-items:center;
       background-image: var(--hero-overlay), url("hero.jpeg");
       background-size:cover;
-      background-position:center 42%; /* geser fokus sedikit ke bawah agar wajah terlihat */
+      background-position:center 58%; /* turunkan fokus */
       border-bottom:1px solid var(--border);
     }
     .hero .headline{font-weight:800; letter-spacing:.2px; font-size:clamp(22px,2.6vw,28px);}
     .hero .sub{color:#e5e7eb; opacity:.95; font-size:clamp(12px,1.8vw,14px);}
+    .underline-accent{position:relative; display:inline-block}
+    .underline-accent::after{content:""; position:absolute; left:0; right:0; bottom:-6px; height:6px; background:linear-gradient(90deg,var(--brand),var(--brand-2),var(--brand-3)); border-radius:8px; opacity:.95;}
 
-    /* Underline gradasi kecil */
-    .underline-accent{position:relative; display:inline-block;}
-    .underline-accent::after{
-      content:""; position:absolute; left:0; right:0; bottom:-6px; height:6px;
-      background:linear-gradient(90deg,var(--brand),var(--brand-2),var(--brand-3));
-      border-radius:8px; opacity:.95;
-    }
-
-    /* Ribbon quote */
-    .ribbon{background:linear-gradient(90deg,#ef4444,#f97316,#f59e0b); color:#fff; font-weight:800;}
-    .ribbon .inner{padding:14px 0;}
-
-    /* Teams */
+    /* TEAMS */
     .section-title{font-weight:800; letter-spacing:.3px;}
     .team-shot{
-      max-width:520px;           /* diperkecil */
+      max-width:560px;
       border-radius:16px;
       box-shadow:0 20px 50px rgba(2,6,23,.12);
       border:1px solid rgba(2,6,23,.06);
     }
-    .team-list{margin:0; padding:0;}
-    .team-list li{
-      list-style:none; display:flex; align-items:center; gap:.55rem;
-      padding:.42rem .1rem; border-bottom:1px dashed #e5e7eb;
-      font-weight:600;
-    }
-    .team-list li i{color:#16a34a;}
 
-    /* Tabel ringkasan */
+    /* Name chips elegan */
+    .names{
+      display:grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap:.6rem .7rem;
+    }
+    @media (min-width: 992px){
+      .names{grid-template-columns: repeat(3, minmax(0,1fr));}
+    }
+    .chip{
+      display:flex; align-items:center; gap:.5rem;
+      padding:.58rem .75rem;
+      border-radius:999px;
+      background:linear-gradient(180deg,#f8fafc,#eef2ff);
+      border:1px solid #e6e9f5;
+      box-shadow:0 2px 6px rgba(2,6,23,.06);
+      font-weight:600;
+      white-space:nowrap;
+    }
+    .chip i{font-size:14px; color:#64748b}
+
+    /* Ribbon quote (dipindah ke bawah) */
+    .ribbon{background:linear-gradient(90deg,#ef4444,#f97316,#f59e0b); color:#fff; font-weight:800;}
+    .ribbon .inner{padding:14px 0;}
+
+    /* Ringkasan */
     .card-soft{background:var(--panel); border:1px solid var(--border); border-radius:16px; box-shadow:0 12px 28px rgba(2,6,23,.06);}
     .table thead th{background:linear-gradient(90deg,#eef2ff,#e0f2fe); color:#111827; border-bottom:1px solid var(--border);}
     .badge-chip{font-weight:700; border-radius:999px; padding:.35rem .6rem;}
     .badge-up{background:#dcfce7; color:#166534;}
 
-    /* Responsif */
-    @media (max-width: 991.98px){
-      .hero{min-height:32vh; background-position:center 45%;}
-      .team-shot{max-width:100%;}
-    }
+    /* Footer */
+    footer{color:var(--muted); border-top:1px solid var(--border); background:#ffffffc7;}
   </style>
 </head>
 <body>
@@ -95,49 +100,48 @@
     </div>
   </nav>
 
-  <!-- HERO (tipis & fokus wajah) -->
+  <!-- HERO -->
   <header class="hero">
     <div class="container py-2">
-      <div class="row">
-        <div class="col-12 col-lg-7">
-          <h1 class="headline mb-1">
-            <span class="underline-accent">MEET OUR TEAMS</span>
-          </h1>
-          <div class="sub">Tim Penjamin Kualitas SPIP</div>
-        </div>
-      </div>
+      <h1 class="headline mb-1"><span class="underline-accent">MEET OUR TEAMS</span></h1>
+      <div class="sub">Tim Penjamin Kualitas SPIP</div>
     </div>
   </header>
 
-  <!-- QUOTE -->
-  <section class="ribbon">
-    <div class="inner text-center">
-      If the future is yours — <span style="text-decoration:underline">PROVE IT!</span>
+  <!-- TEAMS (judul di kiri, foto di kanan) -->
+  <section class="py-5">
+    <div class="container">
+      <div class="row align-items-start g-4">
+        <!-- LEFT: judul + nama -->
+        <div class="col-lg-6 order-1 order-lg-0">
+          <h2 class="section-title h3 mb-2">MEET OUR TEAMS</h2>
+          <p class="text-secondary mb-3">Tim Penjamin Kualitas SPIP</p>
+
+          <div class="names">
+            <div class="chip"><i class="bi bi-dot"></i> Muhammad Naim</div>
+            <div class="chip"><i class="bi bi-dot"></i> Anita Meilani</div>
+            <div class="chip"><i class="bi bi-dot"></i> Rahmah Febrina</div>
+            <div class="chip"><i class="bi bi-dot"></i> Raeihan Fadilla</div>
+            <div class="chip"><i class="bi bi-dot"></i> Theresia</div>
+            <div class="chip"><i class="bi bi-dot"></i> Dedi Sutrisna Syah Putra</div>
+            <div class="chip"><i class="bi bi-dot"></i> Ganis Purnaningtyas</div>
+            <div class="chip"><i class="bi bi-dot"></i> Hasyin Ghany</div>
+            <div class="chip"><i class="bi bi-dot"></i> Zikra Mardiyyah</div>
+          </div>
+        </div>
+
+        <!-- RIGHT: foto -->
+        <div class="col-lg-6 text-center order-0 order-lg-1">
+          <img src="teams.jpeg" alt="Tim SPIP" class="img-fluid team-shot" onerror="this.style.display='none'">
+        </div>
+      </div>
     </div>
   </section>
 
-  <!-- TEAMS -->
-  <section class="py-5">
-    <div class="container">
-      <div class="row align-items-center g-4">
-        <div class="col-md-6 text-center">
-          <img src="teams.jpeg" alt="Tim SPIP" class="img-fluid team-shot" onerror="this.style.display='none'">
-        </div>
-        <div class="col-md-6">
-          <h2 class="section-title h3 mb-3">MEET OUR TEAMS</h2>
-          <ul class="team-list">
-            <li><i class="bi bi-person-check-fill"></i> Muhammad Naim</li>
-            <li><i class="bi bi-person-check-fill"></i> Anita Meilani</li>
-            <li><i class="bi bi-person-check-fill"></i> Rahmah Febrina</li>
-            <li><i class="bi bi-person-check-fill"></i> Raeihan Fadilla</li>
-            <li><i class="bi bi-person-check-fill"></i> Theresia</li>
-            <li><i class="bi bi-person-check-fill"></i> Dedi Sutrisna Syah Putra</li>
-            <li><i class="bi bi-person-check-fill"></i> Ganis Purnaningtyas</li>
-            <li><i class="bi bi-person-check-fill"></i> Hasyin Ghany</li>
-            <li><i class="bi bi-person-check-fill"></i> Zikra Mardiyyah</li>
-          </ul>
-        </div>
-      </div>
+  <!-- QUOTE di bawah section Teams -->
+  <section class="ribbon">
+    <div class="inner text-center">
+      If the future is yours — <span style="text-decoration:underline">PROVE IT!</span>
     </div>
   </section>
 
@@ -186,7 +190,6 @@
             </tbody>
           </table>
         </div>
-
         <div class="small text-secondary mt-3">
           Keterangan: Angka menunjukkan skor Penjaminan Kualitas (PK). Badge hijau menandakan terjadi peningkatan dibanding tahun sebelumnya.
         </div>
@@ -194,8 +197,7 @@
     </div>
   </main>
 
-  <!-- FOOTER -->
-  <footer class="py-3" style="color:var(--muted); border-top:1px solid var(--border); background:#ffffffc7;">
+  <footer class="py-3">
     <div class="container d-flex flex-column flex-md-row align-items-center justify-content-between gap-2 small">
       <div>© 2025 · Penjamin Kualitas Maturitas SPIP</div>
       <div class="text-secondary">Built with Bootstrap 5</div>
