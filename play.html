@@ -244,122 +244,127 @@
 
   <!-- ================= Quiz Logic ================= -->
   <script>
-    // --- Question bank (SPIP basics; feel free to add more) ---
+    // --- Question bank: 10 soal expert SPIP ---
     const BANK = [
       {
-        tag: "Definisi",
-        q: "Apa tujuan utama SPIP?",
+        tag: "Maturitas",
+        q: "Dalam Penilaian Maturitas SPIP, perbedaan paling mendasar antara Level 4 (Terkelola & Terukur) dan Level 5 (Optimum) adalah…",
         a: 1,
         opts: [
-          "Menyusun anggaran tahunan",
-          "Memastikan kegiatan efektif, efisien, patuh, dan laporan andal",
-          "Meningkatkan gaji pegawai",
-          "Mengganti seluruh SOP lama"
+          "Level 5 telah mendokumentasikan seluruh SOP, sedangkan Level 4 belum",
+          "Level 5 menekankan adaptivitas terhadap perubahan lingkungan organisasi",
+          "Level 4 hanya berfokus pada kepatuhan regulasi, bukan efektivitas",
+          "Level 5 menggunakan auditor eksternal untuk pengujian efektivitas"
         ],
-        explain: "SPIP bertujuan memastikan efektivitas, efisiensi, kepatuhan, dan keandalan pelaporan."
+        explain: "Level 5 (Optimum) bukan hanya efektif, tetapi juga adaptif terhadap perubahan lingkungan organisasi."
       },
       {
-        tag: "Lingkup",
-        q: "Yang dinilai pada setiap parameter terutama adalah…",
-        a: 2,
+        tag: "Maturitas",
+        q: "Strategi sudah relevan & terintegrasi namun implementasi pengendalian belum efektif. Level maturitas yang paling tepat adalah…",
+        a: 1,
         opts: [
-          "Jumlah pegawai yang hadir",
-          "Kelengkapan arsip fisik",
-          "Kebijakan, proses implementasi, dan bukti yang relevan",
-          "Lama berdiri unit organisasi"
+          "Level 2 — Berkembang",
+          "Level 3 — Terdefinisi",
+          "Level 4 — Terkelola & Terukur",
+          "Level 5 — Optimum"
         ],
-        explain: "Penilaian berfokus pada kebijakan, implementasi (proses), dan bukti pendukung."
-      },
-      {
-        tag: "Grade",
-        q: "Ciri grade A yang benar adalah…",
-        a: 0,
-        opts: [
-          "Perbaikan berkelanjutan dan terdokumentasi memberikan dampak ke kinerja",
-          "Baru dikomunikasikan ke pegawai",
-          "Kebijakan dasar tersedia tanpa bukti praktik",
-          "Pelaksanaan belum konsisten di seluruh unit"
-        ],
-        explain: "Grade A menandakan kematangan penerapan dan continuous improvement."
-      },
-      {
-        tag: "Grade",
-        q: "‘Kebijakan telah dikomunikasikan, implementasi masih awal’ paling sesuai dengan grade…",
-        a: 3,
-        opts: ["A","B","C","D"],
-        explain: "Deskripsi tersebut tipikal grade D."
+        explain: "Level 3: strategi relevan & terintegrasi, pengendalian sudah dilaksanakan namun belum efektif."
       },
       {
         tag: "Bukti",
-        q: "Mengapa folder bukti dipisah per grade (A–E)?",
+        q: "Dalam penilaian SPIP, ‘konsistensi bukti’ terutama digunakan untuk…",
         a: 1,
         opts: [
-          "Agar ukuran file merata",
-          "Agar kurasi bukti selaras dengan kedalaman implementasi",
-          "Agar dokumen mudah dihapus",
-          "Agar semua orang tidak bisa mengakses"
+          "Mengukur ketepatan waktu laporan pengendalian",
+          "Menilai keandalan dan keberlanjutan praktik pengendalian",
+          "Menilai kelengkapan administrasi dokumen bukti",
+          "Menentukan validitas laporan keuangan"
         ],
-        explain: "Pemilahan memudahkan menilai kecocokan bukti dengan tingkat kematangan."
+        explain: "Konsistensi bukti = praktik yang andal dan berkelanjutan, bukan sekadar ada dokumen."
       },
       {
-        tag: "Sestama",
-        q: "Peran ‘Rujukan Sestama’ pada aplikasi adalah…",
-        a: 0,
+        tag: "Bukti",
+        q: "Mengapa bukti grade A–E harus dipisahkan dalam pengumpulan dokumen?",
+        a: 2,
         opts: [
-          "Memberikan contoh simpulan/uraian untuk diselaraskan unit lain",
-          "Mengunci semua data agar tidak bisa diubah",
-          "Menghitung skor otomatis dari Drive",
-          "Menonaktifkan parameter yang tidak relevan"
+          "Karena setiap grade merepresentasikan kategori risiko yang berbeda",
+          "Karena reviewer hanya menilai grade A dan B",
+          "Karena pemisahan bukti menjaga keterlacakan dan akurasi penilaian per parameter",
+          "Karena peraturan mewajibkan satu folder per indikator kinerja"
         ],
-        explain: "Rujukan Sestama menjadi benchmark/ contoh untuk penyelarasan."
+        explain: "Pemisahan bukti memudahkan keterlacakan & validasi kecocokan bukti terhadap tingkat kematangan."
+      },
+      {
+        tag: "Tujuan & Efektivitas",
+        q: "Dalam konteks SPIP, ‘Efektivitas dan Efisiensi’ paling terkait dengan…",
+        a: 1,
+        opts: [
+          "Pengendalian atas pelaporan keuangan dan aset negara",
+          "Pencapaian tujuan organisasi melalui pemanfaatan sumber daya secara optimal",
+          "Penyesuaian struktur organisasi dengan perubahan lingkungan",
+          "Pemenuhan audit eksternal sesuai siklus tahunan"
+        ],
+        explain: "Efektivitas/efisiensi = tujuan tercapai dengan sumber daya optimal."
+      },
+      {
+        tag: "Maturitas",
+        q: "Struktur & proses pengendalian telah efektif, namun belum adaptif terhadap perubahan regulasi dan konteks. Ini mencerminkan…",
+        a: 1,
+        opts: [
+          "Level 3 — Terdefinisi",
+          "Level 4 — Terkelola & Terukur",
+          "Level 5 — Optimum",
+          "Level 2 — Berkembang"
+        ],
+        explain: "Level 4: efektif tapi belum adaptif. Level 5: efektif dan adaptif."
       },
       {
         tag: "AoI",
-        q: "Elemen yang PENTING dalam menulis AoI (Area of Improvement) adalah…",
-        a: 2,
-        opts: [
-          "Kalimat panjang umum tanpa penanggung jawab",
-          "Hanya daftar kendala",
-          "Owner, target, dan tenggat yang spesifik",
-          "Menuliskan semua unit organisasi"
-        ],
-        explain: "AoI harus spesifik: siapa (owner), target, dan tenggat waktu."
-      },
-      {
-        tag: "Akses",
-        q: "Agar reviewer dapat membuka bukti di Google Drive, setelan terbaik adalah…",
+        q: "Elemen yang paling menentukan kredibilitas AoI (Area of Improvement) adalah…",
         a: 1,
         opts: [
-          "Private (Restricted)",
-          "Anyone with the link — Viewer",
-          "Editor untuk semua orang",
-          "Hanya pemilik yang dapat melihat"
+          "Banyaknya program yang disebutkan",
+          "Spesifikasi owner, target, dan tenggat yang jelas & terukur",
+          "Penggunaan format/templat dari Sestama",
+          "Tautan Drive yang bersifat “Anyone can view”"
         ],
-        explain: "Set ‘Anyone with the link — Viewer’ memudahkan akses review."
+        explain: "AoI harus spesifik: penanggung jawab, target terukur, dan tenggat waktu."
       },
       {
-        tag: "Implementasi",
-        q: "Contoh indikasi grade C adalah…",
+        tag: "Komponen",
+        q: "Komponen ‘Penetapan Tujuan’ dalam SPIP terutama digunakan untuk menilai…",
         a: 0,
         opts: [
-          "Kebijakan berjalan, bukti implementasi ada namun belum konsisten",
-          "Tidak ada kebijakan",
-          "Sudah ada perbaikan berkelanjutan terdokumentasi",
-          "Baru menyusun rencana awal"
+          "Konsistensi perencanaan dengan indikator kinerja (IKU)",
+          "Keterpaduan laporan audit dengan laporan keuangan tahunan",
+          "Keandalan sistem pelaporan realisasi anggaran",
+          "Efektivitas mekanisme klarifikasi hasil reviu"
         ],
-        explain: "C = implementasi ada tetapi belum konsisten merata."
+        explain: "Penetapan Tujuan menilai kesinambungan tujuan–strategi–IKU sebagai fondasi pengendalian."
       },
       {
-        tag: "Evaluasi",
-        q: "Yang PALING sering menurunkan grade adalah…",
-        a: 3,
+        tag: "Penurunan Grade",
+        q: "Apa konsekuensi umum yang paling sering menyebabkan grade unit turun dalam penilaian SPIP?",
+        a: 1,
         opts: [
-          "Banyaknya rapat",
-          "Jumlah dokumen yang besar",
-          "Perubahan struktur organisasi",
-          "Bukti tidak konsisten/terkini atau tidak ada tindak lanjut"
+          "Dokumen bukti belum ditandatangani pimpinan",
+          "Ketidaksesuaian antara bukti dengan kriteria parameter yang dinilai",
+          "Format laporan berbeda dari templat Sestama",
+          "Tidak ada tautan Drive aktif di setiap parameter"
         ],
-        explain: "Inkonsistensi bukti & tidak ada tindak lanjut atas temuan adalah faktor umum penurun grade."
+        explain: "Kesesuaian bukti terhadap kriteria parameter adalah penentu utama kualitas penilaian."
+      },
+      {
+        tag: "Integrasi",
+        q: "Hubungan SPIP, MRI, dan IEPK dalam kerangka penilaian integratif adalah…",
+        a: 2,
+        opts: [
+          "SPIP menilai efektivitas manajemen risiko, MRI menilai pengendalian korupsi, IEPK menilai efisiensi anggaran",
+          "Ketiganya berdiri sendiri tanpa keterkaitan langsung",
+          "SPIP fokus pengendalian internal, MRI fokus risiko, IEPK fokus pengendalian korupsi — saling melengkapi",
+          "MRI adalah turunan SPIP yang menggantikan IEPK sejak 2021"
+        ],
+        explain: "Ketiganya saling melengkapi: pengendalian internal (SPIP), risiko (MRI), dan anti-korupsi (IEPK)."
       }
     ];
 
@@ -540,6 +545,11 @@
     }
 
     // --- Wire events ---
+    const btnNext = document.getElementById('btnNext');
+    const btnPrev = document.getElementById('btnPrev');
+    const btnClear = document.getElementById('btnClear');
+    const btnRetry = document.getElementById('btnRetry');
+
     btnStart.addEventListener('click', startQuiz);
     btnNext.addEventListener('click', next);
     btnPrev.addEventListener('click', prev);
