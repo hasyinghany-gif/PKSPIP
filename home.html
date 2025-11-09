@@ -121,81 +121,211 @@
   <main class="py-5">
     <div class="container">
 
-      <!-- 2024 -->
-      <section class="compare-card compare-2024">
-        <div class="compare-head">
-          <h4>PERBANDINGAN RINCIAN PENILAIAN PENYELENGGARAAN SISTEM PENGENDALIAN INTERN PEMERINTAH (SPIP) TAHUN 2024</h4>
-        </div>
-        <div class="p-3 p-md-4">
-          <div class="table-responsive">
-            <table class="table align-middle">
-              <thead>
-                <tr>
-                  <th>No</th><th>Fokus Penilaian</th>
-                  <th class="text-center">Hasil Penilaian Mandiri (PM)</th>
-                  <th class="text-center">Hasil Penjaminan Kualitas (PK)</th>
-                  <th class="text-center">Hasil Evaluasi BPKP</th>
-                  <th class="text-center">Naik/Turun (Evaluasi–PK)</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr><td>1</td><td>Maturitas Penyelenggaraan SPIP</td>
-                  <td class="text-center pk-num">4,493</td>
-                  <td class="text-center pk-num">4,170</td>
-                  <td class="text-center pk-num">3,799</td>
-                  <td class="text-center"><span class="delta neg"><i class="bi bi-arrow-down"></i>-0,371</span></td>
-                </tr>
-                <tr><td>2</td><td>Manajemen Risiko Indeks (MRI)</td>
-                  <td class="text-center pk-num">4,277</td>
-                  <td class="text-center pk-num">3,558</td>
-                  <td class="text-center pk-num">3,409</td>
-                  <td class="text-center"><span class="delta neg"><i class="bi bi-arrow-down"></i>-0,149</span></td>
-                </tr>
-                <tr><td>3</td><td>Indeks Efektivitas Pengendalian Korupsi (IEPK)</td>
-                  <td class="text-center pk-num">3,740</td>
-                  <td class="text-center pk-num">3,248</td>
-                  <td class="text-center pk-num">3,232</td>
-                  <td class="text-center"><span class="delta neg"><i class="bi bi-arrow-down"></i>-0,016</span></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </section>
+      <style>
+  :root {
+    --ink:#0f172a; --muted:#64748b;
+    --brand:#2563eb; --brand-2:#7c3aed; --brand-3:#06b6d4;
+    --border:#e5e7eb; --bg:#f9fafb;
+  }
 
-      <!-- 2025 -->
-      <section class="compare-card compare-2025">
-        <div class="compare-head">
-          <h4>PERBANDINGAN RINCIAN PENILAIAN PENYELENGGARAAN SISTEM PENGENDALIAN INTERN PEMERINTAH (SPIP) TAHUN 2025</h4>
-        </div>
-        <div class="p-3 p-md-4">
-          <div class="table-responsive">
-            <table class="table align-middle">
-              <thead>
-                <tr>
-                  <th>No</th><th>Fokus Penilaian</th>
-                  <th class="text-center">Hasil Penilaian Mandiri (PM)</th>
-                  <th class="text-center">Hasil Penjaminan Kualitas (PK)</th>
-                  <th class="text-center">Hasil Evaluasi BPKP</th>
-                  <th class="text-center">Naik/Turun (Evaluasi–PK)</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr><td>1</td><td>Maturitas Penyelenggaraan SPIP</td>
-                  <td class="text-center pk-num">4,560</td><td class="text-center pk-num">4,238</td><td class="text-center pk-num">—</td><td class="text-center">—</td></tr>
-                <tr><td>2</td><td>Manajemen Risiko Indeks (MRI)</td>
-                  <td class="text-center pk-num">4,509</td><td class="text-center pk-num">3,747</td><td class="text-center pk-num">—</td><td class="text-center">—</td></tr>
-                <tr><td>3</td><td>Indeks Efektivitas Pengendalian Korupsi (IEPK)</td>
-                  <td class="text-center pk-num">3,992</td><td class="text-center pk-num">3,908</td><td class="text-center pk-num">—</td><td class="text-center">—</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </section>
+  body {
+    font-family:"Plus Jakarta Sans",sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+  }
 
-      <div class="footer-note mt-4 text-center">Keterangan: Kolom <b>Naik/Turun</b> menunjukkan selisih hasil Evaluasi BPKP terhadap hasil Penjaminan Kualitas (PK).</div>
+  /* === Kartu Tabel === */
+  .compare-card {
+    background:#ffffff;
+    border:1px solid rgba(99,102,241,.12);
+    border-radius:18px;
+    box-shadow:0 10px 30px rgba(2,6,23,.08);
+    overflow:hidden;
+    margin-bottom:2rem;
+  }
+
+  /* === Header Tabel === */
+  .compare-head {
+    padding:18px 22px;
+    font-weight:800;
+    font-size:1.05rem;
+    letter-spacing:.2px;
+    border-bottom:1px solid rgba(99,102,241,.12);
+  }
+  .compare-2024 .compare-head {
+    background:linear-gradient(90deg,#dbeafe 0%,#e0f2fe 100%);
+    color:#0f172a;
+  }
+  .compare-2025 .compare-head {
+    background:linear-gradient(90deg,#dcfce7 0%,#f0fdf4 100%);
+    color:#0f172a;
+  }
+
+  /* === Table Style === */
+  .table {
+    border-collapse:separate;
+    border-spacing:0;
+  }
+  .table thead th {
+    background:linear-gradient(90deg,#f8fafc,#eef2ff);
+    font-weight:700;
+    color:#0f172a;
+    border-bottom:2px solid #e2e8f0;
+    text-align:center;
+    vertical-align:middle;
+  }
+  .table tbody td {
+    border-bottom:1px solid #f1f5f9;
+    vertical-align:middle;
+  }
+  .table tbody tr:last-child td {
+    border-bottom:none;
+  }
+  .table tbody tr:hover {
+    background:linear-gradient(90deg,rgba(37,99,235,.04),rgba(6,182,212,.05));
+    transition:.25s ease;
+  }
+  .table th:first-child, .table td:first-child {
+    border-top-left-radius:10px;
+  }
+
+  /* === Badge Delta === */
+  .delta {
+    display:inline-flex;
+    align-items:center;
+    gap:.25rem;
+    padding:.3rem .65rem;
+    border-radius:999px;
+    font-size:.8rem;
+    font-weight:700;
+    white-space:nowrap;
+  }
+  .delta.neg {
+    background:#fee2e2;
+    color:#991b1b;
+    border:1px solid #fecaca;
+  }
+  .delta.pos {
+    background:#dcfce7;
+    color:#166534;
+    border:1px solid #bbf7d0;
+  }
+
+  /* === Nomor tabel === */
+  .pk-num {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* === Keterangan bawah === */
+  .footer-note {
+    color:var(--muted);
+    font-size:.9rem;
+    text-align:center;
+    margin-top:1.5rem;
+  }
+</style>
+
+<!-- ====== PERBANDINGAN 2024 ====== -->
+<section class="compare-card compare-2024">
+  <div class="compare-head">
+    PERBANDINGAN RINCIAN PENILAIAN PENYELENGGARAAN SISTEM PENGENDALIAN INTERN PEMERINTAH (SPIP) TAHUN 2024
+  </div>
+  <div class="p-3 p-md-4">
+    <div class="table-responsive">
+      <table class="table align-middle">
+        <thead>
+          <tr>
+            <th>No</th>
+            <th>Fokus Penilaian</th>
+            <th>Hasil Penilaian Mandiri (PM)</th>
+            <th>Hasil Penjaminan Kualitas (PK)</th>
+            <th>Hasil Evaluasi BPKP</th>
+            <th>Naik/Turun (Evaluasi–PK)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1</td>
+            <td>Maturitas Penyelenggaraan SPIP</td>
+            <td class="text-center pk-num">4,493</td>
+            <td class="text-center pk-num">4,170</td>
+            <td class="text-center pk-num">3,799</td>
+            <td class="text-center"><span class="delta neg"><i class="bi bi-arrow-down"></i>-0,371</span></td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td>Manajemen Risiko Indeks (MRI)</td>
+            <td class="text-center pk-num">4,277</td>
+            <td class="text-center pk-num">3,558</td>
+            <td class="text-center pk-num">3,409</td>
+            <td class="text-center"><span class="delta neg"><i class="bi bi-arrow-down"></i>-0,149</span></td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <td>Indeks Efektivitas Pengendalian Korupsi (IEPK)</td>
+            <td class="text-center pk-num">3,740</td>
+            <td class="text-center pk-num">3,248</td>
+            <td class="text-center pk-num">3,232</td>
+            <td class="text-center"><span class="delta neg"><i class="bi bi-arrow-down"></i>-0,016</span></td>
+          </tr>
+        </tbody>
+      </table>
     </div>
-  </main>
+  </div>
+</section>
+
+<!-- ====== PERBANDINGAN 2025 ====== -->
+<section class="compare-card compare-2025">
+  <div class="compare-head">
+    PERBANDINGAN RINCIAN PENILAIAN PENYELENGGARAAN SISTEM PENGENDALIAN INTERN PEMERINTAH (SPIP) TAHUN 2025
+  </div>
+  <div class="p-3 p-md-4">
+    <div class="table-responsive">
+      <table class="table align-middle">
+        <thead>
+          <tr>
+            <th>No</th>
+            <th>Fokus Penilaian</th>
+            <th>Hasil Penilaian Mandiri (PM)</th>
+            <th>Hasil Penjaminan Kualitas (PK)</th>
+            <th>Hasil Evaluasi BPKP</th>
+            <th>Naik/Turun (Evaluasi–PK)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1</td>
+            <td>Maturitas Penyelenggaraan SPIP</td>
+            <td class="text-center pk-num">4,560</td>
+            <td class="text-center pk-num">4,238</td>
+            <td class="text-center pk-num">—</td>
+            <td class="text-center">—</td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td>Manajemen Risiko Indeks (MRI)</td>
+            <td class="text-center pk-num">4,509</td>
+            <td class="text-center pk-num">3,747</td>
+            <td class="text-center pk-num">—</td>
+            <td class="text-center">—</td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <td>Indeks Efektivitas Pengendalian Korupsi (IEPK)</td>
+            <td class="text-center pk-num">3,992</td>
+            <td class="text-center pk-num">3,908</td>
+            <td class="text-center pk-num">—</td>
+            <td class="text-center">—</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<div class="footer-note">
+  Keterangan: Kolom <b>Naik/Turun</b> menunjukkan selisih hasil Evaluasi BPKP terhadap hasil Penjaminan Kualitas (PK).
+</div>
 
   <footer class="py-3 mt-4 border-top bg-white">
     <div class="container d-flex flex-column flex-md-row align-items-center justify-content-between gap-2 small text-secondary">
