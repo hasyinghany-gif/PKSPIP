@@ -13,125 +13,67 @@
 
   <style>
     :root{
-      --ink:#0f172a;
-      --muted:#6b7280;
-      --brand:#2563eb;
-      --brand-2:#7c3aed;
-      --brand-3:#06b6d4;
-      --panel:#ffffff;
-      --border:#e5e7eb;
-      --hero-overlay: linear-gradient(180deg, rgba(15,23,42,.05) 0%, rgba(15,23,42,.30) 90%);
+      --ink:#0f172a; --muted:#6b7280;
+      --brand:#2563eb; --brand-2:#7c3aed; --brand-3:#06b6d4;
+      --panel:#ffffff; --border:#e5e7eb;
+      --hero-overlay: linear-gradient(180deg, rgba(15,23,42,.08), rgba(15,23,42,.25));
     }
-
     html,body{height:100%}
-    body{
-      font-family:"Plus Jakarta Sans", system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
-      color:var(--ink);
-      background:#f7fafc;
-    }
+    body{font-family:"Plus Jakarta Sans", system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial; color:var(--ink); background:#f7fafc;}
 
     /* Navbar */
-    .navbar{
-      backdrop-filter:saturate(160%) blur(6px);
-      background:rgba(255,255,255,.85) !important;
-      border-bottom:1px solid var(--border);
-    }
+    .navbar{backdrop-filter:saturate(160%) blur(6px); background:rgba(255,255,255,.9)!important; border-bottom:1px solid var(--border);}
 
-    /* ========== HERO lebih pendek, fokus orang ========== */
+    /* HERO – tinggi ~1/4 layar, wajah tetap terlihat */
     .hero{
       position:relative;
-      min-height:34vh;                 /* sekitar 1/3 layar */
-      display:grid;
-      align-items:center;
+      min-height:28vh;            /* ~¼ layar */
+      display:flex; align-items:center;
       background-image: var(--hero-overlay), url("hero.jpeg");
       background-size:cover;
-      /* geser fokus supaya orang tetap terlihat */
-      background-position: 50% 40%;
+      background-position:center 42%; /* geser fokus sedikit ke bawah agar wajah terlihat */
       border-bottom:1px solid var(--border);
-      overflow:hidden;
     }
-    /* judul diperkecil ~½  */
-    .hero .title{
-      font-weight:800;
-      font-size:clamp(28px, 3.2vw, 42px);
-      letter-spacing:.3px;
-      margin-bottom:.25rem;
-    }
+    .hero .headline{font-weight:800; letter-spacing:.2px; font-size:clamp(22px,2.6vw,28px);}
+    .hero .sub{color:#e5e7eb; opacity:.95; font-size:clamp(12px,1.8vw,14px);}
+
+    /* Underline gradasi kecil */
     .underline-accent{position:relative; display:inline-block;}
     .underline-accent::after{
       content:""; position:absolute; left:0; right:0; bottom:-6px; height:6px;
-      background:linear-gradient(90deg, var(--brand), var(--brand-2), var(--brand-3));
-      border-radius:999px; opacity:.95;
-      animation: slideGlow 2.2s ease-in-out infinite alternate;
-    }
-    @keyframes slideGlow{from{filter:brightness(1)} to{filter:brightness(1.25)}}
-
-    /* Section “feature cards” untuk isi area putih */
-    .features{
-      background:#fff;
-      border-top:1px solid var(--border);
-      border-bottom:1px solid var(--border);
-    }
-    .feature-card{
-      height:100%;
-      border:1px solid var(--border);
-      border-radius:16px;
-      padding:18px;
-      background:linear-gradient(180deg, #ffffff, #fafcff);
-      box-shadow:0 10px 26px rgba(2,6,23,.05);
-      transition: transform .18s ease, box-shadow .18s ease;
-    }
-    .feature-card:hover{
-      transform: translateY(-3px);
-      box-shadow:0 18px 38px rgba(2,6,23,.08);
-    }
-    .feature-badge{
-      display:inline-flex; align-items:center; gap:.5rem;
-      padding:.4rem .7rem; border-radius:999px; font-weight:700;
-      background:linear-gradient(90deg,#eef2ff,#e0f2fe);
-      border:1px solid #e5e7eb;
-      color:#0f172a;
+      background:linear-gradient(90deg,var(--brand),var(--brand-2),var(--brand-3));
+      border-radius:8px; opacity:.95;
     }
 
-    /* Foto tim dikecilkan sedikit */
+    /* Ribbon quote */
+    .ribbon{background:linear-gradient(90deg,#ef4444,#f97316,#f59e0b); color:#fff; font-weight:800;}
+    .ribbon .inner{padding:14px 0;}
+
+    /* Teams */
+    .section-title{font-weight:800; letter-spacing:.3px;}
     .team-shot{
-      max-width:520px; border-radius:16px;
-      box-shadow:0 18px 48px rgba(2,6,23,.14);
+      max-width:520px;           /* diperkecil */
+      border-radius:16px;
+      box-shadow:0 20px 50px rgba(2,6,23,.12);
       border:1px solid rgba(2,6,23,.06);
     }
-
-    /* Quote ribbon */
-    .ribbon{
-      background: linear-gradient(90deg, #ef4444, #f97316, #f59e0b);
-      color:#fff; font-weight:800; letter-spacing:.3px;
-      box-shadow:0 10px 30px rgba(249,115,22,.18) inset;
+    .team-list{margin:0; padding:0;}
+    .team-list li{
+      list-style:none; display:flex; align-items:center; gap:.55rem;
+      padding:.42rem .1rem; border-bottom:1px dashed #e5e7eb;
+      font-weight:600;
     }
-    .ribbon .inner{padding:16px 0; position:relative; overflow:hidden;}
-    .ribbon .spark{
-      position:absolute; inset:0;
-      background: radial-gradient(600px 120px at -10% 50%,rgba(255,255,255,.15),transparent 60%),
-                  radial-gradient(600px 120px at 110% 50%,rgba(255,255,255,.15),transparent 60%);
-      animation: shimmer 9s linear infinite; pointer-events:none;
-    }
-    @keyframes shimmer{0%{transform:translateX(-10%)}50%{transform:translateX(10%)}100%{transform:translateX(-10%)}}
-    .quote{font-size:clamp(15px, 2vw, 18px)}
-    .quote strong{ text-decoration: underline; text-underline-offset: .18em; }
+    .team-list li i{color:#16a34a;}
 
-    /* Table card */
-    .card-soft{background:#fff; border:1px solid var(--border); border-radius:16px; box-shadow:0 12px 28px rgba(2,6,23,.06);}
-    .table thead th{background:linear-gradient(90deg, #eef2ff, #e0f2fe); color:#111827; border-bottom:1px solid var(--border);}
-    .badge-chip{font-weight:700; border-radius:999px; padding:.35rem .55rem;}
-    .badge-up{ background:#dcfce7; color:#166534; }
+    /* Tabel ringkasan */
+    .card-soft{background:var(--panel); border:1px solid var(--border); border-radius:16px; box-shadow:0 12px 28px rgba(2,6,23,.06);}
+    .table thead th{background:linear-gradient(90deg,#eef2ff,#e0f2fe); color:#111827; border-bottom:1px solid var(--border);}
+    .badge-chip{font-weight:700; border-radius:999px; padding:.35rem .6rem;}
+    .badge-up{background:#dcfce7; color:#166534;}
 
-    /* Fade-in util */
-    .fade-in-up{opacity:0; transform:translateY(12px); animation:fadeUp .7s ease .06s forwards;}
-    .fade-in-del-1{animation-delay:.16s} .fade-in-del-2{animation-delay:.26s} .fade-in-del-3{animation-delay:.36s}
-    @keyframes fadeUp{to{opacity:1; transform:none;}}
-
-    .mini-footer{color:var(--muted); border-top:1px solid var(--border); background:#ffffffc7;}
-
+    /* Responsif */
     @media (max-width: 991.98px){
-      .hero{min-height:42vh; background-position:50% 45%;}
+      .hero{min-height:32vh; background-position:center 45%;}
       .team-shot{max-width:100%;}
     }
   </style>
@@ -153,68 +95,61 @@
     </div>
   </nav>
 
-  <!-- HERO (lebih pendek, fokus ke orang) -->
+  <!-- HERO (tipis & fokus wajah) -->
   <header class="hero">
-    <div class="container py-4">
-      <div class="row align-items-center g-4">
-        <div class="col-lg-6 fade-in-up">
-          <h1 class="title">
+    <div class="container py-2">
+      <div class="row">
+        <div class="col-12 col-lg-7">
+          <h1 class="headline mb-1">
             <span class="underline-accent">MEET OUR TEAMS</span>
           </h1>
-          <p class="text-secondary mb-0">Tim Penjamin Kualitas SPIP</p>
-        </div>
-        <div class="col-lg-6 text-center fade-in-up fade-in-del-1">
-          <img src="teams.jpeg" alt="Tim SPIP" class="img-fluid team-shot" onerror="this.style.display='none'">
+          <div class="sub">Tim Penjamin Kualitas SPIP</div>
         </div>
       </div>
     </div>
   </header>
 
-  <!-- FEATURE CARDS (mengisi area putih agar lebih menarik) -->
-  <section class="features py-5">
-    <div class="container">
-      <div class="row g-4">
-        <div class="col-md-4">
-          <div class="feature-card h-100">
-            <div class="feature-badge mb-2"><i class="bi bi-speedometer2"></i> Penilaian Cepat</div>
-            <p class="text-secondary mb-0">Pengisian indikator dan verifikasi lebih ringkas dengan alur kerja yang jelas.</p>
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="feature-card h-100">
-            <div class="feature-badge mb-2"><i class="bi bi-diagram-3"></i> Data Terpadu</div>
-            <p class="text-secondary mb-0">Semua dokumen & bukti dukung terorganisir—mudah dilacak dan diaudit.</p>
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="feature-card h-100">
-            <div class="feature-badge mb-2"><i class="bi bi-graph-up-arrow"></i> Monitoring Real-time</div>
-            <p class="text-secondary mb-0">Progres unit dan capaian PK tersaji real-time untuk keputusan yang cepat.</p>
-          </div>
-        </div>
-      </div>
+  <!-- QUOTE -->
+  <section class="ribbon">
+    <div class="inner text-center">
+      If the future is yours — <span style="text-decoration:underline">PROVE IT!</span>
     </div>
   </section>
 
-  <!-- QUOTE -->
-  <section class="ribbon">
-    <div class="inner text-center position-relative">
-      <div class="spark"></div>
-      <div class="container">
-        <div class="quote fw-800">If the future is yours — <strong>PROVE IT!</strong></div>
+  <!-- TEAMS -->
+  <section class="py-5">
+    <div class="container">
+      <div class="row align-items-center g-4">
+        <div class="col-md-6 text-center">
+          <img src="teams.jpeg" alt="Tim SPIP" class="img-fluid team-shot" onerror="this.style.display='none'">
+        </div>
+        <div class="col-md-6">
+          <h2 class="section-title h3 mb-3">MEET OUR TEAMS</h2>
+          <ul class="team-list">
+            <li><i class="bi bi-person-check-fill"></i> Muhammad Naim</li>
+            <li><i class="bi bi-person-check-fill"></i> Anita Meilani</li>
+            <li><i class="bi bi-person-check-fill"></i> Rahmah Febrina</li>
+            <li><i class="bi bi-person-check-fill"></i> Raeihan Fadilla</li>
+            <li><i class="bi bi-person-check-fill"></i> Theresia</li>
+            <li><i class="bi bi-person-check-fill"></i> Dedi Sutrisna Syah Putra</li>
+            <li><i class="bi bi-person-check-fill"></i> Ganis Purnaningtyas</li>
+            <li><i class="bi bi-person-check-fill"></i> Hasyin Ghany</li>
+            <li><i class="bi bi-person-check-fill"></i> Zikra Mardiyyah</li>
+          </ul>
+        </div>
       </div>
     </div>
   </section>
 
   <!-- RINGKASAN NILAI SPIP -->
-  <main class="py-5">
+  <main class="pb-5">
     <div class="container">
-      <div class="mb-4 text-center fade-in-up">
-        <h2 class="h4 fw-800 mb-1">Rincian Hasil Evaluasi Penilaian Mandiri SPIP</h2>
+      <div class="mb-4 text-center">
+        <h3 class="h4 fw-800 mb-1">Rincian Hasil Evaluasi Penilaian Mandiri SPIP</h3>
         <div class="text-secondary">Tahun <strong>2024</strong> &amp; <strong>2025</strong></div>
       </div>
 
-      <div class="card-soft p-3 p-md-4 fade-in-up fade-in-del-1">
+      <div class="card-soft p-3 p-md-4">
         <div class="table-responsive">
           <table class="table align-middle mb-0">
             <thead>
@@ -251,6 +186,7 @@
             </tbody>
           </table>
         </div>
+
         <div class="small text-secondary mt-3">
           Keterangan: Angka menunjukkan skor Penjaminan Kualitas (PK). Badge hijau menandakan terjadi peningkatan dibanding tahun sebelumnya.
         </div>
@@ -259,7 +195,7 @@
   </main>
 
   <!-- FOOTER -->
-  <footer class="mini-footer py-3">
+  <footer class="py-3" style="color:var(--muted); border-top:1px solid var(--border); background:#ffffffc7;">
     <div class="container d-flex flex-column flex-md-row align-items-center justify-content-between gap-2 small">
       <div>© 2025 · Penjamin Kualitas Maturitas SPIP</div>
       <div class="text-secondary">Built with Bootstrap 5</div>
