@@ -3,69 +3,69 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>PKSPIP – Typing Race PvP</title>
+<title>PKSPIP – Typing Race Arena</title>
 
-<!-- Firebase (compat) -->
+<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-database-compat.js"></script>
 
 <style>
-  :root{--ink:#e5e7eb;--muted:#93a3b8;--brand:#38bdf8;--panel:#0b1220;--border:#1f2937;--good:#34d399;--bad:#ef4444}
-  html,body{margin:0;height:100%;background:#0f172a;color:var(--ink);font-family:Inter,system-ui;overflow:hidden}
-  a.back{position:fixed;left:12px;top:12px;color:#93c5fd;text-decoration:none;z-index:4}
-  .wrap{max-width:960px;margin:74px auto 18px;padding:0 16px}
-  h1{margin:0 0 6px;color:var(--brand)}
-  .sub{margin:0 0 14px;color:#9aa9c2}
-  .top{display:flex;gap:8px;align-items:center;margin-bottom:10px}
-  .btn{background:#111827;border:1px solid var(--border);color:var(--ink);border-radius:10px;padding:8px 12px;cursor:pointer}
-  .btn:hover{border-color:#334155}
-  .badge{padding:4px 8px;border-radius:999px;border:1px solid var(--border);color:#9aa9c2}
-  #arena{display:grid;grid-template-columns:1fr;gap:12px}
-  #text{background:#0b1220;border:1px solid #182131;border-radius:12px;padding:14px;font-size:18px;line-height:1.7;min-height:140px}
-  .word{padding:1px 2px}
-  .current{background:#334155;border-radius:4px}
-  .correct{color:var(--good)}
-  .wrong{color:var(--bad);text-decoration:underline}
-  #input{width:100%;padding:12px 14px;border-radius:12px;border:1px solid #182131;background:#0b1220;color:var(--ink);font-size:16px;outline:none}
-  .row{display:flex;gap:10px;justify-content:space-between;align-items:center}
-  .progress{height:10px;background:#132033;border-radius:999px;overflow:hidden;border:1px solid #182131}
-  .bar-a{height:100%;width:0;background:#93c5fd}
-  .bar-b{height:100%;width:0;background:#f472b6}
-  .stat{font-variant-numeric:tabular-nums}
-  #overlay{position:fixed;inset:0;background:#000a;display:none;align-items:center;justify-content:center;z-index:5}
-  #card{background:#0b1220;border:1px solid #182131;padding:18px 20px;border-radius:16px;min-width:280px;text-align:center}
-  #countdown{font-size:40px;font-weight:700;margin:10px 0 0;text-align:center}
-  @media(min-width:980px){ #arena{grid-template-columns:1fr 1fr} }
+ :root{--ink:#e5e7eb;--muted:#9aa9c2;--brand:#38bdf8;--panel:#0b1220;--border:#1f2937;--good:#34d399;--bad:#ef4444}
+ html,body{margin:0;height:100%;background:#0f172a;color:var(--ink);font-family:Inter,system-ui;overflow:hidden}
+ a.back{position:fixed;left:12px;top:12px;color:#38bdf8;text-decoration:none;z-index:4}
+ .wrap{max-width:960px;margin:74px auto 18px;padding:0 16px}
+ h1{margin:0 0 6px;color:var(--brand)}
+ .sub{margin:0 0 14px;color:#9aa9c2}
+ .top{display:flex;gap:8px;align-items:center;margin-bottom:10px}
+ .btn{background:#111827;border:1px solid var(--border);color:var(--ink);border-radius:10px;padding:8px 12px;cursor:pointer}
+ .btn:hover{border-color:#334155}
+ .badge{padding:4px 8px;border-radius:999px;border:1px solid var(--border);color:#9aa9c2}
+ #arena{display:grid;grid-template-columns:1fr;gap:12px}
+ #text{background:#0b1220;border:1px solid #182131;border-radius:12px;padding:14px;font-size:18px;line-height:1.7;min-height:140px}
+ .word{padding:1px 2px}
+ .current{background:#334155;border-radius:4px}
+ .correct{color:var(--good)}
+ .wrong{color:var(--bad);text-decoration:underline}
+ #input{width:100%;padding:12px 14px;border-radius:12px;border:1px solid #182131;background:#0b1220;color:var(--ink);font-size:16px;outline:none}
+ .row{display:flex;gap:10px;justify-content:space-between;align-items:center}
+ .progress{height:10px;background:#132033;border-radius:999px;overflow:hidden;border:1px solid #182131}
+ .bar-a{height:100%;width:0;background:#93c5fd}
+ .bar-b{height:100%;width:0;background:#f472b6}
+ .bar-c{height:100%;width:0;background:#34d399}
+ .bar-d{height:100%;width:0;background:#fbbf24}
+ .stat{font-variant-numeric:tabular-nums}
+ #overlay{position:fixed;inset:0;background:#000a;display:none;align-items:center;justify-content:center;z-index:5}
+ #card{background:#0b1220;border:1px solid #182131;padding:18px 20px;border-radius:16px;min-width:280px;text-align:center}
+ #countdown{font-size:40px;font-weight:700;margin:10px 0 0;text-align:center}
+ @media(min-width:980px){ #arena{grid-template-columns:1fr 1fr} }
 </style>
 </head>
 <body>
-<a class="back" href="../main.html">⟵ Kembali</a>
+<a href="../main.html" class="back">⟵ Kembali</a>
 <div class="wrap">
   <div class="top">
-    <h1 style="margin-right:auto">Typing Race — PvP</h1>
+    <h1>Typing Race Arena</h1>
     <span class="badge" id="roomBadge">room: -</span>
     <button class="btn" id="seatA">Claim A</button>
     <button class="btn" id="seatB">Claim B</button>
-    <button class="btn" id="readyBtn">Ready</button>
+    <button class="btn" id="seatC">Claim C</button>
+    <button class="btn" id="seatD">Claim D</button>
+    <button class="btn" id="quickBtn">Quick Match</button>
     <button class="btn" id="startBtn">Start</button>
   </div>
-  <p class="sub">Masuk room yang sama, ambil kursi A/B. Tekan <b>Ready</b> lalu <b>Start</b> (oleh siapa saja). Countdown 5 detik lalu balapan sampai akhir teks!</p>
+  <p class="sub">Masuk room yang sama, ambil kursi A-D. Tekan Ready (otomatis saat duduk) lalu tekan <b>Start</b> (oleh siapa saja). Countdown 5 detik lalu balapan mengetik!</p>
 
-  <div class="row">
-    <div class="badge" id="seatInfo">A: - | B: -</div>
-    <div class="stat">⏱ <span id="timer">60</span>s | WPM: <span id="wpm">0</span> | Akurasi: <span id="acc">0%</span> | Giliran: <span id="phase">lobby</span></div>
+  <div class="row" style="margin-bottom:12px;">
+    <div class="badge" id="seatInfo">A:- | B:- | C:- | D:-</div>
+    <div class="stat">⏱ <span id="timer">60</span>s | WPM: <span id="wpm">0</span> | Akurasi: <span id="acc">0%</span> | Fase: <span id="phase">lobby</span></div>
   </div>
 
   <div id="arena">
-    <div>
-      <div class="row" style="margin:6px 0 6px"><b>Player A</b><span id="nameA" class="badge">-</span></div>
-      <div class="progress"><div class="bar-a" id="barA"></div></div>
-    </div>
-    <div>
-      <div class="row" style="margin:6px 0 6px"><b>Player B</b><span id="nameB" class="badge">-</span></div>
-      <div class="progress"><div class="bar-b" id="barB"></div></div>
-    </div>
+    <div><b>A</b> <span id="nameA" class="badge">-</span> <div class="progress"><div class="bar-a" id="barA"></div></div></div>
+    <div><b>B</b> <span id="nameB" class="badge">-</span> <div class="progress"><div class="bar-b" id="barB"></div></div></div>
+    <div><b>C</b> <span id="nameC" class="badge">-</span> <div class="progress"><div class="bar-c" id="barC"></div></div></div>
+    <div><b>D</b> <span id="nameD" class="badge">-</span> <div class="progress"><div class="bar-d" id="barD"></div></div></div>
   </div>
 
   <div id="text" style="margin-top:12px"></div>
@@ -74,7 +74,6 @@
   <div id="countdown"></div>
 </div>
 
-<!-- Winner / finish -->
 <div id="overlay">
   <div id="card">
     <h2 id="title">Hasil</h2>
@@ -87,242 +86,270 @@
 </div>
 
 <script>
-/* ========= Firebase ========= */
+// ===== Firebase config =====
 const firebaseConfig = {
-  apiKey: "AIzaSyDl-YQJ7gQuOZ0QXtdjIxLGlv2AwBTj0dU",
-  authDomain: "shooter-fd9ba.firebaseapp.com",
-  databaseURL: "https://shooter-fd9ba-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "shooter-fd9ba",
-  storageBucket: "shooter-fd9ba.firebasestorage.app",
-  messagingSenderId: "735948321115",
-  appId: "1:735948321115:web:aab8d41e506535bf5eea7e",
-  measurementId: "G-MNC788Q7YD"
+  apiKey: "PASTE_API_KEY",
+  authDomain: "PROJECT_ID.firebaseapp.com",
+  databaseURL: "https://PROJECT_ID-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "PROJECT_ID",
+  appId: "1:XXXX:web:YYYY"
 };
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db   = firebase.database();
 
-/* ========= Room paths ========= */
+// ===== Paths =====
 const qp = new URLSearchParams(location.search);
 const roomId = qp.get('room') || 'room-1';
-const base   = db.ref(`rooms/${roomId}/raceTyping`);
-const seats  = base.child('seats');           // A / B
-const state  = base.child('state');           // textIndex, startedAt, duration, phase
-const prog   = base.child('progress');        // per uid {name, chars, total, wpm, acc, finished}
-document.getElementById('roomBadge').textContent = 'room: ' + roomId;
+const base   = db.ref(`rooms/${roomId}/arenaTyping`);
+const seats  = base.child('seats');
+const state  = base.child('state');
+const progress= base.child('progress');
+document.getElementById('roomBadge').textContent='room: '+roomId;
 
-/* ========= Local state ========= */
-let uid=null, meName='Player', mySeat=null;   // 'A'|'B'|null
-let phase='lobby';                            // lobby|countdown|running|ended
-let duration=60, startedAt=0;                 // ms (epoch)
-let interval = null, timeLeft = 60;
-let texts = [
-`Typing fast is not just speed; accuracy and rhythm matter too.`,
-`Practice every day to build muscle memory and consistency.`,
-`Light hands and steady breathing help you type more smoothly.`,
-`Be patient; small progress every session compounds over time.`
-];
-let textIndex = 0, words=[], curIdx=0, typed=0, correct=0, wrong=0, totalChars=0, myChars=0;
-const el = {
-  text: document.getElementById('text'),
-  input: document.getElementById('input'),
-  wpm: document.getElementById('wpm'),
-  acc: document.getElementById('acc'),
-  timer: document.getElementById('timer'),
-  phase: document.getElementById('phase'),
-  nameA: document.getElementById('nameA'),
-  nameB: document.getElementById('nameB'),
-  barA: document.getElementById('barA'),
-  barB: document.getElementById('barB'),
-  seatInfo: document.getElementById('seatInfo'),
-  countdown: document.getElementById('countdown'),
-  overlay: document.getElementById('overlay'),
-  result: document.getElementById('result'),
-  title: document.getElementById('title')
-};
+// ===== Local vars =====
+let uid, meName='Player', mySeat=null;
+let phase='lobby'; let duration=60; let startedAt=0;
+let textData='', words=[], curIdx=0, typed=0, correct=0, wrong=0, totalChars=0, myChars=0;
+let interval=null;
 
-/* ========= Auth ========= */
+// UI refs
+const el={ timer:document.getElementById('timer'), wpm:document.getElementById('wpm'),
+           acc:document.getElementById('acc'), phase:document.getElementById('phase'),
+           countdown:document.getElementById('countdown'),
+           nameA:document.getElementById('nameA'),
+           nameB:document.getElementById('nameB'),
+           nameC:document.getElementById('nameC'),
+           nameD:document.getElementById('nameD'),
+           barA:document.getElementById('barA'),
+           barB:document.getElementById('barB'),
+           barC:document.getElementById('barC'),
+           barD:document.getElementById('barD'),
+           seatInfo:document.getElementById('seatInfo'),
+           result:document.getElementById('result'), title:document.getElementById('title'), overlay:document.getElementById('overlay') };
+
+// ===== Auth =====
 auth.onAuthStateChanged(async u=>{
   if(!u) await auth.signInAnonymously();
   uid = auth.currentUser.uid;
   meName = 'User-'+uid.slice(0,4);
-
-  // presence cleanup for seat
-  ['A','B'].forEach(s=>{
-    seats.child(s).on('value',snap=>{
-      const v=snap.val();
-      if(v && v.uid===uid){ seats.child(s).onDisconnect().remove(); }
-    });
-  });
-
-  bindListeners();
+  seats.on('value',snap=>{updateSeatsUI(snap.val()||{});});
+  state.on('value',snap=>{handleState(snap.val());});
+  progress.on('value',snap=>{updateProgressUI(snap.val()||{});});
 });
 
-/* ========= UI buttons ========= */
-document.getElementById('seatA').onclick = ()=> seats.transaction(cur=>{cur=cur||{}; if(!cur.A)cur.A={uid, name:meName}; return cur;});
-document.getElementById('seatB').onclick = ()=> seats.transaction(cur=>{cur=cur||{}; if(!cur.B)cur.B={uid, name:meName}; return cur;});
-document.getElementById('readyBtn').onclick = ()=> prog.child(uid).update({name:meName, ready:true, ts:Date.now()});
-document.getElementById('startBtn').onclick = async ()=>{
-  // pilih textIndex jika belum ada; hitung mulai 5 detik dari sekarang
-  const now = Date.now();
-  await state.set({
-    textIndex: textIndex || 0,
-    startedAt: now + 5000,
-    duration: duration,
-    phase: 'countdown',
-    ts: firebase.database.ServerValue.TIMESTAMP
-  });
-};
-document.getElementById('again').onclick = async ()=>{
-  // reset progress pribadi
-  await prog.child(uid).set({name:meName, ready:false, chars:0, total:totalChars, wpm:0, acc:0, finished:false, ts:Date.now()});
-  el.overlay.style.display='none';
-  el.input.value=''; el.input.disabled=true;
-  curIdx=0; typed=correct=wrong=myChars=0; highlight();
-  // biarkan host menekan Start lagi
-};
+// ===== Seat buttons =====
+document.getElementById('seatA').onclick = ()=>claimSeat('A');
+document.getElementById('seatB').onclick = ()=>claimSeat('B');
+document.getElementById('seatC').onclick = ()=>claimSeat('C');
+document.getElementById('seatD').onclick = ()=>claimSeat('D');
 
-/* ========= Realtime listeners ========= */
-function bindListeners(){
-  seats.on('value',snap=>{
-    const v=snap.val()||{};
-    const a=v.A?v.A.name:'-'; const b=v.B?v.B.name:'-';
-    el.nameA.textContent=a; el.nameB.textContent=b;
-    el.seatInfo.textContent=`A: ${a} | B: ${b}`;
-    mySeat = (v.A && v.A.uid===uid) ? 'A' : (v.B && v.B.uid===uid ? 'B' : null);
-  });
+document.getElementById('quickBtn').onclick = ()=>startQuickMatch();
+document.getElementById('startBtn').onclick = ()=>startMatch();
 
-  state.on('value',snap=>{
-    const s=snap.val();
-    if(!s){ // init lobby default
-      state.set({textIndex:0, startedAt:0, duration:60, phase:'lobby', ts:firebase.database.ServerValue.TIMESTAMP});
-      return;
-    }
-    textIndex = s.textIndex||0;
-    duration  = s.duration||60;
-    startedAt = s.startedAt||0;
-    phase     = s.phase||'lobby';
-    el.phase.textContent = phase;
-    if(phase==='lobby'){ loadText(textIndex); el.input.disabled=true; el.countdown.textContent=''; clearInterval(interval); el.timer.textContent=duration; }
-    if(phase==='countdown'){ loadText(textIndex); runCountdown(); }
-    if(phase==='running'){ loadText(textIndex); startRun(); }
-    if(phase==='ended'){ finishRace('Sesi berakhir.'); }
-  });
+document.getElementById('again').onclick = ()=>{resetLocal();};
 
-  prog.on('value',snap=>{
-    const data=snap.val()||{};
-    // progress bar dari dua seat jika ada
-    const pA = getSeatUser('A', data), pB = getSeatUser('B', data);
-    const pctA = pA ? Math.min(100, Math.round((pA.chars||0)/(pA.total||1)*100)) : 0;
-    const pctB = pB ? Math.min(100, Math.round((pB.chars||0)/(pB.total||1)*100)) : 0;
-    el.barA.style.width = pctA+'%';
-    el.barB.style.width = pctB+'%';
-
-    // jika salah satu finished terlebih dahulu, umumkan pemenang (klien-side)
-    const finA = pA && pA.finished, finB = pB && pB.finished;
-    if(phase==='running' && (finA || finB)){
-      const winner = finA && finB ? 'Seri!' : (finA ? 'Pemenang: Player A' : 'Pemenang: Player B');
-      finishRace(winner);
-      state.update({phase:'ended'});
-    }
+// ===== Functions =====
+async function claimSeat(s){
+  await seats.transaction(cur=>{
+    cur=cur||{};
+    if(!cur[s]) cur[s]={uid, name:meName};
+    return cur;
   });
 }
-function getSeatUser(seatName, data){
-  // cari uid yang menduduki seat tsb
-  return seats.child(seatName).get().then(()=>{}); // placeholder (tidak dipakai di fungsi ini)
+function updateSeatsUI(v){
+  const na = v.A ? v.A.name : '-';
+  const nb = v.B ? v.B.name : '-';
+  const nc = v.C ? v.C.name : '-';
+  const nd = v.D ? v.D.name : '-';
+  el.nameA.textContent=na; el.nameB.textContent=nb;
+  el.nameC.textContent=nc; el.nameD.textContent=nd;
+  el.seatInfo.textContent=`A:${na} | B:${nb} | C:${nc} | D:${nd}`;
+  mySeat = (v.A && v.A.uid===uid) ? 'A'
+         : (v.B && v.B.uid===uid) ? 'B'
+         : (v.C && v.C.uid===uid) ? 'C'
+         : (v.D && v.D.uid===uid) ? 'D'
+         : null;
 }
 
-/* ========= Text / game logic ========= */
-function loadText(idx){
-  const t = texts[idx % texts.length];
-  const ws = t.split(' ');
-  words = ws;
-  totalChars = t.length;
-  el.text.innerHTML = ws.map((w,i)=>`<span class="word" id="w${i}">${w}</span>`).join(' ');
+// Load text sample
+const texts=[
+`Typing fast is not just about speed; accuracy and rhythm matter too.`,
+`Practice every day to build muscle memory and consistency.`,
+`Light hands and steady breathing help you type more smoothly.`,
+`Be patient; small progress every session compounds over time.`
+];
+function loadText(){
+  textData=texts[Math.floor(Math.random()*texts.length)];
+  words = textData.split(' ');
+  totalChars = textData.length;
+  document.getElementById('text').innerHTML = words.map((w,i)=>`<span class="word" id="w${i}">${w}</span>`).join(' ');
+  curIdx=typed=correct=wrong=myChars=0;
   highlight();
 }
+
 function highlight(){
   document.querySelectorAll('.word').forEach(n=>n.classList.remove('current'));
   const cur = document.getElementById('w'+curIdx);
   if(cur) cur.classList.add('current');
 }
-el.input.addEventListener('keydown', (e)=>{
+
+document.getElementById('input').addEventListener('keydown', e=>{
   if(phase!=='running') return;
   if(e.key===' '){
     e.preventDefault();
-    const val = el.input.value.trim();
+    const val = e.target.value.trim();
     const target = words[curIdx]||'';
     typed++;
-    if(val===target){ correct++; mark('correct'); myChars += target.length + 1; }
-    else            { wrong++;   mark('wrong');   myChars += Math.max(val.length, target.length) + 1; }
-    curIdx++; el.input.value=''; highlight();
-    updateHUD();
-    pushProgress(false);
-    if(curIdx>=words.length){ // finish first
-      pushProgress(true); 
-      finishRace('Selesai lebih dulu!');
+    if(val===target){ correct++; mark('correct'); myChars += target.length +1; }
+    else { wrong++; mark('wrong'); myChars += Math.max(val.length, target.length)+1; }
+    curIdx++; e.target.value=''; highlight();
+    updateHUD(); pushProgress(false);
+    if(curIdx>=words.length){
+      pushProgress(true); finishRace('Selesai lebih dulu!');
       state.update({phase:'ended'});
     }
   }
 });
 function mark(cls){
-  const n = document.getElementById('w'+curIdx);
+  const n=document.getElementById('w'+curIdx);
   if(n) n.classList.add(cls);
 }
+
 function updateHUD(){
-  const secs = Math.max(1, (duration - (Date.now()-startedAt)/1000));
-  const wpm = Math.max(0, Math.round(correct / ((Math.max(0.1,(duration-secs))/60))));
+  const sec = Math.max(1, duration - Math.floor((Date.now()-startedAt)/1000));
+  const wpm = Math.round(correct / ((duration - sec)/60));
   const acc = typed ? Math.round((correct/typed)*100) : 0;
   el.wpm.textContent = wpm;
-  el.acc.textContent = acc + '%';
+  el.acc.textContent = acc+'%';
+  el.timer.textContent = sec;
 }
-function pushProgress(finished){
-  const wpm = parseInt(el.wpm.textContent)||0;
-  const acc = parseInt((typed? (correct/typed)*100:0));
-  prog.child(uid).update({
-    name: meName, chars: myChars, total: totalChars, wpm, acc, finished: !!finished, ts: Date.now()
+
+async function pushProgress(finished){
+  const wpm = parseInt(el.wpm.textContent) || 0;
+  const acc = parseInt(el.acc.textContent) || 0;
+  await progress.child(uid).set({name:meName, chars:myChars, total:totalChars, wpm, acc, finished, ts:Date.now()});
+}
+
+function updateProgressUI(val){
+  const pa = val[Object.keys(val)[0]]; // simplifikasi utk 2–4 pemain
+  const keys = Object.keys(val);
+  keys.forEach((uid2,i)=>{
+    const bar = document.getElementById('bar'+['A','B','C','D'][i]);
+    const p = val[uid2];
+    const pct = p.chars && p.total ? Math.min(100, Math.round(p.chars/p.total*100)) : 0;
+    bar.style.width = pct+'%';
   });
 }
 
-/* ========= Countdown, start, finish ========= */
-function runCountdown(){
-  el.input.value=''; el.input.disabled=true;
-  const ms = Math.max(0, startedAt - Date.now());
-  let n = Math.ceil(ms/1000);
-  el.countdown.textContent = n;
-  const t = setInterval(()=>{
-    n--; if(n<=0){ clearInterval(t); state.update({phase:'running'}); return; }
-    el.countdown.textContent = n;
-  },1000);
+// ===== Match flow =====
+async function startQuickMatch(){
+  // “Quick match” = set phase to countdown & pick textIndex
+  await state.update({ textIndex:0, startedAt:Date.now()+5000, duration:60, phase:'countdown' });
 }
-function startRun(){
-  el.countdown.textContent='';
-  timeLeft = duration;
-  el.timer.textContent = timeLeft;
-  el.input.disabled=false; el.input.focus();
-  startedAt = startedAt || Date.now();
-  clearInterval(interval);
-  interval = setInterval(()=>{
-    const remain = Math.max(0, Math.ceil(duration - (Date.now()-startedAt)/1000));
-    el.timer.textContent = remain;
-    updateHUD();
-    if(remain<=0){
-      clearInterval(interval);
-      pushProgress(false);
-      finishRace('Waktu habis.');
-      state.update({phase:'ended'});
-    }
-  },250);
+async function startMatch(){
+  await state.update({ textIndex:0, startedAt:Date.now()+5000, duration:60, phase:'countdown' });
 }
-function finishRace(message){
-  el.input.disabled=true;
-  el.title.textContent = 'Hasil';
-  el.result.textContent = `${message}  WPM: ${el.wpm.textContent}, Akurasi: ${el.acc.textContent}`;
-  el.overlay.style.display='flex';
+function handleState(s){
+  if(!s){ state.set({textIndex:0, startedAt:0, duration:60, phase:'lobby'}); loadText(); return; }
+  phase = s.phase||'lobby';
+  el.phase.textContent = phase;
+  duration = s.duration || 60;
+  if(phase==='lobby'){
+    loadText();
+    document.getElementById('input').disabled=true;
+    el.countdown.textContent='';
+    clearInterval(interval);
+  }
+  if(phase==='countdown'){
+    startCountdown(s.startedAt);
+  }
+  if(phase==='running'){
+    loadText();
+    document.getElementById('input').disabled=false;
+    document.getElementById('input').focus();
+    startedAt = s.startedAt;
+    interval = setInterval(()=>{
+      const rem = Math.max(0, Math.ceil(duration - ((Date.now()-startedAt)/1000)));
+      el.timer.textContent = rem;
+      updateHUD();
+      if(rem<=0){
+        clearInterval(interval);
+        pushProgress(false);
+        finishRace('Waktu habis.');
+        state.update({phase:'ended'});
+      }
+    },200);
+  }
+  if(phase==='ended'){
+    finishRace('Sesi selesai.');
+  }
 }
 
-/* ========= Utilities ========= */
-function setPhase(p){ phase=p; el.phase.textContent=p; }
+function startCountdown(ts){
+  document.getElementById('input').disabled=true;
+  const update = ()=>{
+    const now = Date.now();
+    const diff = Math.max(0, Math.ceil((ts - now)/1000));
+    el.countdown.textContent = diff;
+    if(diff<=0){
+      clearInterval(interval);
+      state.update({phase:'running'});
+      return;
+    }
+    requestAnimationFrame(update);
+  };
+  update();
+}
+
+function finishRace(msg){
+  document.getElementById('input').disabled=true;
+  el.title.textContent='Hasil';
+  el.result.textContent = `${msg}`;
+  el.overlay.style.display='flex';
+  // update rating sederhana
+  updateRatings();
+}
+
+async function updateRatings(){
+  const lbRef = db.ref("leaderboard");
+  const lbSnap = await lbRef.once("value");
+  const lb = lbSnap.val()||{};
+  const K = 25;
+  const players = await seats.get().then(s=>s.val()||{});
+  const list = Object.entries(players).filter(([s,p])=>p && p.uid);
+  const finished = await progress.once("value").then(s=>s.val()||{});
+  if(list.length<2) return;
+
+  // find best wpm from finished
+  let bestUid=null, bestWpm=-1;
+  list.forEach(([seat,p],i)=>{
+    const uid2 = p.uid;
+    const rec = finished[uid2];
+    if(rec && rec.wpm>bestWpm){ bestWpm=rec.wpm; bestUid=uid2; }
+  });
+  const losers = list.map(([seat,p])=>p.uid).filter(id=>id!==bestUid);
+  if(!bestUid) return;
+
+  // ELO-ish
+  function exp(a,b){ return 1/(1+10**((b-a)/400)); }
+  const winner = lb[bestUid]||{name:meName, rating:1000, wins:0, losses:0};
+
+  for(const loserUid of losers){
+    const loser = lb[loserUid]||{name:"User-"+loserUid.slice(0,4), rating:1000, wins:0, losses:0};
+    const eW = exp(winner.rating, loser.rating);
+    const eL = exp(loser.rating, winner.rating);
+    const newW = Math.round(winner.rating + K*(1 - eW));
+    const newL = Math.round(loser.rating + K*(0 - eL));
+    lb[bestUid]={ name:winner.name, rating:newW, wins:(winner.wins||0)+1, losses: winner.losses||0 };
+    lb[loserUid]={ name:loser.name, rating:newL, wins:loser.wins||0, losses:(loser.losses||0)+1 };
+  }
+
+  await lbRef.set(lb);
+}
+
+// ===== End =====
+loadText();
 </script>
 </body>
 </html>
