@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="id" data-theme="auto">
+<html lang="id">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -17,130 +17,75 @@
   <link rel="preconnect" href="https://drive.google.com" crossorigin>
 
   <style>
-    /* ================= THEME PRESETS + TOKENS ================= */
     :root{
-      --font:'Inter',system-ui,-apple-system,Segoe UI,Roboto,'Helvetica Neue',Arial,'Noto Sans';
-
-      /* tinta & latar */
-      --ink:#0f172a; --muted:#64748b;
-      --bg:#f7f9fc; --panel:#ffffff; --border:#e6ebf5;
-
-      /* gradient brand (Aurora default) */
-      --grad-1:#16a085; --grad-2:#6366f1; /* teal → indigo */
-      --accent:#16a085;
-
-      /* efek */
-      --ring:0 10px 30px rgba(82,92,235,.12);
-
-      /* status */
-      --ok:#16a34a; --warn:#f59e0b; --alert:#ef4444; --info:#3b82f6;
-
-      /* Grade pills */
-      --gA:#22c55e; --gB:#3b82f6; --gC:#f59e0b; --gD:#fb923c; --gE:#ef4444;
+      --brand:#0d6efd;
+      --grade-a:#2ecc71; /* A */
+      --grade-b:#a3e635; /* B */
+      --grade-c:#facc15; /* C */
+      --grade-d:#f97316; /* D */
+      --grade-e:#ef4444; /* E */
     }
-    /* Sunset theme */
-    html[data-theme="sunset"]{
-      --grad-1:#ff7a59; --grad-2:#8b5cf6; --accent:#ff7a59;
-    }
-    /* Midnight (dark) */
-    html[data-theme="midnight"]{
-      --ink:#e5e7eb; --muted:#9aa4b2;
-      --bg:#0b1020; --panel:#0f1426; --border:#1c2442;
-      --grad-1:#22d3ee; --grad-2:#a78bfa; --accent:#22d3ee;
-    }
-
     html,body{height:100%}
     body{
-      font-family:var(--font);
-      color:var(--ink);
-      background:linear-gradient(180deg,var(--bg),#eef3ff 60%,#eefbf7);
+      font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial,"Noto Sans";
+      background:#f8f9fa;
     }
 
-    /* ======= UTILITIES / COMPONENTS ======= */
-    .hero-title{
-      background:linear-gradient(92deg,var(--grad-1),var(--grad-2));
-      -webkit-background-clip:text;background-clip:text;color:transparent;
+    /* LOGIN */
+    #login-section{
+      display:flex;align-items:center;justify-content:center;min-height:100vh;
+      background:linear-gradient(145deg,#e9f2ff,#f9fafb);
+      padding:24px;
     }
-    .muted{color:var(--muted)}
-    .glass{background:rgba(255,255,255,.65); backdrop-filter:saturate(160%) blur(8px); border:1px solid var(--border); border-radius:1rem;}
-    html[data-theme="midnight"] .glass{background:rgba(16,22,45,.5);}
-
-    /* Ribbon progress (visual tambahan) */
-    .ribbon{height:14px;border-radius:999px;background:#e9eefb;overflow:hidden}
-    html[data-theme="midnight"] .ribbon{background:#17203f}
-    .ribbon > .bar{
-      height:100%; width:0%; background:linear-gradient(90deg,var(--grad-1),var(--grad-2));
-      transition:width .6s ease; position:relative;
+    .login-card{
+      width:100%;max-width:400px;background:#fff;border-radius:16px;
+      box-shadow:0 12px 28px rgba(13,110,253,.08);padding:2rem;border:1px solid #eef2f7;
     }
-    .ribbon > .bar::after{
-      content:""; position:absolute; inset:0;
-      background:linear-gradient(90deg,transparent,rgba(255,255,255,.35),transparent);
-      transform:translateX(-100%); animation:shine 2.8s linear infinite;
+    .login-card .btn{width:100%;}
+    .login-card a{cursor:pointer;}
+
+    /* APP */
+    .sticky-toolbar{position:sticky;top:0;z-index:1030}
+    .criteria-box{max-height:180px;overflow-y:auto}
+    .form-hint{font-size:.85rem;color:#6c757d}
+    .brand-row img{height:40px;object-fit:contain}
+
+    .badge[data-grade]{
+      border-radius:999px;
+      padding:.45rem .75rem;
+      font-weight:600;
+      min-width:2.25rem;
+      display:inline-block;
     }
-    @keyframes shine{to{transform:translateX(100%)}}
+    .badge[data-grade="A"]{ background:var(--grade-a) !important; color:#fff !important; }
+    .badge[data-grade="B"]{ background:var(--grade-b) !important; color:#111 !important; }
+    .badge[data-grade="C"]{ background:var(--grade-c) !important; color:#111 !important; }
+    .badge[data-grade="D"]{ background:var(--grade-d) !important; color:#fff !important; }
+    .badge[data-grade="E"]{ background:var(--grade-e) !important; color:#fff !important; }
 
-    /* Table look */
-    .table-wrap{border:1px solid var(--border); border-radius:1rem; overflow:hidden; background:var(--panel)}
-    .table{margin:0;}
-    .table thead th{position:sticky; top:0; background:#f8fbff; color:#1f2a44; font-weight:700;}
-    html[data-theme="midnight"] .table thead th{background:#111a33; color:#d8def2;}
-    .table tbody tr:nth-child(even){background:rgba(99,102,241,.03)}
-    .table tbody tr:hover{background:rgba(99,102,241,.07); transform:translateY(-1px)}
-    .table tbody tr{transition:background .15s ease, transform .15s ease}
-
-    /* Icon-only soft tiles */
-    .tile-btn{
-      display:inline-flex; align-items:center; justify-content:center;
-      width:38px; height:38px; border-radius:14px; background:var(--panel);
-      border:1px solid var(--border); box-shadow:0 6px 20px rgba(2,6,23,.06);
-      transition:transform .12s ease, box-shadow .12s ease, border-color .12s;
-    }
-    .tile-btn:hover{transform:translateY(-2px); box-shadow:var(--ring); border-color:#c7d2fe99}
-    .tile-edit{color:#2563eb;}     /* biru */
-    .tile-del{color:#ef4444;}      /* merah */
-    .tile-suspend{color:#d97706;}  /* amber */
-    .tile-activate{color:#16a34a;} /* hijau */
-
-    /* Badges */
-    .badge-chip{border-radius:999px; font-weight:600; padding:.35rem .6rem;}
-    .badge-status{background:color-mix(in srgb, var(--ok) 12%, transparent); color:var(--ok); border:1px solid color-mix(in srgb,var(--ok) 26%, transparent)}
-    .pill-A{background:color-mix(in srgb,var(--gA) 12%,transparent); color:var(--gA); border:1px solid color-mix(in srgb,var(--gA) 30%,transparent)}
-    .pill-B{background:color-mix(in srgb,var(--gB) 12%,transparent); color:var(--gB); border:1px solid color-mix(in srgb,var(--gB) 30%,transparent)}
-    .pill-C{background:color-mix(in srgb,var(--gC) 12%,transparent); color:var(--gC); border:1px solid color-mix(in srgb,var(--gC) 30%,transparent)}
-    .pill-D{background:color-mix(in srgb,var(--gD) 12%,transparent); color:var(--gD); border:1px solid color-mix(in srgb,var(--gD) 30%,transparent)}
-    .pill-E{background:color-mix(in srgb,var(--gE) 12%,transparent); color:var(--gE); border:1px solid color-mix(in srgb,var(--gE) 30%,transparent)}
-
-    /* ========= CETAK ========= */
     @media print {
       @page { size: A4 portrait; margin: 14mm; }
       html, body { background: #fff !important; }
-      .sticky-toolbar, .btn, .modal, .nav, #loader, #logoutBtn, .tile-btn, .theme-switcher { display: none !important; }
-      .card, .table-responsive, .table-wrap { box-shadow: none !important; border: 0 !important; }
+      .sticky-toolbar, .btn, .modal, .nav, #loader, #logoutBtn { display: none !important; }
+      .card, .table-responsive { box-shadow: none !important; border: 0 !important; }
       .table { font-size: 12px; }
       .table thead th { background: #f1f3f5 !important; color: #000 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-      .badge-chip, .pill-A, .pill-B, .pill-C, .pill-D, .pill-E { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .badge[data-grade] { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
       a { color: inherit !important; text-decoration: none !important; }
     }
-
-    /* ====== LEGACY BADGE (kompatibel dengan kode lama) ====== */
-    .badge[data-grade]{border-radius:999px; padding:.45rem .75rem; font-weight:600; min-width:2.25rem; display:inline-block;}
-    .badge[data-grade="A"]{ background:var(--gA) !important; color:#fff !important; }
-    .badge[data-grade="B"]{ background:var(--gB) !important; color:#fff !important; }
-    .badge[data-grade="C"]{ background:var(--gC) !important; color:#111 !important; }
-    .badge[data-grade="D"]{ background:var(--gD) !important; color:#fff !important; }
-    .badge[data-grade="E"]{ background:var(--gE) !important; color:#fff !important; }
   </style>
 </head>
 
 <body>
 
   <!-- ======================= LOGIN / REGISTER ======================= -->
-  <section id="login-section" style="display:flex;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(145deg,#e9f2ff,#f9fafb);padding:24px;">
-    <div class="login-card" style="width:100%;max-width:400px;background:var(--panel);border-radius:16px;box-shadow:0 12px 28px rgba(13,110,253,.08);padding:2rem;border:1px solid var(--border)">
+  <section id="login-section">
+    <div class="login-card">
       <div class="text-center mb-3">
+        <!-- Logo SPIP: simpan file gambar sebagai "logo-spip.png" di folder yang sama -->
         <img src="logo-spip.png" alt="Logo SPIP" style="height:48px;object-fit:contain" onerror="this.style.display='none'">
       </div>
-      <h4 class="text-center mb-3 hero-title"><i class="bi bi-shield-lock"></i> Login SPIP</h4>
+      <h4 class="text-center mb-3 text-primary"><i class="bi bi-shield-lock"></i> Login SPIP</h4>
 
       <form id="loginForm" novalidate>
         <div class="mb-3">
@@ -155,7 +100,7 @@
           <div class="invalid-feedback">Masukkan kata sandi.</div>
         </div>
 
-        <button type="submit" id="submitBtn" class="btn btn-primary w-100">
+        <button type="submit" id="submitBtn" class="btn btn-primary">
           <i class="bi bi-box-arrow-in-right me-1"></i> Masuk
         </button>
         <div id="loginError" class="text-danger small mt-3 text-center"></div>
@@ -163,7 +108,7 @@
 
       <div class="text-center mt-3 small text-muted">
         <span id="toggleText">Belum punya akun?</span>
-        <a id="toggleLink" role="button">Daftar Baru</a>
+        <a id="toggleLink">Daftar Baru</a>
       </div>
     </div>
   </section>
@@ -171,96 +116,91 @@
   <!-- ========================= APP · SPIP =========================== -->
   <div id="app" class="container my-4 my-md-5" style="display:none">
     <div class="d-flex justify-content-end mb-3">
-      <div class="theme-switcher me-2 d-flex align-items-center gap-1">
-        <span class="small muted">Tema:</span>
-        <button class="btn btn-sm btn-outline-secondary" data-set-theme="auto" title="Aurora">Aurora</button>
-        <button class="btn btn-sm btn-outline-secondary" data-set-theme="sunset" title="Sunset">Sunset</button>
-        <button class="btn btn-sm btn-outline-secondary" data-set-theme="midnight" title="Midnight">Midnight</button>
-      </div>
       <button id="logoutBtn" class="btn btn-outline-danger btn-sm">
         <i class="bi bi-box-arrow-right me-1"></i> Keluar
       </button>
     </div>
 
-    <!-- Header (hero) -->
-    <header class="card border-0 hero-card mb-4" style="border:1px solid var(--border); background:var(--panel); border-radius:1rem">
+    <!-- Header -->
+    <header class="card shadow-sm mb-4 border-0">
       <div class="card-body p-4">
         <div class="d-flex align-items-center gap-3 brand-row mb-2">
-          <img src="logo-spip.png" alt="Logo SPIP" style="height:40px;object-fit:contain" onerror="this.style.display='none'">
-          <h1 class="h3 fw-bold hero-title mb-0">Penjamin Kualitas Maturitas Penyelenggaraan SPIP</h1>
+          <img src="logo-spip.png" alt="Logo SPIP" onerror="this.style.display='none'">
+          <h1 class="h3 fw-bold text-primary mb-0">Penjamin Kualitas Maturitas Penyelenggaraan SPIP</h1>
         </div>
-        <p class="muted mb-1">Periode Penilaian: 01 Juli 2024 s.d. 30 Juni 2025</p>
-        <p class="muted small mb-3">KK 3.1 · Penilaian Struktur & Proses Efektivitas dan Efisiensi</p>
-
-        <!-- Ribbon visual kemajuan -->
-        <div class="d-flex align-items-center justify-content-between">
-          <div class="flex-grow-1 me-3">
-            <div class="muted small mb-1">Kemajuan Bukti</div>
-            <div class="ribbon"><div class="bar" id="ribbonBar" style="width:0%"></div></div>
-          </div>
-          <div class="d-flex gap-2">
-            <a class="tile-btn tile-edit" href="dashboard_interactive.html" target="_blank" data-bs-toggle="tooltip" title="Dashboard"><i class="bi bi-speedometer2"></i></a>
-            <a class="tile-btn tile-activate" href="read.html" data-bs-toggle="tooltip" title="READ"><i class="bi bi-journal-text"></i></a>
-            <a class="tile-btn tile-suspend" href="play.html" data-bs-toggle="tooltip" title="PLAY"><i class="bi bi-controller"></i></a>
-            <button id="btn-export-pdf" class="tile-btn tile-del" data-bs-toggle="tooltip" title="Export PDF"><i class="bi bi-filetype-pdf"></i></button>
-          </div>
-        </div>
+        <p class="text-muted mb-1">Periode Penilaian: 01 Juli 2024 s.d. 30 Juni 2025</p>
+        <p class="text-muted small mb-0">KK 3.1 · Penilaian Struktur & Proses Efektivitas dan Efisiensi</p>
       </div>
     </header>
 
-    <!-- Toolbar (tetap; progress bawaan) -->
-    <div class="sticky-toolbar card shadow-sm border-0 mb-3">
-      <div class="card-body d-flex flex-column flex-md-row gap-3 align-items-md-center">
-        <div class="d-flex align-items-center gap-2">
-          <i class="bi bi-building text-primary"></i>
-          <label for="satker-select" class="form-label fw-semibold mb-0">Pilih Unit Organisasi (Unor)</label>
-        </div>
-        <select id="satker-select" class="form-select flex-grow-1" aria-label="Pilih Satuan Kerja"></select>
-
-        <div class="ms-md-auto d-flex align-items-center gap-2">
-          <div class="small muted" id="last-saved">—</div>
-          <a href="dashboard_interactive.html" target="_blank" class="btn btn-outline-secondary btn-sm" id="btn-open-dashboard" title="Buka Dashboard" aria-label="Buka Dashboard">
-            <i class="bi bi-speedometer2 me-1"></i> Dashboard
-          </a>
-          <a href="read.html" class="btn btn-outline-info btn-sm" title="Fakta & Edukasi SPIP">
-            <i class="bi bi-book me-1"></i> READ
-          </a>
-          <a href="play.html" class="btn btn-outline-success btn-sm" title="Mini Game / Kuis SPIP">
-            <i class="bi bi-controller me-1"></i> PLAY
-          </a>
-        </div>
-      </div>
-      <div class="progress rounded-0" role="progressbar" aria-label="Progress penyelesaian" aria-valuemin="0" aria-valuemax="100">
-        <div id="progress-bar" class="progress-bar" style="width:0%">0%</div>
-      </div>
+    <!-- Toolbar -->
+<div class="sticky-toolbar card shadow-sm border-0 mb-3">
+  <div class="card-body d-flex flex-column flex-md-row gap-3 align-items-md-center">
+    <div class="d-flex align-items-center gap-2">
+      <i class="bi bi-building text-primary"></i>
+      <label for="satker-select" class="form-label fw-semibold mb-0">Pilih Unit Organisasi (Unor)</label>
     </div>
+    <select id="satker-select" class="form-select flex-grow-1" aria-label="Pilih Satuan Kerja"></select>
+
+    <!-- BAGIAN KANAN -->
+    <div class="ms-md-auto d-flex align-items-center gap-2">
+      <div class="small text-muted" id="last-saved">—</div>
+
+      <!-- Tombol Dashboard -->
+      <a href="dashboard_interactive.html" target="_blank" class="btn btn-outline-secondary btn-sm" id="btn-open-dashboard" title="Buka Dashboard" aria-label="Buka Dashboard">
+        <i class="bi bi-speedometer2 me-1"></i> Dashboard
+      </a>
+
+      <!-- Tombol Export PDF -->
+      <button id="btn-export-pdf" class="btn btn-outline-danger btn-sm" title="Ekspor ke PDF" aria-label="Ekspor ke PDF">
+        <i class="bi bi-filetype-pdf me-1"></i> Export PDF
+      </button>
+
+      <!-- 🔹 Tambahkan tombol READ dan PLAY di bawah ini -->
+      <a href="read.html" class="btn btn-outline-info btn-sm" title="Fakta & Edukasi SPIP">
+        <i class="bi bi-book me-1"></i> READ
+      </a>
+      <a href="play.html" class="btn btn-outline-success btn-sm" title="Mini Game / Kuis SPIP">
+        <i class="bi bi-controller me-1"></i> PLAY
+      </a>
+      <!-- 🔹 Selesai -->
+    </div>
+  </div>
+
+  <!-- Progress Bar -->
+  <div class="progress rounded-0" role="progressbar" aria-label="Progress penyelesaian" aria-valuemin="0" aria-valuemax="100">
+    <div id="progress-bar" class="progress-bar" style="width:0%">0%</div>
+  </div>
+</div>
 
     <!-- Loading -->
     <div id="loader" class="text-center p-5">
       <div class="spinner-border text-primary" role="status" aria-live="polite" aria-busy="true">
         <span class="visually-hidden">Loading...</span>
       </div>
-      <p class="mt-2 muted">Menghubungkan ke database...</p>
-      <p id="loader-tip" class="small muted">Pastikan Email/Password Auth aktif & aturan Firestore sesuai.</p>
+      <p class="mt-2 text-muted">Menghubungkan ke database...</p>
+      <p id="loader-tip" class="small text-muted">Pastikan Email/Password Auth aktif & aturan Firestore sesuai.</p>
     </div>
 
     <!-- Main -->
     <main id="main-content" class="d-none">
-      <div class="table-wrap">
-        <div class="table-responsive">
-          <table class="table table-hover mb-0 align-middle">
-            <thead>
-              <tr>
-                <th class="px-3">Kode</th>
-                <th class="px-3">Uraian Parameter</th>
-                <th class="px-3 text-center">Status</th>
-                <th class="px-3 text-center">TOC</th>
-                <th class="px-3 text-center">Aksi</th>
-                <th class="px-3 text-center">Grade</th>
-              </tr>
-            </thead>
-            <tbody id="assessment-table-body"></tbody>
-          </table>
+      <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-striped table-hover mb-0 align-middle">
+              <thead class="table-light">
+                <tr>
+                  <th scope="col" class="px-3">Kode</th>
+                  <th scope="col" class="px-3">Uraian Parameter</th>
+                  <th scope="col" class="px-3 text-center">Status</th>
+                  <th scope="col" class="px-3 text-center">TOC</th>
+                  <th scope="col" class="px-3 text-center">Aksi</th>
+                  <th scope="col" class="px-3 text-center">Grade</th>
+                </tr>
+              </thead>
+              <tbody id="assessment-table-body"></tbody>
+            </table>
+          </div>
         </div>
       </div>
     </main>
@@ -272,7 +212,7 @@
           <div class="modal-header">
             <div>
               <h1 class="modal-title h5" id="modalTitle">Formulir Penilaian</h1>
-              <p id="modal-parameter-title" class="muted small mb-0"></p>
+              <p id="modal-parameter-title" class="text-muted small mb-0"></p>
             </div>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
           </div>
@@ -282,7 +222,7 @@
 
               <div class="mb-4">
                 <h3 class="h6 fw-semibold mb-2">Kriteria Penilaian</h3>
-                <div id="modal-criteria-container" class="p-3" style="max-height:180px;overflow:auto;background:#f6f8ff;border:1px solid var(--border);border-radius:.75rem" aria-live="polite"></div>
+                <div id="modal-criteria-container" class="criteria-box p-3 bg-light border rounded" aria-live="polite"></div>
               </div>
 
               <div class="row g-3">
@@ -298,7 +238,11 @@
                 <div class="col-md-6">
                   <label for="simpulan" class="form-label">Simpulan Hasil Pengujian</label>
                   <select id="simpulan" class="form-select" required>
-                    <option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option>
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="C">C</option>
+                    <option value="D">D</option>
+                    <option value="E">E</option>
                   </select>
                   <div class="invalid-feedback">Pilih simpulan.</div>
                 </div>
@@ -318,7 +262,7 @@
 
               <hr class="my-4">
               <div id="sestama-fields" class="d-none">
-                <p class="small muted mb-2"><i class="bi bi-info-circle"></i> Bidang berikut khusus untuk <strong>Sestama</strong>.</p>
+                <p class="form-hint mb-2"><i class="bi bi-info-circle"></i> Bidang berikut khusus untuk <strong>Sestama</strong>.</p>
                 <div class="row g-3">
                   <div class="col-md-6">
                     <label for="simpulan-sestama" class="form-label">Simpulan Hasil Pengujian (Sestama)</label>
@@ -354,7 +298,7 @@
               <!-- BUKTI DUKUNG -->
               <div class="mt-4">
                 <h3 class="h6 fw-semibold mb-2">Bukti Dukung</h3>
-                <p class="small muted mb-3">Dokumen per grade ditarik dari Google Drive (tanpa unggah di aplikasi ini).</p>
+                <p class="text-muted small mb-3">Dokumen per grade ditarik dari Google Drive (tanpa unggah di aplikasi ini).</p>
                 <div class="nav nav-pill-grade gap-2 mb-3" id="grade-tabs">
                   <button type="button" class="btn btn-primary btn-sm" data-grade="A">Grade A</button>
                   <button type="button" class="btn btn-outline-primary btn-sm" data-grade="B">Grade B</button>
@@ -371,7 +315,7 @@
                       </button>
                     </div>
                     <div id="drive-file-list" class="list-group list-group-flush small" style="min-height:3rem">
-                      <div class="muted px-2 py-1">Pilih grade untuk memuat dokumen dari Google Drive.</div>
+                      <div class="text-muted px-2 py-1">Pilih grade untuk memuat dokumen dari Google Drive.</div>
                     </div>
                   </div>
                 </div>
@@ -409,35 +353,14 @@
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
 
-  <!-- ========== Theme toggler + tooltip init + ribbon animate ========== -->
-  <script>
-    (function(){
-      const saved = localStorage.getItem('ui.theme') || 'auto';
-      document.documentElement.setAttribute('data-theme', saved);
-      document.querySelectorAll('[data-set-theme]').forEach(btn=>{
-        btn.addEventListener('click', ()=>{
-          const t = btn.getAttribute('data-set-theme');
-          document.documentElement.setAttribute('data-theme', t);
-          localStorage.setItem('ui.theme', t);
-        });
-      });
-      // Enable tooltips for icon tiles
-      [...document.querySelectorAll('[data-bs-toggle="tooltip"]')].forEach(el => new bootstrap.Tooltip(el));
-
-      // Animate ribbon after mount; will be synced again by App.updateProgress()
-      const rb = document.getElementById('ribbonBar');
-      if (rb) setTimeout(()=>{ rb.style.width = '0%'; }, 200);
-    })();
-  </script>
-
-  <!-- =================== Firebase + App Script (ASLI, tidak diubah logikanya) =================== -->
+  <!-- =================== Firebase + App Script =================== -->
   <script type="module">
     /* ==== Firebase config (Email/Password Auth + Firestore) ==== */
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import {
       getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword,
       signOut, onAuthStateChanged
-      // , sendEmailVerification
+      // , sendEmailVerification // opsional, jika ingin verifikasi email
     } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
     import {
       getFirestore, doc, onSnapshot, setDoc, getDoc, enableIndexedDbPersistence
@@ -477,7 +400,7 @@
 
     /* ==== Helpers & constants ==== */
     const SATKER_LIST = ['Inspektorat', 'Pusdatin', 'Sestama', 'D1', 'D3', 'Puslat', 'D4'];
-    const APPROVED_ROLES = ["admin","monitor","member"];
+    const APPROVED_ROLES = ["admin","monitor","member"]; // <— tambahan: role yang diizinkan masuk
     const $ = (sel) => document.querySelector(sel);
     function shallowEqual(a, b){
       const ka = Object.keys(a||{}), kb = Object.keys(b||{});
@@ -486,7 +409,7 @@
       return true;
     }
 
-    /* ====== ASSESSMENT_STRUCTURE ====== */
+    /* ====== ASSESSMENT_STRUCTURE (Contoh 5 parameter) ====== */
     const ASSESSMENT_STRUCTURE = [
       {
         kode: `1.1.1`,
@@ -569,19 +492,19 @@
         grades: [
           { grade: 'A',
             kriteria: `Sudah mengalokasikan sumber daya secara memadai untuk penerapan manajemen risiko pada tingkat operasional unit kerja, strategis unit kerja, dan strategis K/L/D`,
-            tooltip:`a. Instansi Pemerintah telah menganggarkan dana implementasi manajemen risiko ...\nb. Minimal 70% SDM ...` },
+            tooltip:`a. Instansi Pemerintah telah menganggarkan dana implementasi manajemen risiko seperti rapat terkait manajemen risiko, identifikasi dan analisis risiko, penyusunan profil risiko, implementasi RTP, kegiatan monitoring dan reviu  dalam rencana kerja/DPA/DIPA  dan dalam implementasi manajemen risiko tidak terkendala kekurangan dana implementasi ditingkat operasional unit kerja, strategis unit kerja, dan strategis K/L/D\nb. Minimal 70% SDM yang menjadi anggota UPR pada tingkat operasional dan strategis unit kerja serta strategis K/L/D diisi oleh orang yang berkompeten dalam bidang manajemen risiko` },
           { grade: 'B',
             kriteria: `Sudah mengalokasikan sumber daya secara memadai untuk penerapan manajemen risiko pada tingkat operasional unit kerja dan strategis unit kerja namun pada tingkat srategis K/L/D belum memadai`,
-            tooltip:`a. Instansi Pemerintah telah menganggarkan ...\nb. Minimal 70% SDM ... kurang dari 70% di tingkat Strategis K/L/D ...` },
+            tooltip:`a. Instansi Pemerintah telah menganggarkan dana implementasi manajemen risiko seperti rapat terkait manajemen risiko, identifikasi dan analisis risiko, penyusunan profil risiko, implementasi RTP, kegiatan monitoring dan reviu  dalam rencana kerja/DPA/DIPA  dan dalam implementasi manajemen risiko tidak terkendala kekurangan dana pada tingkat operasional dan strategis unit kerja, namun masih terkendala kekurangan dana pada tingkat  strategis K/L/D dan\nb. Minimal 70% SDM yang menjadi anggota UPR pada tingkat operasional dan strategis unit kerja diisi oleh orang yang berkompeten dalam bidang manajemen risiko serta kurang dari 70% SDM yang menjadi anggota UPR pada tingkat Strategis K/L/D diisi oleh orang yang berkompeten dalam bidang manajemen risiko` },
           { grade: 'C',
             kriteria: `Sudah mengalokasikan sumber daya secara memadai untuk penerapan manajemen risiko pada tingkat operasional unit kerja dan strategis unit kerja`,
-            tooltip:`a. Instansi Pemerintah telah menganggarkan ...\nb. Minimal 70% SDM ...` },
+            tooltip:`a. Instansi Pemerintah telah menganggarkan dana implementasi manajemen risiko seperti rapat terkait manajemen risiko, identifikasi dan analisis risiko, penyusunan profil risiko, implementasi RTP, kegiatan monitoring dan reviu  dalam rencana kerja/DPA/DIPA  dan dalam implementasi manajemen risiko tidak terkendala kekurangan dana implementasi ditingkat operasional dan strategis unit kerja\nb. Minimal 70% SDM yang menjadi anggota UPR pada tingkat operasional dan strategis unit kerja diisi oleh orang yang berkompeten dalam bidang manajemen risiko` },
           { grade: 'D',
             kriteria: `Sudah mengalokasikan sumber daya secara memadai untuk penerapan manajemen risiko pada tingkat operasional unit kerja namun pada tingkat strategis unit kerja belum memadai`,
-            tooltip:`a. ... memadai di operasional namun belum memadai di strategis unit kerja\nb. Kurang dari 70% SDM ...` },
+            tooltip:`a. Instansi Pemerintah telah menganggarkan dana implementasi manajemen risiko pada tingkat operasional unit kerja seperti rapat terkait manajemen risiko, identifikasi dan analisis risiko, penyusunan profil risiko, implementasi RTP, kegiatan monitoring dan reviu  dalam rencana kerja/DPA/DIPA secara memadai, namun belum memadai pada tingkat strategis unit kerja, dan/atau\nb. Kurang dari 70% SDM yang menjadi anggota UPR pada tingkat operasional Unit Kerja diisi oleh orang yang berkompeten dalam bidang manajemen risiko` },
           { grade: 'E',
             kriteria: `Sudah mengalokasikan sumber daya untuk penerapan manajemen risiko pada tingkat operasional unit kerja namun belum memadai`,
-            tooltip:`a. ... belum memadai\nb. Kurang dari 70% SDM ...` }
+            tooltip:`a. Instansi Pemerintah telah menganggarkan dana implementasi manajemen risiko pada tingkat operasional unit kerja seperti rapat terkait manajemen risiko, identifikasi dan analisis risiko, penyusunan profil risiko, implementasi RTP, kegiatan monitoring dan reviu  dalam rencana kerja/DPA/DIPA namun belum memadai, dan/atau\nb. Kurang dari 70% SDM yang menjadi anggota UPR pada tingkat operasional Unit Kerja diisi oleh orang yang berkompeten dalam bidang manajemen risiko` }
         ]
       },
       {
@@ -593,19 +516,19 @@
         grades: [
           { grade: 'A',
             kriteria: `Seluruh pengambilan keputusan strategis K/L/D, strategis unit kerja, dan operasional unit kerja telah mempertimbangkan risiko dan memberikan dampak bagi pencapaian tujuan organisasi`,
-            tooltip:`Seluruh keputusan ... memberikan dampak ...` },
+            tooltip:`Seluruh keputusan pimpinan instansi maupun pimpinan unit kerja secara umum menggunakan informasi terkait risiko di tingkat operasional unit kerja, strategis unit kerja, dan strategis K/L/D dan memberikan dampak bagi pencapaian tujuan organisasi` },
           { grade: 'B',
             kriteria: `Seluruh pengambilan keputusan strategis K/L/D, strategis unit kerja, dan operasional unit kerja telah mempertimbangkan risiko`,
-            tooltip:`Seluruh keputusan ... menggunakan informasi risiko ...` },
+            tooltip:`Seluruh keputusan pimpinan instansi maupun pimpinan unit kerja secara umum menggunakan informasi terkait risiko di tingkat operasional unit kerja, strategis unit kerja, dan strategis K/L/D` },
           { grade: 'C',
             kriteria: `Seluruh pengambilan keputusan strategis unit kerja dan operasional unit kerja telah mempertimbangkan risiko`,
-            tooltip:`... di tingkat operasional dan strategis unit kerja` },
+            tooltip:`Seluruh keputusan pimpinan instansi maupun pimpinan unit kerja secara umum menggunakan informasi terkait risiko di tingkat operasional dan strategis unit kerja` },
           { grade: 'D',
             kriteria: `Seluruh pengambilan keputusan operasional unit kerja telah mempertimbangkan risiko`,
-            tooltip:`... di tingkat operasional` },
+            tooltip:`Seluruh keputusan pimpinan instansi maupun pimpinan unit kerja secara umum menggunakan informasi terkait risiko di tingkat operasional` },
           { grade: 'E',
             kriteria: `Sebagian pengambilan keputusan operasional unit kerja telah mempertimbangkan risiko`,
-            tooltip:`Sebagian keputusan ...` }
+            tooltip:`Sebagian keputusan pimpinan instansi maupun pimpinan unit kerja secara umum menggunakan informasi terkait risiko di tingkat operasional` }
         ]
       }
     ];
@@ -621,13 +544,13 @@
 
       initAfterAuth(){
         // UI ready
-        document.getElementById('login-section').style.display='none';
-        document.getElementById('app').style.display='block';
+        $('#login-section').style.display='none';
+        $('#app').style.display='block';
 
-        // listeners/UI
+        // set listeners/UI
         this.populateSatkerSelect();
         this.setupEventListeners();
-        this.bootstrapModal = new bootstrap.Modal(document.getElementById('assessment-modal'));
+        this.bootstrapModal = new bootstrap.Modal($('#assessment-modal'));
 
         // preview modal cleanup
         const pm = new bootstrap.Modal(document.getElementById('preview-modal'));
@@ -642,7 +565,7 @@
       },
 
       populateSatkerSelect(){
-        const select=document.getElementById('satker-select'); select.innerHTML='';
+        const select=$('#satker-select'); select.innerHTML='';
         SATKER_LIST.forEach(s=>{
           const opt=new Option(s,s); if(s===this.currentSatker) opt.selected=true; select.add(opt);
         });
@@ -652,8 +575,8 @@
         if(this.unsubscribe) this.unsubscribe();
         const docRef=doc(this.db,'assessments',this.currentSatker);
         this.unsubscribe = onSnapshot(docRef,(snap)=>{
-          document.getElementById('loader').style.display='none';
-          document.getElementById('main-content').classList.remove('d-none');
+          $('#loader').style.display='none';
+          $('#main-content').classList.remove('d-none');
 
           if(snap.exists()){
             const raw=snap.data();
@@ -674,14 +597,13 @@
           }
         },(err)=>{
           console.error('onSnapshot error:',err);
-          const l = document.getElementById('loader');
-          l.style.display='block';
-          l.innerHTML=`<div class="alert alert-danger" role="alert">Gagal mengambil data. Periksa aturan keamanan Firestore Anda.</div>`;
+          $('#loader').style.display='block';
+          $('#loader').innerHTML=`<div class="alert alert-danger" role="alert">Gagal mengambil data. Periksa aturan keamanan Firestore Anda.</div>`;
         });
       },
 
       setupEventListeners(){
-        document.getElementById('satker-select').addEventListener('change',(e)=>{
+        $('#satker-select').addEventListener('change',(e)=>{
           this.currentSatker=e.target.value; localStorage.setItem('spip.currentSatker',this.currentSatker);
           this.listenForDataChanges();
         });
@@ -727,7 +649,7 @@
       },
 
       renderTable(){
-        const tbody=document.getElementById('assessment-table-body'); tbody.innerHTML='';
+        const tbody=$('#assessment-table-body'); tbody.innerHTML='';
         const frag=document.createDocumentFragment();
         ASSESSMENT_STRUCTURE.forEach(p=>{
           const data = this.assessmentData[p.kode_parameter];
@@ -737,7 +659,7 @@
           tr.innerHTML=`
             <td class="px-3">${p.kode_parameter}</td>
             <td class="px-3">${p.uraian_parameter}</td>
-            <td class="px-3 text-center"><span class="badge-chip badge-status">${done?'Selesai':'Belum Diisi'}</span></td>
+            <td class="px-3 text-center"><span class="badge rounded-pill ${done?'text-bg-success':'text-bg-warning'}">${done?'Selesai':'Belum Diisi'}</span></td>
             <td class="px-3 text-center"><button class="btn btn-outline-primary btn-sm" data-action="open-toc"><i class="bi bi-robot me-1"></i>TOC</button></td>
             <td class="px-3 text-center">
               <button type="button" class="btn btn-primary btn-sm open-modal-btn" data-action="open-modal" data-param-code="${p.kode_parameter}">
@@ -753,14 +675,14 @@
       async openModal(paramCode){
         const param = ASSESSMENT_STRUCTURE.find(p=>p.kode_parameter===paramCode); if(!param) return;
         document.getElementById('current-parameter-code').value=paramCode;
-        window.__currentParamCode = paramCode;
+        window.__currentParamCode = paramCode; // for Drive mapper
         document.getElementById('modal-parameter-title').textContent=`${param.kode_parameter} — ${param.uraian_parameter}`;
 
         const html = param.grades.map(g=>`
           <p class="mb-1 small">
             <strong class="fw-semibold text-body-secondary">Grade ${g.grade}:</strong>
             ${g.kriteria}
-            <button type="button" class="btn btn-link btn-sm p-0 align-baseline ms-1" data-bs-toggle="tooltip" data-bs-placement="top" title="${(g.tooltip||'yang terlampir sebagai berikut').replace(/"/g,'&quot;')}" aria-label="Info kriteria grade ${g.grade}"><i class="bi bi-info-circle"></i></button>
+            <button type="button" class="btn btn-link btn-sm p-0 align-baseline ms-1" data-bs-toggle="tooltip" data-bs-placement="top" title="${g.tooltip || 'yang terlampir sebagai berikut'}" aria-label="Info kriteria grade ${g.grade}"><i class="bi bi-info-circle"></i></button>
           </p>`).join('');
         document.getElementById('modal-criteria-container').innerHTML=html;
         document.querySelectorAll('#assessment-modal [data-bs-toggle="tooltip"]').forEach(el => new bootstrap.Tooltip(el));
@@ -799,7 +721,7 @@
         this.resetGradeTabs('A'); this.currentGrade='A';
         await this.refreshDriveFiles();
 
-        if (!this.bootstrapModal) this.bootstrapModal = new bootstrap.Modal(document.getElementById('assessment-modal'));
+        if (!this.bootstrapModal) this.bootstrapModal = new bootstrap.Modal($('#assessment-modal'));
         this.bootstrapModal.show();
       },
 
@@ -872,7 +794,7 @@
           const row = document.createElement('div');
           row.className = 'list-group-item d-flex justify-content-between align-items-center';
           row.innerHTML = `
-            <a href="${file.webViewLink}" target="_blank" rel="noopener" class="text-truncate" style="max-width:75%">${file.name}</a>
+            <a href="${file.webViewLink}" target="_blank" rel="noopener" class="truncate">${file.name}</a>
             <button class="btn btn-sm btn-outline-primary">Preview</button>`;
           row.querySelector('button').addEventListener('click', ()=>{
             document.getElementById('preview-modal-title').textContent = file.name;
@@ -888,16 +810,10 @@
         const total = ASSESSMENT_STRUCTURE.length;
         const done = Object.values(this.assessmentData||{}).filter(v=>v && v.simpulan).length;
         const pct = Math.round((done/Math.max(1,total))*100);
-
-        // toolbar bar
         const bar = document.getElementById('progress-bar');
         bar.style.width = pct + '%';
         bar.textContent = pct + '%';
         bar.setAttribute('aria-valuenow', pct);
-
-        // hero ribbon bar
-        const rb = document.getElementById('ribbonBar');
-        if (rb) rb.style.width = pct + '%';
       },
 
       updateLastSaved(ts){
@@ -933,75 +849,103 @@
     });
 
     form.addEventListener("submit", async e=>{
-      e.preventDefault();
-      const email = document.getElementById("email").value.trim();
-      const pass  = document.getElementById("password").value;
+  e.preventDefault();
+  const email = document.getElementById("email").value.trim();
+  const pass  = document.getElementById("password").value;
 
-      form.classList.add("was-validated");
-      if (!form.checkValidity()) return;
+  form.classList.add("was-validated");
+  if (!form.checkValidity()) return;
 
-      errorBox.textContent = "";
-      errorBox.classList.remove("text-success","text-warning","text-danger");
+  errorBox.textContent = "";
+  errorBox.classList.remove("text-success","text-warning","text-danger");
 
-      try {
-        if (isRegister) {
-          const cred = await createUserWithEmailAndPassword(auth, email, pass);
-          await setDoc(doc(db, "users", cred.user.uid), {
-            role: "pending", assignedUnits: [], email, createdAt: new Date().toISOString()
-          }, { merge: true });
-          await signOut(auth);
-          isRegister = false;
-          toggleText.textContent = "Belum punya akun?";
-          toggleLink.textContent = "Daftar Baru";
-          submitBtn.innerHTML = '<i class="bi bi-box-arrow-in-right me-1"></i> Masuk';
-          errorBox.classList.add("text-success");
-          errorBox.textContent = "Pendaftaran berhasil. Akun menunggu persetujuan admin. Silakan login kembali setelah diaktifkan.";
-          return;
-        }
-        await signInWithEmailAndPassword(auth, email, pass);
-      } catch (err) {
-        errorBox.classList.add("text-danger");
-        errorBox.textContent = (err?.message || "Login gagal").replace("Firebase:","");
-      }
-    });
+  try {
+    if (isRegister) {
+      // 1) Buat akun
+      const cred = await createUserWithEmailAndPassword(auth, email, pass);
+
+      // 2) Inisialisasi profil Firestore: pending (belum boleh masuk)
+      await setDoc(doc(db, "users", cred.user.uid), {
+        role: "pending",
+        assignedUnits: [],
+        email,
+        createdAt: new Date().toISOString()
+      }, { merge: true });
+
+      // 3) (Opsional) kirim verifikasi email
+      // await sendEmailVerification(cred.user).catch(()=>{});
+
+      // 4) Keluarkan user & ubah UI kembali ke mode masuk
+      await signOut(auth);
+      isRegister = false;
+      toggleText.textContent = "Belum punya akun?";
+      toggleLink.textContent = "Daftar Baru";
+      submitBtn.innerHTML = '<i class="bi bi-box-arrow-in-right me-1"></i> Masuk';
+
+      errorBox.classList.add("text-success");
+      errorBox.textContent = "Pendaftaran berhasil. Akun menunggu persetujuan admin. Silakan login kembali setelah diaktifkan.";
+      return; // stop; jangan auto sign-in
+    }
+
+    // Mode Masuk (login)
+    await signInWithEmailAndPassword(auth, email, pass);
+
+  } catch (err) {
+    errorBox.classList.add("text-danger");
+    errorBox.textContent = (err?.message || "Login gagal").replace("Firebase:","");
+  }
+});
 
     logoutBtn.addEventListener("click", async ()=>{ await signOut(auth); });
 
     onAuthStateChanged(auth, async (user) => {
-      loginSection.style.display = "flex";
-      appSection.style.display  = "none";
+  // default: tampilkan login
+  loginSection.style.display = "flex";
+  appSection.style.display  = "none";
 
-      if (!user) return;
+  if (!user) return;
 
-      try {
-        const ref  = doc(db, "users", user.uid);
-        const snap = await getDoc(ref);
-        const profile = snap.exists() ? (snap.data() || {}) : { role: "pending" };
+  try {
+    // Ambil profil dari Firestore
+    const ref  = doc(db, "users", user.uid);
+    const snap = await getDoc(ref);
+    const profile = snap.exists() ? (snap.data() || {}) : { role: "pending" };
 
-        const approved = ["admin","monitor","member"].includes(profile.role);
-        if (!approved) {
-          await signOut(auth);
-          errorBox.classList.remove("text-danger"); errorBox.classList.add("text-warning");
-          errorBox.textContent = "Akun Anda belum diaktifkan. Hubungi admin untuk persetujuan.";
-          return;
-        }
+    // (Opsional) jika wajib verifikasi email:
+    // if (!user.emailVerified) {
+    //   await signOut(auth);
+    //   errorBox.classList.remove("text-danger"); errorBox.classList.add("text-warning");
+    //   errorBox.textContent = "Silakan verifikasi email terlebih dahulu, kemudian login kembali.";
+    //   return;
+    // }
 
-        App.role = profile.role;
-        App.allowedUnits = (profile.role === "admin" || profile.role === "monitor")
-          ? SATKER_LIST.slice()
-          : (profile.assignedUnits || []);
+    const approved = APPROVED_ROLES.includes(profile.role);
 
-        loginSection.style.display = "none";
-        appSection.style.display  = "block";
-        App.initAfterAuth();
+    if (!approved) {
+      // Tendang balik jika pending / tidak ada role
+      await signOut(auth);
+      errorBox.classList.remove("text-danger"); errorBox.classList.add("text-warning");
+      errorBox.textContent = "Akun Anda belum diaktifkan. Hubungi admin untuk persetujuan.";
+      return;
+    }
 
-      } catch (e) {
-        console.error(e);
-        await signOut(auth);
-        errorBox.classList.add("text-danger");
-        errorBox.textContent = "Gagal memeriksa status akun. Coba lagi.";
-      }
-    });
+    // Lolos gate → set hak akses & masuk App
+    App.role = profile.role;
+    App.allowedUnits = (profile.role === "admin" || profile.role === "monitor")
+      ? SATKER_LIST.slice()
+      : (profile.assignedUnits || []);
+
+    loginSection.style.display = "none";
+    appSection.style.display  = "block";
+    App.initAfterAuth();
+
+  } catch (e) {
+    console.error(e);
+    await signOut(auth);
+    errorBox.classList.add("text-danger");
+    errorBox.textContent = "Gagal memeriksa status akun. Coba lagi.";
+  }
+});
 
     // Helper Drive folder mapping accessor (used by TOC & modal)
     function driveFolderIdFor(unit, grade){
@@ -1015,6 +959,10 @@
 
   <!-- Mapping per Unit × Parameter × Grade -->
   <script>
+    /*  NOTE:
+        - Pastikan folder Google Drive sudah di-share public (Anyone with the link – Viewer).
+        - Isi ID folder sesuai unit/parameter/grade.
+    */
     window.DRIVE_FOLDERS_PARAM = {
       "Sestama": {
         "1.1.1": { A:"1ptHq3fU-BbAGKy5UNvzNhYJ3vo1CsJWI", B:"1lbQ2FydaKVo5BRVaz5n7W_w-LckQvq7L", C:"1J_qAmpTw3jlbfa4bPcpdGpX9vue57fqh", D:"19DEvfcTHMByfbTny1W7L1Ish1LgldhLP", E:"1HRo4VZHa-hUx8sxC4uimnNVdjMtNsU_r" },
@@ -1068,12 +1016,14 @@
     };
   </script>
 
-  <!-- ===== TOC Add-on (tetap) ===== -->
+  <!-- ===== TOC Add-on (pakai Web App kamu & text/plain anti-preflight) ===== -->
   <script>
   (function(){
     'use strict';
+
     const TOC_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxMyqUWL5FISzyeBo433-OHOwsEKAclS1q6U5KknLvOZrarkSK5hPSMrZyGrSqLdrBy/exec";
     const GRADES = ["A","B","C","D","E"];
+
     function getActiveUnit(){ const s=document.querySelector("#satker-select"); return s?s.value:"Sestama"; }
     function getParamCodeFromRow(tr){ return tr&&tr.cells&&tr.cells[0]?tr.cells[0].textContent.trim():""; }
     function getFolders(unit,kode){ const out={}; for(const g of GRADES){ const id=(window.getParamGradeFolderId?window.getParamGradeFolderId(unit,kode,g):null); if(id) out[g]=id; } return out; }
@@ -1081,6 +1031,7 @@
       try{ const p=(window.ASSESSMENT_STRUCTURE||[]).find(x=>x.kode_parameter===kode); if(!p) return ""; return (p.grades||[]).map(g=>String(g.kriteria||"")).join(" | "); }
       catch{ return ""; }
     }
+
     function ensureTocModal(){
       if(document.getElementById("tocModal")) return;
       const html = `
@@ -1137,12 +1088,13 @@
       </div>`;
       document.body.insertAdjacentHTML("beforeend", html);
     }
+
     function renderTOC(data){
       const GR = data.perGradeScores || {};
       const g = data.grade || "E";
       document.querySelector("#tocGrade").innerHTML = `<span class="badge bg-primary-subtle border text-primary fs-4 px-3 py-1">${g}</span>`;
       document.querySelector("#tocScore").textContent = "Skor total: " + (data.score ?? "-") + " / 100";
-      document.querySelector("#tocPerGrade").innerHTML = ["A","B","C","D","E"].map(x=>`<div>Grade ${x}: <strong>${GR[x]??0}</strong></div>`).join("");
+      document.querySelector("#tocPerGrade").innerHTML = GRADES.map(x=>`<div>Grade ${x}: <strong>${GR[x]??0}</strong></div>`).join("");
       document.querySelector("#tocAnalisa").textContent = data.message || "Analisa selesai.";
       const chips = (data.kriteriaTerpenuhi||[]).map(k=>`<span class="badge text-bg-light me-1 mb-1">${k}</span>`).join("");
       document.querySelector("#tocKriteria").innerHTML = chips || "-";
@@ -1155,31 +1107,40 @@
       document.querySelector("#tocResult").classList.remove("d-none");
       document.querySelector("#tocApplyBtn").disabled = false;
     }
+
     let __tocRow = null, __lastTOC = null, __tocModal = null;
+
     document.addEventListener("click", async (e)=>{
       const btn = e.target.closest('[data-action="open-toc"]');
       if(!btn) return;
+
       ensureTocModal();
       __tocModal = __tocModal || (typeof bootstrap!=="undefined" ? new bootstrap.Modal("#tocModal") : null);
+
       __tocRow = btn.closest("tr");
       const unit = getActiveUnit();
       const kode = getParamCodeFromRow(__tocRow);
+
       document.querySelector("#tocSubTitle").textContent = `${unit} · ${kode}`;
       document.querySelector("#tocError").classList.add("d-none");
       document.querySelector("#tocResult").classList.add("d-none");
       document.querySelector("#tocLoading").classList.remove("d-none");
       document.querySelector("#tocApplyBtn").disabled = true;
       __lastTOC = null;
+
       __tocModal && __tocModal.show();
+
       try{
         if(!TOC_WEB_APP_URL.includes("/exec")) throw new Error("TOC_WEB_APP_URL tidak valid.");
         const payload = { unit, kode, folders: getFolders(unit, kode), criteria: criteriaFor(kode) };
+
         const res = await fetch(TOC_WEB_APP_URL, {
           method:"POST",
-          headers:{ "Content-Type":"text/plain;charset=utf-8" },
+          headers:{ "Content-Type":"text/plain;charset=utf-8" }, // anti preflight
           body: JSON.stringify(payload)
         });
         if(!res.ok){ const t=await res.text(); throw new Error(`HTTP ${res.status}: ${t}`); }
+
         const txt = await res.text();
         const data = JSON.parse(txt);
 
@@ -1220,4 +1181,3 @@
 
 </body>
 </html>
-
