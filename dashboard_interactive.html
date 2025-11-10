@@ -11,9 +11,7 @@
     body { background:#f8fafc; }
     .card { border:0; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
     .sticky-topbar { position: sticky; top: 0; z-index: 1000; background: #fff; border-bottom: 1px solid #eaecef; }
-    .kpi { display:flex; align-items:center; gap:.75rem; }
     .kpi .num { font-size:1.4rem; font-weight:700; }
-    .table thead th { white-space:nowrap; }
     .chart-card { min-height: 360px; }
     .badge.grade-a{background:#22c55e} .badge.grade-b{background:#a3e635;color:#111}
     .badge.grade-c{background:#facc15;color:#111} .badge.grade-d{background:#fb923c}
@@ -122,51 +120,97 @@
   <script>
     let stackedChart, donutChart;
     const $ = (s)=>document.querySelector(s);
-    function readData(){ return JSON.parse(localStorage.getItem('gradeDashboardData') || '{}'); }
 
+    // --- Parser tanggal aman (ISO string / number / Date) ---
+    function parseDateAny(x){
+      if (!x) return null;
+      if (x instanceof Date) return isNaN(+x) ? null : x;
+      if (typeof x === 'number') { const d=new Date(x); return isNaN(+d)?null:d; }
+      if (typeof x === 'string') { const d=new Date(x); return isNaN(+d)?null:d; }
+      return null;
+    }
+
+    // Baca seluruh data dashboard dari localStorage
+    function readData(){
+      try { return JSON.parse(localStorage.getItem('gradeDashboardData') || '{}'); }
+      catch(e){ return {}; }
+    }
+
+    // Normalisasi 1 record -> counts + tanggal
+    function normalizeRecord(name, rec){
+      // Skema counts {A..E}
+      if (rec && rec.counts){
+        const c=rec.counts;
+        const A=c.A||0, B=c.B||0, C=c.C||0, D=c.D||0, E=c.E||0;
+        const T = rec.total || (A+B+C+D+E);
+        return { name, A,B,C,D,E, T, updated_at: rec.updated_at || rec.updatedAt || null };
+      }
+      // Skema grade tunggal
+      const g = (rec && rec.grade ? String(rec.grade).toUpperCase() : '');
+      const base = {A:0,B:0,C:0,D:0,E:0};
+      if ('ABCDE'.includes(g)) base[g]=1;
+      return { name, ...base, T:1, updated_at: rec?.updated_at || rec?.updatedAt || null };
+    }
+
+    // Hitung rows (semua data), totals, lastUpdated (Date)
     function compute(data){
-      const rows=[]; let sums={A:0,B:0,C:0,D:0,E:0,T:0}; let lastUpdated='—';
-      Object.keys(data).forEach(name=>{
-        const d=data[name]||{counts:{},total:0};
-        const A=d.counts.A||0,B=d.counts.B||0,C=d.counts.C||0,D=d.counts.D||0,E=d.counts.E||0;
-        const T=A+B+C+D+E || d.total || 0;
-        const pctAC=T?Math.round((A+B+C)/T*100):0, pctDE=T?Math.round((D+E)/T*100):0;
-        rows.push({name,A,B,C,D,E,T,pctAC,pctDE,updated_at:d.updated_at});
-        sums.A+=A; sums.B+=B; sums.C+=C; sums.D+=D; sums.E+=E; sums.T+=T;
-        if(d.updated_at) lastUpdated=d.updated_at;
-      });
-      return {rows,sums,pctACAll: sums.T?Math.round(((sums.A+sums.B+sums.C)/sums.T)*100):0, pctDEAll: sums.T?Math.round(((sums.D+sums.E)/sums.T)*100):0, units: rows.length, lastUpdated};
+      const rows=[]; const sums={A:0,B:0,C:0,D:0,E:0,T:0};
+      let lastUpdated=null;
+      for (const name of Object.keys(data)){
+        const n = normalizeRecord(name, data[name]);
+        const pctAC = n.T ? Math.round(((n.A+n.B+n.C)/n.T)*100) : 0;
+        const pctDE = n.T ? Math.round(((n.D+n.E)/n.T)*100) : 0;
+        const du = parseDateAny(n.updated_at);
+        if (du && (!lastUpdated || du > lastUpdated)) lastUpdated = du;
+        rows.push({name:n.name, A:n.A,B:n.B,C:n.C,D:n.D,E:n.E, T:n.T, pctAC, pctDE, updated_at:du});
+        sums.A+=n.A; sums.B+=n.B; sums.C+=n.C; sums.D+=n.D; sums.E+=n.E; sums.T+=n.T;
+      }
+      return { rows, sums, lastUpdated };
+    }
+
+    // Sum ulang dari rows (dipakai setelah filter)
+    function sumRows(rows){
+      const s={A:0,B:0,C:0,D:0,E:0,T:0};
+      rows.forEach(r=>{ s.A+=r.A; s.B+=r.B; s.C+=r.C; s.D+=r.D; s.E+=r.E; s.T+=r.T; });
+      return s;
     }
 
     function fillTable(rows){
       const body=$('#dash-body'); body.innerHTML='';
       rows.forEach(r=>{
         const tr=document.createElement('tr');
-        tr.innerHTML = '<td>'+r.name+'</td>' +
-          '<td class="text-center">'+r.A+'</td>'+
-          '<td class="text-center">'+r.B+'</td>'+
-          '<td class="text-center">'+r.C+'</td>'+
-          '<td class="text-center text-danger-emphasis">'+r.D+'</td>'+
-          '<td class="text-center text-danger">'+r.E+'</td>'+
-          '<td class="text-center fw-semibold">'+r.T+'</td>'+
-          '<td class="text-center text-success">'+r.pctAC+'%</td>'+
-          '<td class="text-center text-danger">'+r.pctDE+'%</td>';
+        tr.innerHTML =
+          `<td>${r.name}</td>
+           <td class="text-center">${r.A}</td>
+           <td class="text-center">${r.B}</td>
+           <td class="text-center">${r.C}</td>
+           <td class="text-center text-danger-emphasis">${r.D}</td>
+           <td class="text-center text-danger">${r.E}</td>
+           <td class="text-center fw-semibold">${r.T}</td>
+           <td class="text-center text-success">${r.pctAC}%</td>
+           <td class="text-center text-danger">${r.pctDE}%</td>`;
         body.appendChild(tr);
       });
     }
 
-    function updateKPI(meta){
-      $('#kpi-units').textContent = meta.units;
-      $('#kpi-ac').textContent = meta.pctACAll + '%';
-      $('#kpi-de').textContent = meta.pctDEAll + '%';
-      $('#kpi-updated').textContent = meta.lastUpdated ? new Date(meta.lastUpdated).toLocaleString('id-ID') : '—';
-      $('#tA').textContent=meta.sums.A; $('#tB').textContent=meta.sums.B; $('#tC').textContent=meta.sums.C;
-      $('#tD').textContent=meta.sums.D; $('#tE').textContent=meta.sums.E; $('#tT').textContent=meta.sums.T;
-      $('#tAC').textContent=meta.pctACAll+'%'; $('#tDE').textContent=meta.pctDEAll+'%';
+    function updateKPI({ sums, units, lastUpdated }){
+      const pctACAll = sums.T ? Math.round(((sums.A+sums.B+sums.C)/sums.T)*100) : 0;
+      const pctDEAll = sums.T ? Math.round(((sums.D+sums.E)/sums.T)*100) : 0;
+
+      $('#kpi-units').textContent = units;
+      $('#kpi-ac').textContent = pctACAll + '%';
+      $('#kpi-de').textContent = pctDEAll + '%';
+      $('#kpi-updated').textContent = lastUpdated ? lastUpdated.toLocaleString('id-ID') : '—';
+
+      $('#tA').textContent=sums.A; $('#tB').textContent=sums.B; $('#tC').textContent=sums.C;
+      $('#tD').textContent=sums.D; $('#tE').textContent=sums.E; $('#tT').textContent=sums.T;
+      $('#tAC').textContent=pctACAll+'%'; $('#tDE').textContent=pctDEAll+'%';
     }
 
     function buildCharts(rows, sums){
-      const labels=rows.map(r=>r.name), dA=rows.map(r=>r.A), dB=rows.map(r=>r.B), dC=rows.map(r=>r.C), dD=rows.map(r=>r.D), dE=rows.map(r=>r.E);
+      const labels=rows.map(r=>r.name);
+      const dA=rows.map(r=>r.A), dB=rows.map(r=>r.B), dC=rows.map(r=>r.C), dD=rows.map(r=>r.D), dE=rows.map(r=>r.E);
+
       if (stackedChart) stackedChart.destroy();
       stackedChart = new Chart(document.getElementById('stackedChart'), {
         type:'bar',
@@ -178,37 +222,45 @@
           {label:'E',data:dE,backgroundColor:'#ef4444'}
         ]},
         options:{ responsive:true, maintainAspectRatio:false, interaction:{mode:'index',intersect:false},
-          plugins:{ legend:{position:'bottom'}, tooltip:{callbacks:{ footer:(items)=>{const i=items[0].dataIndex; return 'Total: '+rows[i].T; }}}},
-          scales:{ x:{stacked:true}, y:{stacked:true, beginAtZero:true} }
+          plugins:{ legend:{position:'bottom'},
+            tooltip:{callbacks:{ footer:(items)=>{const i=items[0].dataIndex; return 'Total: '+rows[i].T; }}} },
+          scales:{ x:{stacked:true}, y:{stacked:true, beginAtZero:true, ticks:{precision:0}} }
         }
       });
+
       if (donutChart) donutChart.destroy();
       donutChart = new Chart(document.getElementById('donutChart'), {
         type:'doughnut',
-        data:{ labels:['A','B','C','D','E'], datasets:[{ data:[sums.A,sums.B,sums.C,sums.D,sums.E], backgroundColor:['#22c55e','#a3e635','#facc15','#fb923c','#ef4444'] }]},
+        data:{ labels:['A','B','C','D','E'],
+          datasets:[{ data:[sums.A,sums.B,sums.C,sums.D,sums.E],
+          backgroundColor:['#22c55e','#a3e635','#facc15','#fb923c','#ef4444'] }]},
         options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'bottom'}} }
       });
     }
 
     function exportCSV(){
       const data=readData(); const units=Object.keys(data).sort();
-      let csv='Unit,A,B,C,D,E,Total,%A-C,%D-E\\n';
+      let csv='Unit,A,B,C,D,E,Total,%A-C,%D-E,UpdatedAt\n';
       units.forEach(name=>{
-        const d=data[name]||{counts:{A:0,B:0,C:0,D:0,E:0}, total:0};
-        const A=d.counts.A||0,B=d.counts.B||0,C=d.counts.C||0,D=d.counts.D||0,E=d.counts.E||0; const T=A+B+C+D+E||d.total||0;
-        const pctAC=T?Math.round((A+B+C)/T*100):0, pctDE=T?Math.round((D+E)/T*100):0;
-        csv += `"${name}",${A},${B},${C},${D},${E},${T},${pctAC}%,${pctDE}%\\n`;
+        const n = normalizeRecord(name, data[name]);
+        const T = n.T; const pctAC = T? Math.round((n.A+n.B+n.C)/T*100):0;
+        const pctDE = T? Math.round((n.D+n.E)/T*100):0;
+        const du = parseDateAny(n.updated_at);
+        csv += `"${name}",${n.A},${n.B},${n.C},${n.D},${n.E},${T},${pctAC}%,${pctDE}%,${du?du.toISOString():''}\n`;
       });
       const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
-      const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='dashboard_grade.csv'; a.click(); setTimeout(()=>URL.revokeObjectURL(url),500);
+      const url=URL.createObjectURL(blob); const a=document.createElement('a');
+      a.href=url; a.download='dashboard_grade.csv'; a.click(); setTimeout(()=>URL.revokeObjectURL(url),500);
     }
+
     function exportPNG(){
-      const a1=document.createElement('a'); a1.href=stackedChart.toBase64Image(); a1.download='stacked_per_unit.png'; a1.click();
-      setTimeout(()=>{ const a2=document.createElement('a'); a2.href=donutChart.toBase64Image(); a2.download='donut_total.png'; a2.click(); }, 300);
+      const a1=document.createElement('a'); a1.href=stackedChart.toBase64Image(); a1.download='distribusi_per_unit.png'; a1.click();
+      setTimeout(()=>{ const a2=document.createElement('a'); a2.href=donutChart.toBase64Image(); a2.download='komposisi_keseluruhan.png'; a2.click(); },300);
     }
 
     function applyFilterSearch(rows){
-      const q=$('#searchUnit').value.trim().toLowerCase(); const cluster=$('#filterCluster').value;
+      const q=$('#searchUnit').value.trim().toLowerCase();
+      const cluster=$('#filterCluster').value;
       return rows.filter(r=>{
         const okName=!q || r.name.toLowerCase().includes(q);
         let okCluster=true;
@@ -219,7 +271,8 @@
     }
 
     function sortTableBy(th, rows){
-      const type=th.dataset.sort||'text'; const idx=[...th.parentElement.children].indexOf(th);
+      const type=th.dataset.sort||'text';
+      const idx=[...th.parentElement.children].indexOf(th);
       const dir=(th.dataset.dir==='asc')?'desc':'asc'; th.dataset.dir=dir; const factor=dir==='asc'?1:-1;
       rows.sort((a,b)=>{
         const A=[a.name,a.A,a.B,a.C,a.D,a.E,a.T,a.pctAC,a.pctDE], B=[b.name,b.A,b.B,b.C,b.D,b.E,b.T,b.pctAC,b.pctDE];
@@ -230,12 +283,17 @@
     }
 
     function render(){
-      const data=readData();
-      let {rows, sums, pctACAll, pctDEAll, units, lastUpdated} = compute(data);
-      rows = applyFilterSearch(rows);
+      const data = readData();
+      const base = compute(data);            // semua data
+      let rows = applyFilterSearch(base.rows);
+      const sumsFiltered = sumRows(rows);
+
+      // Tabel & KPI (berdasarkan filter), tanggal pakai last update global (terbaru)
       fillTable(rows);
-      updateKPI({sums, pctACAll, pctDEAll, units:Object.keys(data).length, lastUpdated});
-      buildCharts(rows, sums);
+      updateKPI({ sums: sumsFiltered, units: rows.length, lastUpdated: base.lastUpdated });
+
+      // Grafik dari data yang tampil (filtered)
+      buildCharts(rows, sumsFiltered);
     }
 
     document.addEventListener('DOMContentLoaded', ()=>{
@@ -245,13 +303,21 @@
       $('#btn-export-png').addEventListener('click', exportPNG);
       $('#searchUnit').addEventListener('input', render);
       $('#filterCluster').addEventListener('change', render);
+
+      // Sortable headers
       document.querySelectorAll('#tbl thead th').forEach(th=>{
         th.style.cursor='pointer';
         th.addEventListener('click', ()=>{
-          const data=readData(); let comp=compute(data); let rows=applyFilterSearch(comp.rows);
-          sortTableBy(th, rows); fillTable(rows); buildCharts(rows, comp.sums);
+          const data=readData();
+          let rows=applyFilterSearch(compute(data).rows);
+          sortTableBy(th, rows);
+          fillTable(rows);
+          buildCharts(rows, sumRows(rows));
         });
       });
+
+      // Auto-update jika localStorage diubah dari tab/halaman lain
+      window.addEventListener('storage', (e)=>{ if (e.key==='gradeDashboardData') render(); });
     });
   </script>
 </body>
