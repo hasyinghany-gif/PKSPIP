@@ -324,6 +324,13 @@
       // Auto-refresh saat kembali ke tab (mis. form simpan di tab lain)
       document.addEventListener('visibilitychange', ()=>{ if (!document.hidden) render(); });
     });
-  </script>
+  document.getElementById('btnSimpan').addEventListener('click', () => {
+  const unitName  = document.getElementById('unitName').value;
+  const gradeValue= document.getElementById('simpulan').value; // A/B/C/D/E
+  const db = JSON.parse(localStorage.getItem('gradeDashboardData') || '{}');
+  db[unitName] = { grade: gradeValue, updated_at: new Date().toISOString() };
+  localStorage.setItem('gradeDashboardData', JSON.stringify(db));
+});
+</script>
 </body>
 </html>
