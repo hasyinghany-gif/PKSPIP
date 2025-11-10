@@ -3310,6 +3310,17 @@ document.addEventListener('DOMContentLoaded', () => {
       m && m.hide();
     });
   })();
+    <script>
+document.getElementById('btnSimpan').addEventListener('click', () => {
+  const unitName = document.getElementById('unitName').value;   // ambil nama unit dari input
+  const gradeValue = document.getElementById('simpulan').value; // ambil grade A/B/C/D/E
+
+  const db = JSON.parse(localStorage.getItem('gradeDashboardData') || '{}');
+  db[unitName] = { grade: gradeValue, updated_at: new Date().toISOString() };
+  localStorage.setItem('gradeDashboardData', JSON.stringify(db));
+
+  alert('✅ Data tersimpan! Silakan buka dashboard untuk melihat hasilnya.');
+});
   </script>
   <!-- ===== /TOC Add-on ===== -->
 
