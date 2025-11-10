@@ -13,8 +13,6 @@
     .sticky-topbar { position: sticky; top: 0; z-index: 1000; background: #fff; border-bottom: 1px solid #eaecef; }
     .kpi { display:flex; align-items:center; gap:.75rem; }
     .kpi .num { font-size:1.4rem; font-weight:700; }
-    .kpi .trend-up { color:#16a34a; }
-    .kpi .trend-down { color:#dc2626; }
     .table thead th { white-space:nowrap; }
     .toolbar .btn { white-space:nowrap; }
     .chart-card { min-height: 360px; }
@@ -151,31 +149,70 @@
   <script>
     let stackedChart, donutChart;
 
-    function readData(){
-      const raw = localStorage.getItem('gradeDashboardData') || '{}';
-      const data = JSON.parse(raw);
-      return data;
+    // --- Util: parse tanggal aman (ISO string / number / Date) ---
+    function parseDateAny(x){
+      if (!x) return null;
+      if (x instanceof Date) return isNaN(+x) ? null : x;
+      if (typeof x === 'number') { const d = new Date(x); return isNaN(+d)?null:d; }
+      if (typeof x === 'string') { const d = new Date(x); return isNaN(+d)?null:d; }
+      return null;
     }
 
+    // --- Baca dari localStorage (key yang sama dipakai form penilaian) ---
+    function readData(){
+      const raw = localStorage.getItem('gradeDashboardData') || '{}';
+      try { return JSON.parse(raw); } catch(e){ return {}; }
+    }
+
+    // --- Normalisasi 1 record ke bentuk counts + tanggal ---
+    function normalizeRecord(name, rec){
+      // Skema 1 (baru): {counts:{A..E}, total, updated_at}
+      if (rec && rec.counts) {
+        return {
+          name,
+          A: rec.counts.A||0, B: rec.counts.B||0, C: rec.counts.C||0, D: rec.counts.D||0, E: rec.counts.E||0,
+          T: (rec.total || (rec.counts.A||0)+(rec.counts.B||0)+(rec.counts.C||0)+(rec.counts.D||0)+(rec.counts.E||0)),
+          updated_at: rec.updated_at || rec.updatedAt || null
+        };
+      }
+      // Skema 2 (legacy/sederhana): {grade:"A|B|C|D|E", updated_at:...}
+      const g = (rec && rec.grade ? String(rec.grade).toUpperCase() : '');
+      const base = {A:0,B:0,C:0,D:0,E:0};
+      if ('ABCDE'.includes(g)) base[g] = 1;
+      return {
+        name, ...base, T: Object.values(base).reduce((s,v)=>s+v,0),
+        updated_at: rec?.updated_at || rec?.updatedAt || null
+      };
+    }
+
+    // --- Hitung rows, sums, lastUpdated (Date) ---
     function compute(data){
       const rows = [];
       let sums = {A:0,B:0,C:0,D:0,E:0,T:0};
-      let lastUpdated = '-';
+      let lastUpdated = null;
+
       Object.keys(data).forEach(name => {
-        const d = data[name] || {counts:{}, total:0};
-        const A=d.counts.A||0, B=d.counts.B||0, C=d.counts.C||0, D=d.counts.D||0, E=d.counts.E||0;
-        const T = A+B+C+D+E || d.total || 0;
-        const pctAC = T? Math.round((A+B+C)/T*100) : 0;
-        const pctDE = T? Math.round((D+E)/T*100) : 0;
-        rows.push({name,A,B,C,D,E,T,pctAC,pctDE, updated_at:d.updated_at});
-        sums.A+=A; sums.B+=B; sums.C+=C; sums.D+=D; sums.E+=E; sums.T+=T;
-        if (d.updated_at) lastUpdated = d.updated_at;
+        const norm = normalizeRecord(name, data[name]);
+        const pctAC = norm.T ? Math.round(((norm.A+norm.B+norm.C)/norm.T)*100) : 0;
+        const pctDE = norm.T ? Math.round(((norm.D+norm.E)/norm.T)*100) : 0;
+        const du = parseDateAny(norm.updated_at);
+        if (du && (!lastUpdated || du > lastUpdated)) lastUpdated = du;
+
+        rows.push({ name:norm.name, A:norm.A, B:norm.B, C:norm.C, D:norm.D, E:norm.E, T:norm.T, pctAC, pctDE, updated_at: du });
+        sums.A+=norm.A; sums.B+=norm.B; sums.C+=norm.C; sums.D+=norm.D; sums.E+=norm.E; sums.T+=norm.T;
       });
-      const pctACAll = sums.T? Math.round(((sums.A+sums.B+sums.C)/sums.T)*100) : 0;
-      const pctDEAll = sums.T? Math.round(((sums.D+sums.E)/sums.T)*100) : 0;
-      return { rows, sums, pctACAll, pctDEAll, units: rows.length, lastUpdated };
+
+      return { rows, sums, lastUpdated };
     }
 
+    // --- Re-sum dari rows (berguna setelah filter) ---
+    function sumRows(rows){
+      const s = {A:0,B:0,C:0,D:0,E:0,T:0};
+      rows.forEach(r=>{ s.A+=r.A; s.B+=r.B; s.C+=r.C; s.D+=r.D; s.E+=r.E; s.T+=r.T; });
+      return s;
+    }
+
+    // --- Tabel ---
     function fillTable(rows){
       const body = document.getElementById('dash-body');
       body.innerHTML = '';
@@ -195,26 +232,31 @@
       });
     }
 
-    function updateKPI(meta){
-      document.getElementById('kpi-units').textContent = meta.units;
-      document.getElementById('kpi-ac').textContent = meta.pctACAll + '%';
-      document.getElementById('kpi-de').textContent = meta.pctDEAll + '%';
-      document.getElementById('kpi-updated').textContent = meta.lastUpdated ? new Date(meta.lastUpdated).toLocaleString('id-ID') : '—';
-      document.getElementById('tA').textContent = meta.sums.A;
-      document.getElementById('tB').textContent = meta.sums.B;
-      document.getElementById('tC').textContent = meta.sums.C;
-      document.getElementById('tD').textContent = meta.sums.D;
-      document.getElementById('tE').textContent = meta.sums.E;
-      document.getElementById('tT').textContent = meta.sums.T;
-      document.getElementById('tAC').textContent = meta.pctACAll + '%';
-      document.getElementById('tDE').textContent = meta.pctDEAll + '%';
+    // --- KPI & footer ---
+    function updateKPI({ sums, units, lastUpdated }){
+      const pctACAll = sums.T ? Math.round(((sums.A+sums.B+sums.C)/sums.T)*100) : 0;
+      const pctDEAll = sums.T ? Math.round(((sums.D+sums.E)/sums.T)*100) : 0;
+
+      document.getElementById('kpi-units').textContent = units;
+      document.getElementById('kpi-ac').textContent = pctACAll + '%';
+      document.getElementById('kpi-de').textContent = pctDEAll + '%';
+      document.getElementById('kpi-updated').textContent = lastUpdated ? lastUpdated.toLocaleString('id-ID') : '—';
+
+      document.getElementById('tA').textContent = sums.A;
+      document.getElementById('tB').textContent = sums.B;
+      document.getElementById('tC').textContent = sums.C;
+      document.getElementById('tD').textContent = sums.D;
+      document.getElementById('tE').textContent = sums.E;
+      document.getElementById('tT').textContent = sums.T;
+      document.getElementById('tAC').textContent = pctACAll + '%';
+      document.getElementById('tDE').textContent = pctDEAll + '%';
     }
 
+    // --- Charts ---
     function buildCharts(rows, sums){
       const labels = rows.map(r=>r.name);
       const dA = rows.map(r=>r.A), dB = rows.map(r=>r.B), dC = rows.map(r=>r.C), dD = rows.map(r=>r.D), dE = rows.map(r=>r.E);
 
-      // Stacked bar per unit
       const ctx1 = document.getElementById('stackedChart');
       if (stackedChart) stackedChart.destroy();
       stackedChart = new Chart(ctx1, {
@@ -243,11 +285,10 @@
               }
             }}
           },
-          scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } }
+          scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true, ticks:{ precision:0 } } }
         }
       });
 
-      // Donut A..E total
       const ctx2 = document.getElementById('donutChart');
       if (donutChart) donutChart.destroy();
       donutChart = new Chart(ctx2, {
@@ -259,25 +300,22 @@
             backgroundColor: ['#22c55e','#a3e635','#facc15','#fb923c','#ef4444']
           }]
         },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { position: 'bottom' } }
-        }
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
       });
     }
 
+    // --- Exporters ---
     function exportCSV(){
       const data = readData();
       const units = Object.keys(data).sort();
-      let csv = 'Unit,A,B,C,D,E,Total,%A-C,%D-E\\n';
+      let csv = 'Unit,A,B,C,D,E,Total,%A-C,%D-E,UpdatedAt\n';
       units.forEach(name => {
-        const d = data[name] || {counts:{A:0,B:0,C:0,D:0,E:0}, total:0};
-        const A=d.counts.A||0, B=d.counts.B||0, C=d.counts.C||0, D=d.counts.D||0, E=d.counts.E||0;
-        const T=A+B+C+D+E || d.total || 0;
-        const pctAC = T? Math.round((A+B+C)/T*100) : 0;
-        const pctDE = T? Math.round((D+E)/T*100) : 0;
-        csv += `"${name}",${A},${B},${C},${D},${E},${T},${pctAC}%,${pctDE}%\\n`;
+        const rec = normalizeRecord(name, data[name]);
+        const T = rec.T;
+        const pctAC = T? Math.round((rec.A+rec.B+rec.C)/T*100) : 0;
+        const pctDE = T? Math.round((rec.D+rec.E)/T*100) : 0;
+        const du = parseDateAny(rec.updated_at);
+        csv += `"${name}",${rec.A},${rec.B},${rec.C},${rec.D},${rec.E},${T},${pctAC}%,${pctDE}%,${du?du.toISOString():''}\n`;
       });
       const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
       const url = URL.createObjectURL(blob);
@@ -287,15 +325,15 @@
     }
 
     function exportPNG(){
-      // Gabungkan dua chart ke satu gambar (sederhana: unduh masing-masing)
       const link1 = document.createElement('a');
-      link1.href = stackedChart.toBase64Image(); link1.download = 'stacked_per_unit.png'; link1.click();
+      link1.href = stackedChart.toBase64Image(); link1.download = 'distribusi_per_unit.png'; link1.click();
       setTimeout(()=>{
         const link2 = document.createElement('a');
-        link2.href = donutChart.toBase64Image(); link2.download = 'donut_total.png'; link2.click();
+        link2.href = donutChart.toBase64Image(); link2.download = 'komposisi_keseluruhan.png'; link2.click();
       }, 300);
     }
 
+    // --- Filter & pencarian ---
     function applyFilterSearch(rows){
       const q = document.getElementById('searchUnit').value.trim().toLowerCase();
       const cluster = document.getElementById('filterCluster').value;
@@ -323,20 +361,25 @@
       });
     }
 
+    // --- Render utama ---
     function render(){
       const data = readData();
-      let {rows, sums, pctACAll, pctDEAll, units, lastUpdated} = compute(data);
-      // filter & search
-      rows = applyFilterSearch(rows);
-      // table & kpi
+      const base = compute(data);                 // semua data
+      let rows = applyFilterSearch(base.rows);    // sesuaikan filter/pencarian
+      const sumsFiltered = sumRows(rows);
+      const last = base.lastUpdated;              // terakhir update (global)
+
+      // Tabel & KPI (berdasarkan hasil filter)
       fillTable(rows);
-      updateKPI({sums, pctACAll, pctDEAll, units: Object.keys(data).length, lastUpdated});
-      // charts
-      buildCharts(rows, sums);
+      updateKPI({ sums: sumsFiltered, units: rows.length, lastUpdated: last });
+
+      // Charts pakai data filtered
+      buildCharts(rows, sumsFiltered);
     }
 
     document.addEventListener('DOMContentLoaded', () => {
       render();
+
       document.getElementById('btn-refresh').addEventListener('click', render);
       document.getElementById('btn-export-csv').addEventListener('click', exportCSV);
       document.getElementById('btn-export-png').addEventListener('click', exportPNG);
@@ -348,13 +391,16 @@
         th.style.cursor = 'pointer';
         th.addEventListener('click', () => {
           const data = readData();
-          let computed = compute(data);
-          let rows = computed.rows;
-          rows = applyFilterSearch(rows);
+          let rows = applyFilterSearch(compute(data).rows);
           sortTableBy(th, rows);
           fillTable(rows);
-          buildCharts(rows, computed.sums);
+          buildCharts(rows, sumRows(rows));
         });
+      });
+
+      // Live update bila localStorage di-update dari tab/halaman lain
+      window.addEventListener('storage', (e) => {
+        if (e.key === 'gradeDashboardData') render();
       });
     });
   </script>
