@@ -121,24 +121,30 @@
     let stackedChart, donutChart;
     const $ = (s)=>document.querySelector(s);
 
-    // --- Parser tanggal aman (ISO string / number / Date) ---
+    // Parser tanggal aman
     function parseDateAny(x){
-      if (!x) return null;
-      if (x instanceof Date) return isNaN(+x) ? null : x;
-      if (typeof x === 'number') { const d=new Date(x); return isNaN(+d)?null:d; }
-      if (typeof x === 'string') { const d=new Date(x); return isNaN(+d)?null:d; }
-      return null;
+      try{
+        if (!x) return null;
+        if (x instanceof Date) return isNaN(+x) ? null : x;
+        if (typeof x === 'number') { const d=new Date(x); return isNaN(+d)?null:d; }
+        if (typeof x === 'string') { const d=new Date(x); return isNaN(+d)?null:d; }
+        // dukung bentuk Timestamp-like {seconds,nanos}
+        if (typeof x === 'object' && typeof x.seconds === 'number') {
+          const d=new Date(x.seconds*1000); return isNaN(+d)?null:d;
+        }
+        return null;
+      }catch{ return null; }
     }
 
-    // Baca seluruh data dashboard dari localStorage
+    // Ambil data dari localStorage
     function readData(){
       try { return JSON.parse(localStorage.getItem('gradeDashboardData') || '{}'); }
       catch(e){ return {}; }
     }
 
-    // Normalisasi 1 record -> counts + tanggal
+    // Normalisasi record -> counts + tanggal
     function normalizeRecord(name, rec){
-      // Skema counts {A..E}
+      // Skema counts
       if (rec && rec.counts){
         const c=rec.counts;
         const A=c.A||0, B=c.B||0, C=c.C||0, D=c.D||0, E=c.E||0;
@@ -152,7 +158,7 @@
       return { name, ...base, T:1, updated_at: rec?.updated_at || rec?.updatedAt || null };
     }
 
-    // Hitung rows (semua data), totals, lastUpdated (Date)
+    // Hitung rows + total + lastUpdated
     function compute(data){
       const rows=[]; const sums={A:0,B:0,C:0,D:0,E:0,T:0};
       let lastUpdated=null;
@@ -168,7 +174,7 @@
       return { rows, sums, lastUpdated };
     }
 
-    // Sum ulang dari rows (dipakai setelah filter)
+    // Sum ulang sesudah filter
     function sumRows(rows){
       const s={A:0,B:0,C:0,D:0,E:0,T:0};
       rows.forEach(r=>{ s.A+=r.A; s.B+=r.B; s.C+=r.C; s.D+=r.D; s.E+=r.E; s.T+=r.T; });
@@ -284,15 +290,11 @@
 
     function render(){
       const data = readData();
-      const base = compute(data);            // semua data
+      const base = compute(data);       // semua data
       let rows = applyFilterSearch(base.rows);
       const sumsFiltered = sumRows(rows);
-
-      // Tabel & KPI (berdasarkan filter), tanggal pakai last update global (terbaru)
       fillTable(rows);
       updateKPI({ sums: sumsFiltered, units: rows.length, lastUpdated: base.lastUpdated });
-
-      // Grafik dari data yang tampil (filtered)
       buildCharts(rows, sumsFiltered);
     }
 
@@ -304,7 +306,7 @@
       $('#searchUnit').addEventListener('input', render);
       $('#filterCluster').addEventListener('change', render);
 
-      // Sortable headers
+      // Sortable
       document.querySelectorAll('#tbl thead th').forEach(th=>{
         th.style.cursor='pointer';
         th.addEventListener('click', ()=>{
@@ -316,8 +318,11 @@
         });
       });
 
-      // Auto-update jika localStorage diubah dari tab/halaman lain
+      // Auto-refresh bila localStorage berubah dari tab/halaman lain
       window.addEventListener('storage', (e)=>{ if (e.key==='gradeDashboardData') render(); });
+
+      // Auto-refresh saat kembali ke tab (mis. form simpan di tab lain)
+      document.addEventListener('visibilitychange', ()=>{ if (!document.hidden) render(); });
     });
   </script>
 </body>
