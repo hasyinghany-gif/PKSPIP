@@ -261,6 +261,13 @@
               </div>
 
               <hr class="my-4">
+              <!-- Sinkron otomatis ke Sestama -->
+              <div class="form-check form-switch my-3">
+                <input class="form-check-input" type="checkbox" id="autosync-sestama" checked>
+                <label class="form-check-label" for="autosync-sestama">
+                  Sinkronkan otomatis ke bidang Sestama (dari simpulan & uraian di atas)
+                </label>
+              </div>
               <div id="sestama-fields" class="d-none">
                 <p class="form-hint mb-2"><i class="bi bi-info-circle"></i> Bidang berikut khusus untuk <strong>Sestama</strong>.</p>
                 <div class="row g-3">
@@ -2748,6 +2755,88 @@ c. Memberikan rekomendasi yang relevan.`
     window.getParamGradeFolderId = function(unit, kodeParam, grade){
       return window.DRIVE_FOLDERS_PARAM?.[unit]?.[kodeParam]?.[grade] || null;
     };
+    /* ----------------- Auto-sync Simpulan & Uraian ke Sestama ----------------- */
+// Helper pilih value select berdasarkan value/label
+function setSelectValue(selectEl, val) {
+  if (!selectEl || val == null) return;
+  const opts = Array.from(selectEl.options);
+  const found = opts.find(o => o.value === val) || opts.find(o => o.text === val);
+  if (found) selectEl.value = found.value;
+}
+
+// (Opsional) template default kalau uraian atas kosong tapi grade sudah dipilih
+const DETAIL_TEMPLATES_BY_GRADE = {
+  'A': 'Kepatuhan dan praktik etika sangat baik; bukti konsisten dan berdampak.',
+  'B': 'Kepatuhan baik; ada perbaikan berkelanjutan dan penguatan budaya etika.',
+  'C': 'Cukup; temuan minor, perlu rencana perbaikan terarah.',
+  'D': 'Kurang; banyak ketidakselarasan, perlu tindakan korektif segera.',
+  'E': 'Tidak memadai; prinsip inti belum diterapkan, risiko tinggi.'
+};
+
+// Ambil elemen yang sudah ada di HTML-mu
+const elAuto   = document.getElementById('autosync-sestama');
+const elGrade  = document.getElementById('simpulan');
+const elDetail = document.getElementById('hasil-pengujian');
+
+const elSGrade  = document.getElementById('simpulan-sestama');
+const elSDetail = document.getElementById('hasil-pengujian-sestama');
+
+// (opsional) live reference card kalau kamu pakai
+const elRefSGrade  = document.getElementById('ref-simpulan-sestama');
+const elRefSDetail = document.getElementById('ref-uraian-sestama');
+
+// Jangan timpa kalau user sudah edit Sestama manual
+let sestamaDetailDirty = false;
+let sestamaGradeDirty  = false;
+elSDetail?.addEventListener('input', () => { sestamaDetailDirty = true; });
+elSGrade?.addEventListener('change', () => { sestamaGradeDirty  = true; });
+
+function updateRefCard() {
+  if (elRefSGrade)  elRefSGrade.textContent = elSGrade?.value || '—';
+  if (elRefSDetail) elRefSDetail.textContent = (elSDetail?.value || 'Tidak ada rujukan');
+}
+
+function syncToSestama({ force=false } = {}) {
+  if (!elAuto?.checked) return;                 // hanya kalau toggle aktif
+  if (!elSGrade || !elSDetail) return;          // kalau field Sestama tidak ada, lewati
+
+  // Sinkron GRADE
+  const g = elGrade?.value?.trim();
+  if (g && (force || !sestamaGradeDirty || !elSGrade.value)) {
+    setSelectValue(elSGrade, g);
+  }
+
+  // Sinkron DETAIL
+  const textTop = elDetail?.value?.trim();
+  if (force || !sestamaDetailDirty || !elSDetail.value) {
+    let v = textTop;
+    if ((!v || v.length < 5) && g && DETAIL_TEMPLATES_BY_GRADE[g]) {
+      v = DETAIL_TEMPLATES_BY_GRADE[g];         // fallback template singkat
+    }
+    if (v) elSDetail.value = v;
+  }
+
+  updateRefCard();
+}
+
+// Trigger saat user isi bagian atas
+elGrade?.addEventListener('change', () => syncToSestama());
+elDetail?.addEventListener('input',  () => syncToSestama());
+
+// Toggle: saat dicentang ulang → paksa sinkron ulang
+elAuto?.addEventListener('change', () => {
+  if (elAuto.checked) syncToSestama({ force:true });
+});
+
+// Jalankan sekali setelah modal/form siap dipakai
+document.addEventListener('DOMContentLoaded', () => {
+  // Kalau form sudah ter-render saat halaman load, paksa sekali
+  syncToSestama({ force:true });
+});
+
+// (opsional) kalau kamu punya event "saat modal dibuka", panggil juga:
+// const assessmentModal = document.getElementById('assessment-modal');
+// assessmentModal?.addEventListener('shown.bs.modal', () => syncToSestama({ force:true }));
   </script>
 
   <!-- Mapping per Unit × Parameter × Grade -->
