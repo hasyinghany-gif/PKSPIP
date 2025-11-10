@@ -385,7 +385,39 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
     enableIndexedDbPersistence(db).catch(()=>{});
+    
+    // User login logic
+document.getElementById('loginForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const email = document.getElementById('email').value;
+  const password = document.getElementById('password').value;
 
+  signInWithEmailAndPassword(auth, email, password)
+    .then((userCredential) => {
+      const user = userCredential.user;
+      const uid = user.uid;
+      
+      // Fetch user data from Firestore
+      const docRef = doc(db, "users", uid);
+      getDoc(docRef).then((docSnap) => {
+        if (docSnap.exists()) {
+          const userData = docSnap.data();
+          // Check if the user is approved, etc.
+          if (userData.role === 'approved') {
+            window.location.href = "dashboard.html"; // Redirect to dashboard
+          } else {
+            alert("Account not approved. Contact admin.");
+          }
+        } else {
+          alert("No such user data!");
+        }
+      });
+    })
+    .catch((error) => {
+      console.error(error);
+      alert("Login failed!");
+    });
+});
     /* ==== Google Drive (public files) ==== */
     const DRIVE_API_KEY = "AIzaSyAukkICkUg5NsFaGy0K8F-GDeOXWCWml4s";
     function drivePreviewUrl(file) {
