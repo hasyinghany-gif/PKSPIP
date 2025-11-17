@@ -20,7 +20,16 @@
     }
     body{font-family:"Plus Jakarta Sans",sans-serif;background:#f7fafc;color:var(--ink);}
     .navbar{backdrop-filter:blur(8px);background:rgba(255,255,255,.9)!important;border-bottom:1px solid var(--border);}
-    .hero{min-height:34vh;background:url("hero.jpeg")center 56%/cover no-repeat;border-bottom:1px solid var(--border);}
+    .hero{height: clamp(160px, 24vh, 220px);
+  background:url("hero.jpeg") center 56%/cover no-repeat;
+  border-bottom:1px solid var(--border);
+  overflow:hidden;
+}
+    @media (max-width: 576px){
+  .hero{
+    height: clamp(180px, 30vh, 240px);
+  }
+}
     /* TEAMS */
     .teams-wrap{padding-block:30px}
     .team-shot{width:100%;max-width:420px;border-radius:18px;box-shadow:0 20px 50px rgba(2,6,23,.12);border:1px solid rgba(2,6,23,.06);}
