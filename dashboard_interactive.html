@@ -196,19 +196,23 @@
     }
 
     function updateKPI(meta){
-      document.getElementById('kpi-units').textContent = meta.units;
-      document.getElementById('kpi-ac').textContent = meta.pctACAll + '%';
-      document.getElementById('kpi-de').textContent = meta.pctDEAll + '%';
-      document.getElementById('kpi-updated').textContent = meta.lastUpdated ? new Date(meta.lastUpdated).toLocaleString('id-ID') : '—';
-      document.getElementById('tA').textContent = meta.sums.A;
-      document.getElementById('tB').textContent = meta.sums.B;
-      document.getElementById('tC').textContent = meta.sums.C;
-      document.getElementById('tD').textContent = meta.sums.D;
-      document.getElementById('tE').textContent = meta.sums.E;
-      document.getElementById('tT').textContent = meta.sums.T;
-      document.getElementById('tAC').textContent = meta.pctACAll + '%';
-      document.getElementById('tDE').textContent = meta.pctDEAll + '%';
-    }
+  document.getElementById('kpi-units').textContent = meta.units;
+  document.getElementById('kpi-ac').textContent = meta.pctACAll + '%';
+  document.getElementById('kpi-de').textContent = meta.pctDEAll + '%';
+  
+  // Memastikan format tanggal valid
+  const updatedAt = meta.lastUpdated ? new Date(meta.lastUpdated).toLocaleString('id-ID') : '—';
+  document.getElementById('kpi-updated').textContent = updatedAt;
+  
+  document.getElementById('tA').textContent = meta.sums.A;
+  document.getElementById('tB').textContent = meta.sums.B;
+  document.getElementById('tC').textContent = meta.sums.C;
+  document.getElementById('tD').textContent = meta.sums.D;
+  document.getElementById('tE').textContent = meta.sums.E;
+  document.getElementById('tT').textContent = meta.sums.T;
+  document.getElementById('tAC').textContent = meta.pctACAll + '%';
+  document.getElementById('tDE').textContent = meta.pctDEAll + '%';
+}
 
     function buildCharts(rows, sums){
       const labels = rows.map(r=>r.name);
