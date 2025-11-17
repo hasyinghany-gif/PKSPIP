@@ -151,7 +151,7 @@
   </div>
 
   <script>
-    // Firebase configuration
+        // --- 1. Konfigurasi Firebase ---
     const firebaseConfig = {
       apiKey: "AIzaSyCYwuJHeL_YlyW7zPNRGSXe_NB8r_Ql_t0",
       authDomain: "spip-8e5e9.firebaseapp.com",
@@ -162,35 +162,297 @@
       measurementId: "G-J44L941K89"
     };
 
-    // Initialize Firebase
+    // Inisialisasi Firebase (menggunakan sintaks v8/namespaced sesuai tag script Anda)
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
+    // --- 2. Variabel Global ---
+    let stackedChart, donutChart;
+    // Variabel global baru untuk menyimpan data dari Firestore
+    let globalData = {};
+
+    // --- 3. Fungsi Logika (Dimodifikasi & Asli) ---
+
+    // MODIFIKASI: readData sekarang membaca dari variabel global
+    function readData(){
+      // const raw = localStorage.getItem('gradeDashboardData') || '{}'; // <-- VERSI LAMA
+      // const data = JSON.parse(raw); // <-- VERSI LAMA
+      const data = globalData || {}; // <-- VERSI BARU
+      return data;
+    }
+    
+    // FUNGSI BARU: Untuk mengambil data dari Firestore
     function fetchDataFromFirestore() {
-  const dataRef = db.collection('assessments');  // Pastikan path ke koleksi sudah benar
-  dataRef.onSnapshot((querySnapshot) => {
-    const data = {};
-    querySnapshot.forEach((doc) => {
-      data[doc.id] = doc.data();
+      console.log("Mulai mengambil data dari Firestore...");
+      const dataRef = db.collection('assessments'); // Pastikan nama koleksi ini ('assessments') benar
+
+      // Menggunakan onSnapshot agar dashboard update secara real-time
+      dataRef.onSnapshot((querySnapshot) => {
+        console.log(`Data diterima: ${querySnapshot.size} dokumen.`);
+        const data = {};
+        querySnapshot.forEach((doc) => {
+          data[doc.id] = doc.data();
+        });
+        
+        // Simpan data yang diambil ke variabel global
+        globalData = data;
+        
+        // Panggil render() untuk memperbarui seluruh dashboard dengan data baru
+        render(); 
+        
+      }, (error) => {
+        console.error("Error mengambil data dari Firestore: ", error);
+        alert("Gagal memuat data. Periksa konsol (F12) untuk detail.");
+      });
+    }
+
+    // ASLI (Dimodifikasi sedikit untuk Tanggal): Fungsi untuk menghitung data
+    function compute(data){
+      const rows = [];
+      let sums = {A:0,B:0,C:0,D:0,E:0,T:0};
+      let lastUpdated = '-';
+      
+      // Menangani jika data kosong
+      if (!data || Object.keys(data).length === 0) {
+        return { rows, sums, pctACAll: 0, pctDEAll: 0, units: 0, lastUpdated: '-' };
+      }
+
+      Object.keys(data).forEach(name => {
+        const d = data[name] || {counts:{}, total:0};
+        const A=d.counts.A||0, B=d.counts.B||0, C=d.counts.C||0, D=d.counts.D||0, E=d.counts.E||0;
+        const T = A+B+C+D+E || d.total || 0;
+        const pctAC = T? Math.round((A+B+C)/T*100) : 0;
+        const pctDE = T? Math.round((D+E)/T*100) : 0;
+        
+        // Menangani format tanggal dari Firestore (Timestamp)
+        let timestamp = d.updated_at;
+        if (timestamp && typeof timestamp.toDate === 'function') {
+            timestamp = timestamp.toDate(); // Konversi Firestore Timestamp ke Date Object
+        } else if (timestamp) {
+            timestamp = new Date(timestamp); // Coba konversi jika ini string
+        }
+
+        rows.push({name,A,B,C,D,E,T,pctAC,pctDE, updated_at:timestamp});
+        sums.A+=A; sums.B+=B; sums.C+=C; sums.D+=D; sums.E+=E; sums.T+=T;
+        
+        // Cari tanggal update terakhir
+        if (timestamp && timestamp instanceof Date) {
+            if (lastUpdated === '-' || timestamp > lastUpdated) {
+                lastUpdated = timestamp;
+            }
+        }
+      });
+      
+      const pctACAll = sums.T? Math.round(((sums.A+sums.B+sums.C)/sums.T)*100) : 0;
+      const pctDEAll = sums.T? Math.round(((sums.D+sums.E)/sums.T)*100) : 0;
+      return { rows, sums, pctACAll, pctDEAll, units: rows.length, lastUpdated };
+    }
+
+    // ASLI: Fungsi untuk mengisi tabel
+    function fillTable(rows){
+      const body = document.getElementById('dash-body');
+      body.innerHTML = '';
+      rows.forEach(r => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${r.name}</td>
+          <td class="text-center">${r.A}</td>
+          <td class="text-center">${r.B}</td>
+          <td class="text-center">${r.C}</td>
+          <td class="text-center text-danger-emphasis">${r.D}</td>
+          <td class="text-center text-danger">${r.E}</td>
+          <td class="text-center fw-semibold">${r.T}</td>
+          <td class="text-center text-success">${r.pctAC}%</td>
+          <td class="text-center text-danger">${r.pctDE}%</td>`;
+        body.appendChild(tr);
+      });
+    }
+
+    // ASLI (Dimodifikasi sedikit untuk Tanggal): Fungsi untuk update KPI
+    function updateKPI(meta){
+      document.getElementById('kpi-units').textContent = meta.units;
+      document.getElementById('kpi-ac').textContent = meta.pctACAll + '%';
+      document.getElementById('kpi-de').textContent = meta.pctDEAll + '%';
+      
+      // Menampilkan tanggal yang sudah jadi Date object
+      const updatedAt = (meta.lastUpdated && meta.lastUpdated instanceof Date) 
+        ? meta.lastUpdated.toLocaleString('id-ID') 
+        : '—';
+      document.getElementById('kpi-updated').textContent = updatedAt;
+      
+      document.getElementById('tA').textContent = meta.sums.A;
+      document.getElementById('tB').textContent = meta.sums.B;
+      document.getElementById('tC').textContent = meta.sums.C;
+      document.getElementById('tD').textContent = meta.sums.D;
+      document.getElementById('tE').textContent = meta.sums.E;
+      document.getElementById('tT').textContent = meta.sums.T;
+      document.getElementById('tAC').textContent = meta.pctACAll + '%';
+      document.getElementById('tDE').textContent = meta.pctDEAll + '%';
+    }
+
+    // ASLI: Fungsi untuk membuat chart
+    function buildCharts(rows, sums){
+      const labels = rows.map(r=>r.name);
+      const dA = rows.map(r=>r.A), dB = rows.map(r=>r.B), dC = rows.map(r=>r.C), dD = rows.map(r=>r.D), dE = rows.map(r=>r.E);
+
+      // Stacked bar per unit
+      const ctx1 = document.getElementById('stackedChart');
+      if (stackedChart) stackedChart.destroy();
+      stackedChart = new Chart(ctx1, {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [
+            { label: 'A', data: dA, backgroundColor: '#22c55e' },
+            { label: 'B', data: dB, backgroundColor: '#a3e635' },
+            { label: 'C', data: dC, backgroundColor: '#facc15' },
+            { label: 'D', data: dD, backgroundColor: '#fb923c' },
+            { label: 'E', data: dE, backgroundColor: '#ef4444' }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: { mode: 'index', intersect: false },
+          plugins: {
+            legend: { position: 'bottom' },
+            tooltip: { callbacks: {
+              footer: (items)=> {
+                const idx = items[0].dataIndex;
+                const tot = rows[idx].T || 0;
+                return 'Total: ' + tot;
+              }
+            }}
+          },
+          scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } }
+        }
+      });
+
+      // Donut A..E total
+      const ctx2 = document.getElementById('donutChart');
+      if (donutChart) donutChart.destroy();
+      donutChart = new Chart(ctx2, {
+        type: 'doughnut',
+        data: {
+          labels: ['A','B','C','D','E'],
+          datasets: [{
+            data: [sums.A, sums.B, sums.C, sums.D, sums.E],
+            backgroundColor: ['#22c55e','#a3e635','#facc15','#fb923c','#ef4444']
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { position: 'bottom' } }
+        }
+      });
+    }
+
+    // ASLI: Fungsi ekspor
+    function exportCSV(){
+      const data = readData(); // Ini sudah benar, akan mengambil dari globalData
+      const units = Object.keys(data).sort();
+      let csv = 'Unit,A,B,C,D,E,Total,%A-C,%D-E\n';
+      units.forEach(name => {
+        const d = data[name] || {counts:{A:0,B:0,C:0,D:0,E:0}, total:0};
+        const A=d.counts.A||0, B=d.counts.B||0, C=d.counts.C||0, D=d.counts.D||0, E=d.counts.E||0;
+        const T=A+B+C+D+E || d.total || 0;
+        const pctAC = T? Math.round((A+B+C)/T*100) : 0;
+        const pctDE = T? Math.round((D+E)/T*100) : 0;
+        csv += `"${name}",${A},${B},${C},${D},${E},${T},${pctAC}%,${pctDE}%\n`;
+      });
+      const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'dashboard_grade.csv'; a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 500);
+    }
+
+    function exportPNG(){
+      const link1 = document.createElement('a');
+      link1.href = stackedChart.toBase64Image(); link1.download = 'stacked_per_unit.png';
+      link1.click();
+      setTimeout(()=> {
+        const link2 = document.createElement('a');
+        link2.href = donutChart.toBase64Image(); link2.download = 'donut_total.png'; link2.click();
+      }, 300);
+    }
+
+    // ASLI: Fungsi filter & sort
+    function applyFilterSearch(rows){
+      const q = document.getElementById('searchUnit').value.trim().toLowerCase();
+      const cluster = document.getElementById('filterCluster').value;
+      return rows.filter(r => {
+        const okName = !q || r.name.toLowerCase().includes(q);
+        let okCluster = true;
+        if (cluster === 'AC') okCluster = (r.pctAC >= r.pctDE);
+        if (cluster === 'DE') okCluster = (r.pctDE > r.pctAC);
+        return okName && okCluster;
+      });
+    }
+
+    function sortTableBy(th, rows){
+      const type = th.dataset.sort || 'text';
+      const idx = Array.from(th.parentElement.children).indexOf(th);
+      const dir = (th.dataset.dir === 'asc') ? 'desc' : 'asc';
+      // Hapus indikator sort dari header lain
+      th.parentElement.querySelectorAll('th').forEach(h => h.dataset.dir = '');
+      th.dataset.dir = dir; // Set arah di header yang diklik
+      
+      const factor = dir === 'asc' ? 1 : -1;
+      rows.sort((a,b)=>{
+        const A = [a.name,a.A,a.B,a.C,a.D,a.E,a.T,a.pctAC,a.pctDE];
+        const B = [b.name,b.A,b.B,b.C,b.D,b.E,b.T,b.pctAC,b.pctDE];
+        const va = A[idx], vb = B[idx];
+        if (type === 'num') return (va - vb) * factor;
+        return String(va).localeCompare(String(vb)) * factor;
+      });
+    }
+
+    // ASLI: Fungsi render utama
+    function render(){
+      const data = readData(); // Ambil data (dari globalData)
+      let {rows, sums, pctACAll, pctDEAll, units, lastUpdated} = compute(data); // Hitung semua data
+      
+      const filteredRows = applyFilterSearch(rows); // Terapkan filter/search
+      
+      fillTable(filteredRows); // Isi tabel dengan data terfilter
+      
+      // Update KPI dengan data TOTAL (bukan terfilter)
+      updateKPI({sums, pctACAll, pctDEAll, units, lastUpdated}); 
+      
+      // Bangun chart dengan data TOTAL (donut) dan TERFILTER (stacked)
+      buildCharts(filteredRows, sums);
+    }
+
+    // --- 4. Event Listener Utama (DIGABUNG) ---
+    document.addEventListener('DOMContentLoaded', () => {
+      // Pasang semua listener untuk tombol, search, filter
+      document.getElementById('btn-refresh').addEventListener('click', render); // 'Refresh' hanya me-render ulang (menerapkan filter)
+      document.getElementById('btn-export-csv').addEventListener('click', exportCSV);
+      document.getElementById('btn-export-png').addEventListener('click', exportPNG);
+      document.getElementById('searchUnit').addEventListener('input', render);
+      document.getElementById('filterCluster').addEventListener('change', render);
+
+      // Pasang listener untuk sorting tabel
+      document.querySelectorAll('#tbl thead th').forEach(th => {
+        if(th.dataset.sort) { // Hanya tambahkan ke kolom yang bisa disortir
+            th.style.cursor = 'pointer';
+            th.addEventListener('click', () => {
+                const data = readData();
+                let {rows, sums} = compute(data); // Ambil data & total
+                let filteredRows = applyFilterSearch(rows); // Terapkan filter
+                sortTableBy(th, filteredRows); // Urutkan data yang sudah terfilter
+                fillTable(filteredRows); // Isi ulang tabel
+                buildCharts(filteredRows, sums); // Bangun ulang chart
+            });
+        }
+      });
+
+      // Panggil fungsi untuk mengambil data dari Firebase
+      // Ini akan otomatis memanggil render() saat data pertama kali diterima
+      fetchDataFromFirestore();
     });
-    renderData(data);  // Gunakan data yang baru diambil untuk merender dashboard
-  }, (error) => {
-    console.error("Error getting documents: ", error);  // Menangani error jika query gagal
-  });
-}
-
-function renderData(data) {
-  // Render dashboard menggunakan data terbaru
-  render();  // Misalnya, fungsi render() akan memperbarui tampilan dashboard
-}
-
-// Panggil fungsi saat halaman dimuat
-document.addEventListener('DOMContentLoaded', () => {
-  fetchDataFromFirestore();
-});
-
-    // Panggil fungsi fetch data saat halaman dimuat
-    document.addEventListener('DOMContentLoaded', fetchDataFromFirestore);
   </script>
 </body>
 </html>
