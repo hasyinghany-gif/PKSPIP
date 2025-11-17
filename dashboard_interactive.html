@@ -167,18 +167,27 @@
     const db = firebase.firestore();
 
     function fetchDataFromFirestore() {
-      const dataRef = db.collection('assessments');  // Ganti dengan path Firestore Anda
-      dataRef.get().then((querySnapshot) => {
-        const data = {};
-        querySnapshot.forEach((doc) => {
-          data[doc.id] = doc.data();
-        });
-        localStorage.setItem('gradeDashboardData', JSON.stringify(data));
-        render();  // Menyegarkan tampilan
-      }).catch((error) => {
-        console.error("Error getting documents: ", error);
-      });
-    }
+  const dataRef = db.collection('assessments');  // Pastikan path ke koleksi sudah benar
+  dataRef.onSnapshot((querySnapshot) => {
+    const data = {};
+    querySnapshot.forEach((doc) => {
+      data[doc.id] = doc.data();
+    });
+    renderData(data);  // Gunakan data yang baru diambil untuk merender dashboard
+  }, (error) => {
+    console.error("Error getting documents: ", error);  // Menangani error jika query gagal
+  });
+}
+
+function renderData(data) {
+  // Render dashboard menggunakan data terbaru
+  render();  // Misalnya, fungsi render() akan memperbarui tampilan dashboard
+}
+
+// Panggil fungsi saat halaman dimuat
+document.addEventListener('DOMContentLoaded', () => {
+  fetchDataFromFirestore();
+});
 
     // Panggil fungsi fetch data saat halaman dimuat
     document.addEventListener('DOMContentLoaded', fetchDataFromFirestore);
