@@ -42,9 +42,8 @@
       display:block;
     }
 
-    /* HERO + BADGE JUDUL APLIKASI */
+    /* HERO */
     .hero{
-      position:relative;
       height:clamp(160px, 24vh, 220px);
       background:url("hero.jpeg") center 56%/cover no-repeat;
       border-bottom:1px solid var(--border);
@@ -56,53 +55,48 @@
       }
     }
 
-    .hero-inner{
-      position:absolute;
-      inset:0;
-      display:flex;
-      align-items:flex-start;
-      padding-top:14px;
+    /* HERO LABEL – judul di bawah hero (opsi 3) */
+    .hero-label-wrapper{
+      margin-top:-20px;       /* sedikit overlap dengan hero */
+      margin-bottom:30px;
     }
-    @media (min-width:768px){
-      .hero-inner{
-        align-items:center;
-        padding-top:0;
-      }
-    }
-
-    .hero-inner .container{
-      display:flex;
-      align-items:flex-start;
-    }
-
-    .hero-badge{
+    .hero-label{
       display:inline-flex;
-      flex-wrap:wrap;
-      align-items:center;
-      gap:.3rem .9rem;
-      padding:.5rem 1.3rem;
+      gap:.9rem;
+      padding:.6rem 1.4rem;
       border-radius:999px;
+      background:rgba(15,23,42,.86);
       backdrop-filter:blur(10px);
-      background:rgba(15,23,42,.78);
-      border:1px solid rgba(148,163,184,.7);
-      box-shadow:0 18px 40px rgba(15,23,42,.45);
+      border:1px solid rgba(148,163,184,.45);
+      box-shadow:0 16px 34px rgba(15,23,42,.35);
+      align-items:center;
     }
-
     .hero-main{
-      font-size:.8rem;
+      font-size:.82rem;
+      font-weight:700;
       text-transform:uppercase;
       letter-spacing:.14em;
-      font-weight:700;
       color:#bfdbfe; /* biru lembut */
     }
-
     .hero-sub{
       font-size:.78rem;
+      font-weight:600;
       text-transform:uppercase;
       letter-spacing:.12em;
-      font-weight:600;
-      color:#e5e7eb;
+      color:#e2e8f0; /* abu soft */
       opacity:.95;
+    }
+    @media(max-width:576px){
+      .hero-label-wrapper{
+        margin-top:-18px;
+        margin-bottom:26px;
+      }
+      .hero-label{
+        gap:.6rem;
+        padding:.5rem 1.2rem;
+      }
+      .hero-main{font-size:.74rem;}
+      .hero-sub{font-size:.7rem;}
     }
 
     /* TEAMS */
@@ -257,17 +251,18 @@
     </div>
   </nav>
 
-  <!-- HERO dengan badge judul aplikasi -->
-  <header class="hero">
-    <div class="hero-inner">
-      <div class="container">
-        <div class="hero-badge">
-          <span class="hero-main">Web-Based SPIP</span>
-          <span class="hero-sub">Inspektorat LKPP</span>
-        </div>
+  <!-- HERO -->
+  <header class="hero"></header>
+
+  <!-- LABEL JUDUL DI BAWAH HERO -->
+  <div class="hero-label-wrapper">
+    <div class="container">
+      <div class="hero-label">
+        <span class="hero-main">Web-Based SPIP</span>
+        <span class="hero-sub">Inspektorat LKPP</span>
       </div>
     </div>
-  </header>
+  </div>
 
   <!-- TEAMS -->
   <section class="teams-wrap">
