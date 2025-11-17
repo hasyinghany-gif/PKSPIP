@@ -182,6 +182,7 @@
       rows.forEach(r => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
+
           <td>${r.name}</td>
           <td class="text-center">${r.A}</td>
           <td class="text-center">${r.B}</td>
@@ -191,6 +192,8 @@
           <td class="text-center fw-semibold">${r.T}</td>
           <td class="text-center text-success">${r.pctAC}%</td>
           <td class="text-center text-danger">${r.pctDE}%</td>`;
+
+
         body.appendChild(tr);
       });
     }
