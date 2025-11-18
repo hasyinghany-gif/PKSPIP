@@ -443,18 +443,30 @@ function shallowEqual(a, b){
 /* ====== ASSESSMENT_STRUCTURE (Contoh) ====== */
 const ASSESSMENT_STRUCTURE = [
 {
-    kode: `1.1.1`, uraian_subunsur: `Penegakan Integritas dan Nilai Etika`,
-    uraian_parameter: `K/L/D menegakkan integritas dan nilai etika dalam melaksanakan tugas dan fungsi organisasi`,
-    kode_parameter: `1.1.1`,
-    grades: [
-      { grade: 'A', kriteria: `Penegakan integritas dan nilai etika telah diperbaiki secara berkelanjutan...`, tooltip: `Tooltip A` },
-      { grade: 'B', kriteria: `Kebijakan dan implementasi organisasi telah dievaluasi...`, tooltip: `Tooltip B` },
-      { grade: 'C', kriteria: `Penegakan integritas dan nilai etika telah dilaksanakan oleh pegawai...`, tooltip: `Tooltip C` },
-      { grade: 'D', kriteria: `Kebijakan penegakan integritas dan nilai etika organisasi telah dipahami...`, tooltip: `Tooltip D` },
-      { grade: 'E', kriteria: `Terdapat kebijakan penegakan integritas dan nilai etika...`, tooltip: `Tooltip E` }
-    ]
-},
-{
+    kode: `1.1.1`,
+        uraian_subunsur: `Penegakan Integritas dan Nilai Etika`,
+        no: ``,
+        uraian_parameter: `K/L/D menegakkan integritas dan nilai etika dalam melaksanakan tugas dan fungsi organisasi`,
+        kode_parameter: `1.1.1`,
+        grades: [
+          { grade: 'A',
+            kriteria: `Penegakan integritas dan nilai etika telah diperbaiki secara berkelanjutan sehingga tercipta suasana kerja organisasi yang kondusif yang dapat mendorong kinerja para pegawai secara optimal`,
+            tooltip: `- Setiap individu dalam organisasi dapat mendorong penerapan nilai-nilai organisasi\n- Setiap individu mendukung pencapaian kinerja organisasi\n- Keberhasilan pencapaian kinerja organisasi dapat dihubungkan dengan integritas dan perilaku individu serta mempengaruhi remunerasi individu` },
+          { grade: 'B',
+            kriteria: `Kebijakan dan implementasi organisasi telah dievaluasi untuk meningkatkan integritas dan nilai etika para pegawai`,
+            tooltip: `Kebijakan dan implementasi telah dievaluasi dengan ketentuan:\n- Berkala\n- Terdokumentasi\n- Dilakukan untuk menangani residual risk\n- Hasil evaluasi telah ditindak lanjuti \n- Perbaikan telah menghasilkan kinerja yang lebih baik` },
+          { grade: 'C',
+            kriteria: `Penegakan integritas dan nilai etika telah dilaksanakan oleh pegawai dalam pelaksanaan tugas dan fungsinya dalam organisasi`,
+            tooltip: `- Terdapat wujud keteladanan dari pimpinan atas nilai organisasi \n- Terdapat praktik pembangunan integritas dan nilai etika\n- Terdapat praktik penegakan nilai etika \n- Terdapat bukti penegakan disiplin\n- Terdapat pemberian punishment bagi pegawai yang melanggar dan reward bagi pegawai yang menegakan integritas dan nilai etika \n- Proses tersebut di atas dilaksanakan melalui struktur dan mekanisme yang ditetapkan` },
+          { grade: 'D',
+            kriteria: `Kebijakan penegakan integritas dan nilai etika organisasi telah dipahami oleh seluruh pegawai`,
+            tooltip: `Kebijakan telah dikomunikasikan dan dipahami oleh:\n- Pimpinan (struktural)\n- Penanggungjawab penegakan integritas dan nilai etika\n- Pegawai` },
+          { grade: 'E',
+            kriteria: `Terdapat kebijakan penegakan integritas dan nilai etika untuk seluruh pegawai dalam organisasi`,
+            tooltip: `Kebijakan telah mengatur:\n- Keteladanan pimpinan\n- Upaya pembangunan integritas\n- Nilai etika \n- Penegakan disiplin\n- Pemberian reward and punishment  \n- Penetapan struktur dan mekanisme penanganan penegakan integritas dan nilai etika` }
+        ]
+      },
+      {
         kode: `1.2.1`,
         uraian_subunsur: `Komitmen terhadap Kompetensi`,
         no: ``,
@@ -2612,9 +2624,10 @@ elAuto?.addEventListener('change', () => { if (elAuto.checked) syncToSestama({ f
 
 <script>
 window.DRIVE_FOLDERS_PARAM = {
-    "Sestama": { "1.1.1": { A:"1ptHq3fU-BbAGKy5UNvzNhYJ3vo1CsJWI", B:"1lbQ2FydaKVo5BRVaz5n7W_w-LckQvq7L", C:"1J_qAmpTw3jlbfa4bPcpdGpX9vue57fqh", D:"19DEvfcTHMByfbTny1W7L1Ish1LgldhLP", E:"1HRo4VZHa-hUx8sxC4uimnNVdjMtNsU_r" },
-        "1.2.1": { A:"1ptHq3fU-BbAGKy5UNvzNhYJ3vo1CsJWI", B:"1lbQ2FydaKVo5BRVaz5n7W_w-LckQvq7L", C:"1J_qAmpTw3jlbfa4bPcpdGpX9vue57fqh", D:"19DEvfcTHMByfbTny1W7L1Ish1LgldhLP", E:"1HRo4VZHa-hUx8sxC4uimnNVdjMtNsU_r" },
-        "1.3.1": { A:"1ptHq3fU-BbAGKy5UNvzNhYJ3vo1CsJWI", B:"1lbQ2FydaKVo5BRVaz5n7W_w-LckQvq7L", C:"1J_qAmpTw3jlbfa4bPcpdGpX9vue57fqh", D:"19DEvfcTHMByfbTny1W7L1Ish1LgldhLP", E:"1HRo4VZHa-hUx8sxC4uimnNVdjMtNsU_r" },
+    "Sestama": {
+        "1.1.1": { A:"1InAiVaY_C_FAszxGdXS71uHqiXbSn4Fs", B:"1__V5pVtlXCFPPIgBsYSIT-ghFeJiMUcU", C:"16r3YPAKB_vegwgG3GVwoCedXEJGRcAcu", D:"1QuIfyqbiPZDni9xOliElhIf8iwvRVNzs", E:"1dn0cCdDHoGOQ6mYS4Xojb4I993yYG2Pf" },
+        "1.2.1": { A:"1kYGZB2SsyYxCkuD7PsXXvIsKAWsIjidw", B:"1DFuK4cg6TNz2AAjfwVmkCYSSvgGnkcdg", C:"16biTk4xXZVo3nmZ6MPBAtu9lKYEOlotv", D:"1WBLKNfuZK7TSg8ieEirvkRTZj3_JugP8", E:"1ZAhHxI8PLnIyqN5vJf9DFvToRSDyM9jx" },
+        "1.3.1": { A:"1Lydg9CzF4IqWNHK1CmhcvSv7QRcZp1yz", B:"1OJ2-WfMvaMvoNS6CCtK3LKODvfqCEXTq", C:"1lthoM7XT3DJGjjlj3ChgO1kBsU52dUoo", D:"1-qmrWyYODbG3ZgUe9xbeEDbz7bi3Lvie", E:"1_YbguoX-Wwt5pS-rrNUmYCDBEBXcTE7z" },
         "1.3.2": { A:"1ptHq3fU-BbAGKy5UNvzNhYJ3vo1CsJWI", B:"1lbQ2FydaKVo5BRVaz5n7W_w-LckQvq7L", C:"1J_qAmpTw3jlbfa4bPcpdGpX9vue57fqh", D:"19DEvfcTHMByfbTny1W7L1Ish1LgldhLP", E:"1HRo4VZHa-hUx8sxC4uimnNVdjMtNsU_r" },
         "1.3.3": { A:"1ptHq3fU-BbAGKy5UNvzNhYJ3vo1CsJWI", B:"1lbQ2FydaKVo5BRVaz5n7W_w-LckQvq7L", C:"1J_qAmpTw3jlbfa4bPcpdGpX9vue57fqh", D:"19DEvfcTHMByfbTny1W7L1Ish1LgldhLP", E:"1HRo4VZHa-hUx8sxC4uimnNVdjMtNsU_r" },
         "1.3.4": { A:"1ptHq3fU-BbAGKy5UNvzNhYJ3vo1CsJWI", B:"1lbQ2FydaKVo5BRVaz5n7W_w-LckQvq7L", C:"1J_qAmpTw3jlbfa4bPcpdGpX9vue57fqh", D:"19DEvfcTHMByfbTny1W7L1Ish1LgldhLP", E:"1HRo4VZHa-hUx8sxC4uimnNVdjMtNsU_r" },
@@ -2698,9 +2711,9 @@ window.DRIVE_FOLDERS_PARAM = {
         "5.2.2": { A:"1ptHq3fU-BbAGKy5UNvzNhYJ3vo1CsJWI", B:"1lbQ2FydaKVo5BRVaz5n7W_w-LckQvq7L", C:"1J_qAmpTw3jlbfa4bPcpdGpX9vue57fqh", D:"19DEvfcTHMByfbTny1W7L1Ish1LgldhLP", E:"1HRo4VZHa-hUx8sxC4uimnNVdjMtNsU_r" }
       },
       "Pusdatin": {
-        "1.1.1": { A:"1ptHq3fU-BbAGKy5UNvzNhYJ3vo1CsJWI", B:"1lbQ2FydaKVo5BRVaz5n7W_w-LckQvq7L", C:"1J_qAmpTw3jlbfa4bPcpdGpX9vue57fqh", D:"19DEvfcTHMByfbTny1W7L1Ish1LgldhLP", E:"1HRo4VZHa-hUx8sxC4uimnNVdjMtNsU_r" },
-        "1.2.1": { A:"1ptHq3fU-BbAGKy5UNvzNhYJ3vo1CsJWI", B:"1lbQ2FydaKVo5BRVaz5n7W_w-LckQvq7L", C:"1J_qAmpTw3jlbfa4bPcpdGpX9vue57fqh", D:"19DEvfcTHMByfbTny1W7L1Ish1LgldhLP", E:"1HRo4VZHa-hUx8sxC4uimnNVdjMtNsU_r" },
-        "1.3.1": { A:"1ptHq3fU-BbAGKy5UNvzNhYJ3vo1CsJWI", B:"1lbQ2FydaKVo5BRVaz5n7W_w-LckQvq7L", C:"1J_qAmpTw3jlbfa4bPcpdGpX9vue57fqh", D:"19DEvfcTHMByfbTny1W7L1Ish1LgldhLP", E:"1HRo4VZHa-hUx8sxC4uimnNVdjMtNsU_r" },
+        "1.1.1": { A:"1QDWGZDzGGRk7tohJwDXZZizrdqwNlOlR", B:"1CsuC_KQrPoJwmYBYV_60i9gaz1FZdiMR", C:"1nBlVkCDf2oJdRMiPE7KtaOLcJqW5Oy0N", D:"1vSgKJXPbNyXovlTLhREt3waHKBwcOXmN", E:"14nss0Z4Rcmq74LlA3GR52r4QnfxPCJFd" },
+        "1.2.1": { A:"1IxO3sKiACfQzm-NdUWc0UqcOEBMRnXzI", B:"1C5bSNbeBPs48wjXFBQMFlfbXiWZKPX1G", C:"1KFr2xm2X7ZAiQDeWk00jwnWrT6bW54aB", D:"1cV28w_vuUOu3Antknz4VQ2czullaHX7N", E:"19olLcvxkPRoLi_oyfKLkVCrrPWbZqdPU" },
+        "1.3.1": { A:"11cyLkpFyPQMw6FJaz0sB51uAuvGsdB3-", B:"1GvT8mzKIp8-Vf-sKhF7tdivCu_6rsSxw", C:"1I0yiaVP-Qctn3T0ByXy359o26oVs9kob", D:"12HvCpJJUwGAMt0Nht23flvqq1SzXnpoP", E:"19E4A5EGdxitGzHDEQgAxWSBKtG5-Sb3v" },
         "1.3.2": { A:"1ptHq3fU-BbAGKy5UNvzNhYJ3vo1CsJWI", B:"1lbQ2FydaKVo5BRVaz5n7W_w-LckQvq7L", C:"1J_qAmpTw3jlbfa4bPcpdGpX9vue57fqh", D:"19DEvfcTHMByfbTny1W7L1Ish1LgldhLP", E:"1HRo4VZHa-hUx8sxC4uimnNVdjMtNsU_r" },
         "1.3.3": { A:"1ptHq3fU-BbAGKy5UNvzNhYJ3vo1CsJWI", B:"1lbQ2FydaKVo5BRVaz5n7W_w-LckQvq7L", C:"1J_qAmpTw3jlbfa4bPcpdGpX9vue57fqh", D:"19DEvfcTHMByfbTny1W7L1Ish1LgldhLP", E:"1HRo4VZHa-hUx8sxC4uimnNVdjMtNsU_r" },
         "1.3.4": { A:"1ptHq3fU-BbAGKy5UNvzNhYJ3vo1CsJWI", B:"1lbQ2FydaKVo5BRVaz5n7W_w-LckQvq7L", C:"1J_qAmpTw3jlbfa4bPcpdGpX9vue57fqh", D:"19DEvfcTHMByfbTny1W7L1Ish1LgldhLP", E:"1HRo4VZHa-hUx8sxC4uimnNVdjMtNsU_r" },
