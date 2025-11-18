@@ -370,8 +370,8 @@
       // , sendEmailVerification // opsional, jika ingin verifikasi email
     } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
     import {
-      getFirestore, doc, onSnapshot, setDoc, getDoc, enableIndexedDbPersistence
-    } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+      getFirestore, doc, onSnapshot, setDoc, getDoc, enableIndexedDbPersistence, serverTimestamp // <--- serverTimestamp ditambahkan di sini
+    } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCYwuJHeL_YlyW7zPNRGSXe_NB8r_Ql_t0",
@@ -2557,22 +2557,31 @@ c. Memberikan rekomendasi yang relevan.`
         this.bootstrapModal.show();
       },
 
-      async saveAssessment(){
-        const paramCode=document.getElementById('current-parameter-code').value;
-        const payload={
-          metode_penilaian: document.getElementById('metode-penilaian').value,
-          simpulan: document.getElementById('simpulan').value,
-          hasil_pengujian: document.getElementById('hasil-pengujian').value.trim(),
-          uraian_aoi: document.getElementById('uraian-aoi').value.trim()
-        };
-        if (this.currentSatker==='Sestama') {
-          payload.simpulan_sestama = document.getElementById('simpulan-sestama').value || '';
-          payload.hasil_pengujian_sestama = document.getElementById('hasil-pengujian-sestama').value.trim();
-        }
-        const docRef=doc(this.db,'assessments',this.currentSatker);
-        await setDoc(docRef, { parameters:{ [paramCode]: { ...(this.assessmentData[paramCode]||{}), ...payload } }, updated_at:new Date().toISOString() }, { merge:true });
-        if (this.bootstrapModal) this.bootstrapModal.hide();
-      },
+     async saveAssessment(){
+        const paramCode=document.getElementById('current-parameter-code').value;
+        const payload={
+          metode_penilaian: document.getElementById('metode-penilaian').value,
+          simpulan: document.getElementById('simpulan').value,
+          hasil_pengujian: document.getElementById('hasil-pengujian').value.trim(),
+          uraian_aoi: document.getElementById('uraian-aoi').value.trim()
+        };
+        if (this.currentSatker==='Sestama') {
+          payload.simpulan_sestama = document.getElementById('simpulan-sestama').value || '';
+          payload.hasil_pengujian_sestama = document.getElementById('hasil-pengujian-sestama').value.trim();
+        }
+        const docRef=doc(this.db,'assessments',this.currentSatker);
+
+        // 👇 PERUBAHAN UTAMA DI SINI
+        await setDoc(docRef, { 
+            parameters:{ 
+                [paramCode]: { ...(this.assessmentData[paramCode]||{}), ...payload } 
+            }, 
+            updated_at: serverTimestamp() // DIGANTI DARI new Date().toISOString()
+        }, { merge:true });
+        // 👆 AKHIR PERUBAHAN UTAMA
+
+        if (this.bootstrapModal) this.bootstrapModal.hide();
+      },
 
       resetGradeTabs(active){
         document.querySelectorAll('#grade-tabs [data-grade]').forEach(btn=>{
