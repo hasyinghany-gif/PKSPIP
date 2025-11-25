@@ -2710,34 +2710,67 @@ changeKK(newKK){
     this.listenForDataChanges();
 },
     listenForDataChanges(){
-        if(this.unsubscribe) this.unsubscribe();
-        const docRef = doc(this.db, colName, this.currentSatker);
-        this.unsubscribe = onSnapshot(docRef,(snap)=>{
-            $('#loader').style.display='none';
-            $('#main-content').classList.remove('d-none');
-            if(snap.exists()){
-                const raw=snap.data();
-                const next = raw?.parameters || {};
-                if (!shallowEqual(this.assessmentData, next)) {
-                    this.assessmentData = next;
-                    this.renderTable();
-                    this.updateProgress();
-                }
-                this.updateLastSaved(raw?.updated_at || null);
-            }else{
-                this.assessmentData={};
+    if (this.unsubscribe) this.unsubscribe();
+
+    const colName = collectionNameForKK(this.currentKK);   // ⬅️ TAMBAHAN PENTING
+    const docRef  = doc(this.db, colName, this.currentSatker);
+
+    this.unsubscribe = onSnapshot(docRef,(snap)=>{
+        $('#loader').style.display='none';
+        $('#main-content').classList.remove('d-none');
+        if (snap.exists()){
+            const raw  = snap.data();
+            const next = raw?.parameters || {};
+            if (!shallowEqual(this.assessmentData, next)) {
+                this.assessmentData = next;
                 this.renderTable();
                 this.updateProgress();
-                this.updateLastSaved(null);
             }
-            // TRIGGER DASHBOARD COLLECTOR SAAT DATA BERUBAH
-            setTimeout(() => window.collectDashboardData(), 500);
-        },(err)=>{
-            console.error('onSnapshot error:',err);
-            $('#loader').style.display='block';
-            $('#loader').innerHTML=`<div class="alert alert-danger">Gagal mengambil data. Periksa aturan Firestore.</div>`;
-        });
-    },
+            this.updateLastSaved(raw?.updated_at || null);
+        } else {
+            this.assessmentData = {};
+            this.renderTable();
+            this.updateProgress();
+            this.updateLastSaved(null);
+        }
+        setTimeout(() => window.collectDashboardData(), 500);
+    },(err)=>{
+        console.error('onSnapshot error:',err);
+        $('#loader').style.display='block';
+        $('#loader').innerHTML = `<div class="alert alert-danger">Gagal mengambil data. Periksa aturan Firestore.</div>`;
+    });
+},
+listenForDataChanges(){
+    if (this.unsubscribe) this.unsubscribe();
+
+    const colName = collectionNameForKK(this.currentKK);   // ⬅️ TAMBAHAN PENTING
+    const docRef  = doc(this.db, colName, this.currentSatker);
+
+    this.unsubscribe = onSnapshot(docRef,(snap)=>{
+        $('#loader').style.display='none';
+        $('#main-content').classList.remove('d-none');
+        if (snap.exists()){
+            const raw  = snap.data();
+            const next = raw?.parameters || {};
+            if (!shallowEqual(this.assessmentData, next)) {
+                this.assessmentData = next;
+                this.renderTable();
+                this.updateProgress();
+            }
+            this.updateLastSaved(raw?.updated_at || null);
+        } else {
+            this.assessmentData = {};
+            this.renderTable();
+            this.updateProgress();
+            this.updateLastSaved(null);
+        }
+        setTimeout(() => window.collectDashboardData(), 500);
+    },(err)=>{
+        console.error('onSnapshot error:',err);
+        $('#loader').style.display='block';
+        $('#loader').innerHTML = `<div class="alert alert-danger">Gagal mengambil data. Periksa aturan Firestore.</div>`;
+    });
+},
     setupEventListeners(){
     $('#satker-select').addEventListener('change',(e)=>{
         this.currentSatker = e.target.value;
