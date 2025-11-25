@@ -108,31 +108,48 @@ body{
                 <h1 class="h3 fw-bold text-primary mb-0">Penjamin Kualitas Maturitas Penyelenggaraan SPIP</h1>
             </div>
             <p class="text-muted mb-1">Periode Penilaian: 01 Juli 2024 s.d. 30 Juni 2025</p>
-            <p class="text-muted small mb-0">KK 3.1 · Penilaian Struktur & Proses Efektivitas dan Efisiensi</p>
+            <p class="text-muted small mb-0" id="kk-subtitle"> KK 3.1 · Penilaian Struktur & Proses Efektivitas dan Efisiensi </p>
         </div>
     </header>
     <div class="sticky-toolbar card shadow-sm border-0 mb-3">
-        <div class="card-body d-flex flex-column flex-md-row gap-3 align-items-md-center">
-            <div class="d-flex align-items-center gap-2">
-                <i class="bi bi-building text-primary"></i>
-                <label for="satker-select" class="form-label fw-semibold mb-0">Pilih Unit Organisasi (Unor)</label>
-            </div>
-            <select id="satker-select" class="form-select flex-grow-1" aria-label="Pilih Satuan Kerja"></select>
-            
-            <div class="ms-md-auto d-flex align-items-center gap-2">
-                <div class="small text-muted" id="last-saved">—</div>
-                <a href="dashboard_interactive.html" target="_blank" class="btn btn-outline-secondary btn-sm" id="btn-open-dashboard" title="Buka Dashboard">
-                    <i class="bi bi-speedometer2 me-1"></i> Dashboard
-                </a>
-                <button id="btn-export-pdf" class="btn btn-outline-danger btn-sm" title="Ekspor ke PDF">
-                    <i class="bi bi-filetype-pdf me-1"></i> Export PDF
-                </button>
-                <a href="read.html" class="btn btn-outline-info btn-sm" title="Fakta & Edukasi SPIP">
-                    <i class="bi bi-book me-1"></i> READ
-                </a>
-                <a href="play.html" class="btn btn-outline-success btn-sm" title="Mini Game / Kuis SPIP">
-                    <i class="bi bi-controller me-1"></i> PLAY
-                </a>
+       <div class="card-body d-flex flex-column flex-md-row gap-3 align-items-md-center">
+    <!-- Pilih Unit -->
+    <div class="d-flex flex-column flex-md-row align-items-md-center gap-2 flex-grow-1">
+        <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-building text-primary"></i>
+            <label for="satker-select" class="form-label fw-semibold mb-0">
+                Pilih Unit Organisasi (Unor)
+            </label>
+        </div>
+        <select id="satker-select" class="form-select" aria-label="Pilih Satuan Kerja"></select>
+
+        <!-- Pilih KK -->
+        <div class="d-flex align-items-center gap-2 ms-md-3">
+            <label for="kk-select" class="form-label fw-semibold mb-0">
+                KK
+            </label>
+            <select id="kk-select" class="form-select" style="max-width: 280px">
+                <!-- opsi akan diisi via JS -->
+            </select>
+        </div>
+    </div>
+
+    <!-- Kanan: last saved + tombol -->
+    <div class="ms-md-auto d-flex align-items-center gap-2 mt-2 mt-md-0">
+        <div class="small text-muted" id="last-saved">—</div>
+        <a href="dashboard_interactive.html" target="_blank"
+           class="btn btn-outline-secondary btn-sm" id="btn-open-dashboard" title="Buka Dashboard">
+            <i class="bi bi-speedometer2 me-1"></i> Dashboard
+        </a>
+        <button id="btn-export-pdf" class="btn btn-outline-danger btn-sm" title="Ekspor ke PDF">
+            <i class="bi bi-filetype-pdf me-1"></i> Export PDF
+        </button>
+        <a href="read.html" class="btn btn-outline-info btn-sm" title="Fakta & Edukasi SPIP">
+            <i class="bi bi-book me-1"></i> READ
+        </a>
+        <a href="play.html" class="btn btn-outline-success btn-sm" title="Mini Game / Kuis SPIP">
+            <i class="bi bi-controller me-1"></i> PLAY
+        </a>
             </div>
         </div>
         <div class="progress rounded-0" role="progressbar" aria-label="Progress penyelesaian" aria-valuemin="0" aria-valuemax="100">
@@ -433,6 +450,40 @@ async function listDriveFolder(folderId, signal) {
 const SATKER_LIST = ['Inspektorat', 'Pusdatin', 'Sestama', 'D1', 'D3', 'Puslat', 'D4'];
 const APPROVED_ROLES = ["admin","monitor","member"];
 const $ = (sel) => document.querySelector(sel);
+// Daftar KK yang tersedia
+const KK_LIST = [
+    {
+        value: '3.1',
+        label: 'KK 3.1 – Efektivitas & Efisiensi',
+        subtitle: 'KK 3.1 · Penilaian Struktur & Proses Efektivitas dan Efisiensi'
+    },
+    {
+        value: '3.2',
+        label: 'KK 3.2 – Keandalan Pelaporan Keuangan',
+        subtitle: 'KK 3.2 · Penilaian Struktur & Proses Keandalan Pelaporan Keuangan'
+    },
+    {
+        value: '3.3',
+        label: 'KK 3.3 – Pengamanan Aset Negara/Daerah',
+        subtitle: 'KK 3.3 · Penilaian Struktur & Proses Pengamanan Aset Negara/Daerah'
+    },
+    {
+        value: '3.4',
+        label: 'KK 3.4 – Ketaatan terhadap Peraturan Perundang-undangan',
+        subtitle: 'KK 3.4 · Penilaian Struktur & Proses Ketaatan terhadap Peraturan Perundang-undangan'
+    }
+];
+
+function getKKMeta(value) {
+    return KK_LIST.find(k => k.value === value) || KK_LIST[0];
+}
+
+// Nama koleksi Firestore per KK.
+// Catatan: KK 3.1 tetap pakai koleksi lama "assessments" sehingga data lama tidak hilang.
+function collectionNameForKK(kk) {
+    if (!kk || kk === '3.1') return 'assessments';
+    return 'assessments_' + kk.replace('.', '');
+}
 function shallowEqual(a, b){
     const ka = Object.keys(a||{}), kb = Object.keys(b||{});
     if (ka.length !== kb.length) return false;
@@ -441,7 +492,7 @@ function shallowEqual(a, b){
 }
 
 /* ====== ASSESSMENT_STRUCTURE (Contoh) ====== */
-const ASSESSMENT_STRUCTURE = [
+const ASSESSMENT_STRUCTURE_KK31 = [
 {
     kode: `1.1.1`,
         uraian_subunsur: `Penegakan Integritas dan Nilai Etika`,
@@ -2356,33 +2407,312 @@ c. Memberikan rekomendasi yang relevan.`
     ]
   }
 ];
+const ASSESSMENT_STRUCTURE_KK32 = [];
+{
+    kode: `1.1.1`,
+        uraian_subunsur: `Penegakan Integritas dan Nilai Etika`,
+        no: ``,
+        uraian_parameter: `K/L/D menegakkan integritas dan nilai etika dalam melaksanakan tugas dan fungsi organisasi`,
+        kode_parameter: `1.1.1`,
+        grades: [
+          { grade: 'A',
+            kriteria: `Penegakan integritas dan nilai etika telah diperbaiki secara berkelanjutan sehingga tercipta suasana kerja organisasi yang kondusif yang dapat mendorong kinerja para pegawai secara optimal`,
+            tooltip: `- Setiap individu dalam organisasi dapat mendorong penerapan nilai-nilai organisasi\n- Setiap individu mendukung pencapaian kinerja organisasi\n- Keberhasilan pencapaian kinerja organisasi dapat dihubungkan dengan integritas dan perilaku individu serta mempengaruhi remunerasi individu` },
+          { grade: 'B',
+            kriteria: `Kebijakan dan implementasi organisasi telah dievaluasi untuk meningkatkan integritas dan nilai etika para pegawai`,
+            tooltip: `Kebijakan dan implementasi telah dievaluasi dengan ketentuan:\n- Berkala\n- Terdokumentasi\n- Dilakukan untuk menangani residual risk\n- Hasil evaluasi telah ditindak lanjuti \n- Perbaikan telah menghasilkan kinerja yang lebih baik` },
+          { grade: 'C',
+            kriteria: `Penegakan integritas dan nilai etika telah dilaksanakan oleh pegawai dalam pelaksanaan tugas dan fungsinya dalam organisasi`,
+            tooltip: `- Terdapat wujud keteladanan dari pimpinan atas nilai organisasi \n- Terdapat praktik pembangunan integritas dan nilai etika\n- Terdapat praktik penegakan nilai etika \n- Terdapat bukti penegakan disiplin\n- Terdapat pemberian punishment bagi pegawai yang melanggar dan reward bagi pegawai yang menegakan integritas dan nilai etika \n- Proses tersebut di atas dilaksanakan melalui struktur dan mekanisme yang ditetapkan` },
+          { grade: 'D',
+            kriteria: `Kebijakan penegakan integritas dan nilai etika organisasi telah dipahami oleh seluruh pegawai`,
+            tooltip: `Kebijakan telah dikomunikasikan dan dipahami oleh:\n- Pimpinan (struktural)\n- Penanggungjawab penegakan integritas dan nilai etika\n- Pegawai` },
+          { grade: 'E',
+            kriteria: `Terdapat kebijakan penegakan integritas dan nilai etika untuk seluruh pegawai dalam organisasi`,
+            tooltip: `Kebijakan telah mengatur:\n- Keteladanan pimpinan\n- Upaya pembangunan integritas\n- Nilai etika \n- Penegakan disiplin\n- Pemberian reward and punishment  \n- Penetapan struktur dan mekanisme penanganan penegakan integritas dan nilai etika` }
+        ]
+      },
+      {
+        kode: `1.2.1`,
+        uraian_subunsur: `Komitmen terhadap Kompetensi`,
+        no: ``,
+        uraian_parameter: `Tugas dan jabatan dalam organisasi dilaksanakan dan diisi oleh SDM yang kompeten`,
+        kode_parameter: `1.2.1`,
+        grades: [
+          { grade: 'A',
+            kriteria: `Pengelolaan kompetensi SDM telah diperbaiki secara berkelanjutan dan secara optimal mampu mendukung pencapaian tujuan organisasi`,
+            tooltip:`- Setiap posisi dalam organisasi telah diisi oleh SDM sesuai dengan standar kompetensinya \n- Penerapan standar kompetensi telah berhasil meningkatkan kinerja yang memberikan dampak bagi pencapaian tujuan organisasi\n- Keberhasilan pencapaian kinerja organisasi dapat dihubungkan dengan kompetensi SDM-nya` },
+          { grade: 'B',
+            kriteria: `Standar kompetensi organisasi dan implementasi/pemanfaatannya telah dievaluasi untuk mengetahui efektivitasnya`,
+            tooltip:`Standar kompetensi dan implementasi/pemanfaatannya telah dievaluasi dengan ketentuan:\n- Berkala\n- Terdokumentasi\n- Dilakukan untuk menangani residual risk\n- Hasil evaluasi telah ditindak lanjuti \n- Perbaikan telah menghasilkan kinerja yang lebih baik` },
+          { grade: 'C',
+            kriteria: `Standar kompetensi telah diimplementasikan/dimanfaatkan dalam pengelolaan/pembinaan SDM organisasi`,
+            tooltip:`- Standar kompetensi dimanfaatkan untuk menyusun analisis kompetensi SDM\n- Analisis kompetensi yang disusun berdasarkan standar kompetensi dimanfaatkan untuk perencanaan rekrutmen SDM\n- Analisis kompetensi yang disusun berdasarkan standar kompetensi dimanfaatkan untuk perencanaan pengembangan SDM\n- Standar kompetensi dimanfaatkan sebagai dasar pertimbangan pengisian jabatan (mutasi/ promosi/ seleksi)` },
+          { grade: 'D',
+            kriteria: `Standar kompetensi telah dikomunikasikan dan dipahami oleh seluruh pegawai organisasi`,
+            tooltip:`Standar kompetensi telah dikomunikasikan dan dipahami oleh:\n- Pimpinan (struktural)\n- Penanggungjawab pengelolaan SDM\n- Pegawai\nsesuai tusinya` },
+          { grade: 'E',
+            kriteria: `Terdapat standar kompetensi yang jelas untuk seluruh jabatan dan posisi dalam organisasi`,
+            tooltip:`Terdapat standar kompetensi yang mengatur:\n- Standar kompetensi SDM struktural\n- Standar kompetensi SDM fungsional\n- Standar kompetensi manajerial\n- Standar kompetensi sosio kultural\n- Standar kompetensi teknis` }
+        ]
+      },
+      {
+        kode: `1.3.1`,
+        uraian_subunsur: `Kepemimpinan yang Kondusif`,
+        no: ``,
+        uraian_parameter: `Pimpinan K/L/D menciptakan lingkungan kerja yang kondusif untuk pencapaian tujuan organisasi`,
+        kode_parameter: `1.3.1`,
+        grades: [
+          { grade: 'A',
+            kriteria: `Penerapan manajemen kinerja, pengelolaan keuangan, manajemen SDM, serta manajemen risiko dapat meningkatkan efektivitas dan efisiensi kinerja seluruh level pimpinan dan pegawai`,
+            tooltip: `Sudah Jelas` },
+          { grade: 'B',
+            kriteria: `Pimpinan organisasi melaksanakan evaluasi berkala atas kebijakan pengendalian intern dan berupaya mengatasi permasalahan yang berkaitan dengan lingkungan pengendalian yang kondusif`,
+            tooltip:`a. K/L/D melakukan evaluasi untuk meninjau kembali relevansi kebijakan beserta implementasinya dengan ketentuan sebagai berikut:\n1. Telah dilaksanakan evaluasi berkala; \n2. Evaluasi dilaksanakan untuk menangani residual risk;\n3. Tindak lanjut atas hasil evaluasi  telah dilaksanakan;\nb. Pimpinan organisasi terbuka atas masukan dari pegawai dan adaptif terhadap perubahan.\nc. Keluhan dari pegawai atas keterbatasan/masalah sumberdaya dukungan pelaksanaan pekerjaan dapat diatasi.` },
+          { grade: 'C',
+            kriteria: `Pimpinan organisasi melaksanakan kebijakan dan didukung dengan SDM yang bekerja sesuai dengan kebijakan yang ditetapkan`,
+            tooltip:`a. Pimpinan organisasi menerapkan manajemen berbasis kinerja dan mempertimbangkan risiko dalam pengambilan keputusan.\nb. Pimpinan organisasi memberikan keteladanan dalam beretika, berintegritas, ketaatan terhadap perundang-undangan, dan berkinerja secara efektif dan efisien.\nc. Pegawai mendukung pimpinan organisasi dengan hadir dan bekerja sesuai dengan ketentuan.` },
+          { grade: 'D',
+            kriteria: `Pimpinan organisasi terlibat dalam penyusunan dan penetapkan kebijakan yang mendukung penciptaan lingkungan kerja yang kondusif untuk pencapaian tujuan organisasi serta memahami substansi kebijakan pengendalian intern dan mendorong penerapan kebijakan dalam berbagai interaksi kepada jajaran di bawahnya`,
+            tooltip:`a. Pimpinan organisasi telah memahami substansi dari kebijakan yang telah ditetapkan.\nb. Pimpinan organisasi mengarahkan pegawai agar dapat bekerja selaras dengan kebijakan, melalui:\n1. Rapat internal.\n2. Upacara/apel pagi.\n3. Forum diskusi/jam pimpinan.\n4. Interaksi informal.` },
+          { grade: 'E',
+            kriteria: `Pimpinan organisasi terlibat dalam penyusunan dan penetapkan kebijakan yang mendukung penciptaan lingkungan kerja yang kondusif untuk pencapaian tujuan organisasi`,
+            tooltip:`Pimpinan organisasi terlibat dalam penyusunan kebijakan yang mendukung penciptaan lingkungan kerja yang kondusif untuk pencapaian tujuan organisasi, antara lain kebijakan terkait manajemen kinerja, manajemen keuangan dan aset, manajemen SDM, serta manajemen risiko.` }
+         }
+    ]
+  }
+];
+const ASSESSMENT_STRUCTURE_KK33 = [];
+{
+    kode: `1.1.1`,
+        uraian_subunsur: `Penegakan Integritas dan Nilai Etika`,
+        no: ``,
+        uraian_parameter: `K/L/D menegakkan integritas dan nilai etika dalam melaksanakan tugas dan fungsi organisasi`,
+        kode_parameter: `1.1.1`,
+        grades: [
+          { grade: 'A',
+            kriteria: `Penegakan integritas dan nilai etika telah diperbaiki secara berkelanjutan sehingga tercipta suasana kerja organisasi yang kondusif yang dapat mendorong kinerja para pegawai secara optimal`,
+            tooltip: `- Setiap individu dalam organisasi dapat mendorong penerapan nilai-nilai organisasi\n- Setiap individu mendukung pencapaian kinerja organisasi\n- Keberhasilan pencapaian kinerja organisasi dapat dihubungkan dengan integritas dan perilaku individu serta mempengaruhi remunerasi individu` },
+          { grade: 'B',
+            kriteria: `Kebijakan dan implementasi organisasi telah dievaluasi untuk meningkatkan integritas dan nilai etika para pegawai`,
+            tooltip: `Kebijakan dan implementasi telah dievaluasi dengan ketentuan:\n- Berkala\n- Terdokumentasi\n- Dilakukan untuk menangani residual risk\n- Hasil evaluasi telah ditindak lanjuti \n- Perbaikan telah menghasilkan kinerja yang lebih baik` },
+          { grade: 'C',
+            kriteria: `Penegakan integritas dan nilai etika telah dilaksanakan oleh pegawai dalam pelaksanaan tugas dan fungsinya dalam organisasi`,
+            tooltip: `- Terdapat wujud keteladanan dari pimpinan atas nilai organisasi \n- Terdapat praktik pembangunan integritas dan nilai etika\n- Terdapat praktik penegakan nilai etika \n- Terdapat bukti penegakan disiplin\n- Terdapat pemberian punishment bagi pegawai yang melanggar dan reward bagi pegawai yang menegakan integritas dan nilai etika \n- Proses tersebut di atas dilaksanakan melalui struktur dan mekanisme yang ditetapkan` },
+          { grade: 'D',
+            kriteria: `Kebijakan penegakan integritas dan nilai etika organisasi telah dipahami oleh seluruh pegawai`,
+            tooltip: `Kebijakan telah dikomunikasikan dan dipahami oleh:\n- Pimpinan (struktural)\n- Penanggungjawab penegakan integritas dan nilai etika\n- Pegawai` },
+          { grade: 'E',
+            kriteria: `Terdapat kebijakan penegakan integritas dan nilai etika untuk seluruh pegawai dalam organisasi`,
+            tooltip: `Kebijakan telah mengatur:\n- Keteladanan pimpinan\n- Upaya pembangunan integritas\n- Nilai etika \n- Penegakan disiplin\n- Pemberian reward and punishment  \n- Penetapan struktur dan mekanisme penanganan penegakan integritas dan nilai etika` }
+        ]
+      },
+      {
+        kode: `1.2.1`,
+        uraian_subunsur: `Komitmen terhadap Kompetensi`,
+        no: ``,
+        uraian_parameter: `Tugas dan jabatan dalam organisasi dilaksanakan dan diisi oleh SDM yang kompeten`,
+        kode_parameter: `1.2.1`,
+        grades: [
+          { grade: 'A',
+            kriteria: `Pengelolaan kompetensi SDM telah diperbaiki secara berkelanjutan dan secara optimal mampu mendukung pencapaian tujuan organisasi`,
+            tooltip:`- Setiap posisi dalam organisasi telah diisi oleh SDM sesuai dengan standar kompetensinya \n- Penerapan standar kompetensi telah berhasil meningkatkan kinerja yang memberikan dampak bagi pencapaian tujuan organisasi\n- Keberhasilan pencapaian kinerja organisasi dapat dihubungkan dengan kompetensi SDM-nya` },
+          { grade: 'B',
+            kriteria: `Standar kompetensi organisasi dan implementasi/pemanfaatannya telah dievaluasi untuk mengetahui efektivitasnya`,
+            tooltip:`Standar kompetensi dan implementasi/pemanfaatannya telah dievaluasi dengan ketentuan:\n- Berkala\n- Terdokumentasi\n- Dilakukan untuk menangani residual risk\n- Hasil evaluasi telah ditindak lanjuti \n- Perbaikan telah menghasilkan kinerja yang lebih baik` },
+          { grade: 'C',
+            kriteria: `Standar kompetensi telah diimplementasikan/dimanfaatkan dalam pengelolaan/pembinaan SDM organisasi`,
+            tooltip:`- Standar kompetensi dimanfaatkan untuk menyusun analisis kompetensi SDM\n- Analisis kompetensi yang disusun berdasarkan standar kompetensi dimanfaatkan untuk perencanaan rekrutmen SDM\n- Analisis kompetensi yang disusun berdasarkan standar kompetensi dimanfaatkan untuk perencanaan pengembangan SDM\n- Standar kompetensi dimanfaatkan sebagai dasar pertimbangan pengisian jabatan (mutasi/ promosi/ seleksi)` },
+          { grade: 'D',
+            kriteria: `Standar kompetensi telah dikomunikasikan dan dipahami oleh seluruh pegawai organisasi`,
+            tooltip:`Standar kompetensi telah dikomunikasikan dan dipahami oleh:\n- Pimpinan (struktural)\n- Penanggungjawab pengelolaan SDM\n- Pegawai\nsesuai tusinya` },
+          { grade: 'E',
+            kriteria: `Terdapat standar kompetensi yang jelas untuk seluruh jabatan dan posisi dalam organisasi`,
+            tooltip:`Terdapat standar kompetensi yang mengatur:\n- Standar kompetensi SDM struktural\n- Standar kompetensi SDM fungsional\n- Standar kompetensi manajerial\n- Standar kompetensi sosio kultural\n- Standar kompetensi teknis` }
+        ]
+      },
+      {
+        kode: `1.3.1`,
+        uraian_subunsur: `Kepemimpinan yang Kondusif`,
+        no: ``,
+        uraian_parameter: `Pimpinan K/L/D menciptakan lingkungan kerja yang kondusif untuk pencapaian tujuan organisasi`,
+        kode_parameter: `1.3.1`,
+        grades: [
+          { grade: 'A',
+            kriteria: `Penerapan manajemen kinerja, pengelolaan keuangan, manajemen SDM, serta manajemen risiko dapat meningkatkan efektivitas dan efisiensi kinerja seluruh level pimpinan dan pegawai`,
+            tooltip: `Sudah Jelas` },
+          { grade: 'B',
+            kriteria: `Pimpinan organisasi melaksanakan evaluasi berkala atas kebijakan pengendalian intern dan berupaya mengatasi permasalahan yang berkaitan dengan lingkungan pengendalian yang kondusif`,
+            tooltip:`a. K/L/D melakukan evaluasi untuk meninjau kembali relevansi kebijakan beserta implementasinya dengan ketentuan sebagai berikut:\n1. Telah dilaksanakan evaluasi berkala; \n2. Evaluasi dilaksanakan untuk menangani residual risk;\n3. Tindak lanjut atas hasil evaluasi  telah dilaksanakan;\nb. Pimpinan organisasi terbuka atas masukan dari pegawai dan adaptif terhadap perubahan.\nc. Keluhan dari pegawai atas keterbatasan/masalah sumberdaya dukungan pelaksanaan pekerjaan dapat diatasi.` },
+          { grade: 'C',
+            kriteria: `Pimpinan organisasi melaksanakan kebijakan dan didukung dengan SDM yang bekerja sesuai dengan kebijakan yang ditetapkan`,
+            tooltip:`a. Pimpinan organisasi menerapkan manajemen berbasis kinerja dan mempertimbangkan risiko dalam pengambilan keputusan.\nb. Pimpinan organisasi memberikan keteladanan dalam beretika, berintegritas, ketaatan terhadap perundang-undangan, dan berkinerja secara efektif dan efisien.\nc. Pegawai mendukung pimpinan organisasi dengan hadir dan bekerja sesuai dengan ketentuan.` },
+          { grade: 'D',
+            kriteria: `Pimpinan organisasi terlibat dalam penyusunan dan penetapkan kebijakan yang mendukung penciptaan lingkungan kerja yang kondusif untuk pencapaian tujuan organisasi serta memahami substansi kebijakan pengendalian intern dan mendorong penerapan kebijakan dalam berbagai interaksi kepada jajaran di bawahnya`,
+            tooltip:`a. Pimpinan organisasi telah memahami substansi dari kebijakan yang telah ditetapkan.\nb. Pimpinan organisasi mengarahkan pegawai agar dapat bekerja selaras dengan kebijakan, melalui:\n1. Rapat internal.\n2. Upacara/apel pagi.\n3. Forum diskusi/jam pimpinan.\n4. Interaksi informal.` },
+          { grade: 'E',
+            kriteria: `Pimpinan organisasi terlibat dalam penyusunan dan penetapkan kebijakan yang mendukung penciptaan lingkungan kerja yang kondusif untuk pencapaian tujuan organisasi`,
+            tooltip:`Pimpinan organisasi terlibat dalam penyusunan kebijakan yang mendukung penciptaan lingkungan kerja yang kondusif untuk pencapaian tujuan organisasi, antara lain kebijakan terkait manajemen kinerja, manajemen keuangan dan aset, manajemen SDM, serta manajemen risiko.` }
+         }
+    ]
+  }
+];
+const ASSESSMENT_STRUCTURE_KK34 = [];
+{
+    kode: `1.1.1`,
+        uraian_subunsur: `Penegakan Integritas dan Nilai Etika`,
+        no: ``,
+        uraian_parameter: `K/L/D menegakkan integritas dan nilai etika dalam melaksanakan tugas dan fungsi organisasi`,
+        kode_parameter: `1.1.1`,
+        grades: [
+          { grade: 'A',
+            kriteria: `Penegakan integritas dan nilai etika telah diperbaiki secara berkelanjutan sehingga tercipta suasana kerja organisasi yang kondusif yang dapat mendorong kinerja para pegawai secara optimal`,
+            tooltip: `- Setiap individu dalam organisasi dapat mendorong penerapan nilai-nilai organisasi\n- Setiap individu mendukung pencapaian kinerja organisasi\n- Keberhasilan pencapaian kinerja organisasi dapat dihubungkan dengan integritas dan perilaku individu serta mempengaruhi remunerasi individu` },
+          { grade: 'B',
+            kriteria: `Kebijakan dan implementasi organisasi telah dievaluasi untuk meningkatkan integritas dan nilai etika para pegawai`,
+            tooltip: `Kebijakan dan implementasi telah dievaluasi dengan ketentuan:\n- Berkala\n- Terdokumentasi\n- Dilakukan untuk menangani residual risk\n- Hasil evaluasi telah ditindak lanjuti \n- Perbaikan telah menghasilkan kinerja yang lebih baik` },
+          { grade: 'C',
+            kriteria: `Penegakan integritas dan nilai etika telah dilaksanakan oleh pegawai dalam pelaksanaan tugas dan fungsinya dalam organisasi`,
+            tooltip: `- Terdapat wujud keteladanan dari pimpinan atas nilai organisasi \n- Terdapat praktik pembangunan integritas dan nilai etika\n- Terdapat praktik penegakan nilai etika \n- Terdapat bukti penegakan disiplin\n- Terdapat pemberian punishment bagi pegawai yang melanggar dan reward bagi pegawai yang menegakan integritas dan nilai etika \n- Proses tersebut di atas dilaksanakan melalui struktur dan mekanisme yang ditetapkan` },
+          { grade: 'D',
+            kriteria: `Kebijakan penegakan integritas dan nilai etika organisasi telah dipahami oleh seluruh pegawai`,
+            tooltip: `Kebijakan telah dikomunikasikan dan dipahami oleh:\n- Pimpinan (struktural)\n- Penanggungjawab penegakan integritas dan nilai etika\n- Pegawai` },
+          { grade: 'E',
+            kriteria: `Terdapat kebijakan penegakan integritas dan nilai etika untuk seluruh pegawai dalam organisasi`,
+            tooltip: `Kebijakan telah mengatur:\n- Keteladanan pimpinan\n- Upaya pembangunan integritas\n- Nilai etika \n- Penegakan disiplin\n- Pemberian reward and punishment  \n- Penetapan struktur dan mekanisme penanganan penegakan integritas dan nilai etika` }
+        ]
+      },
+      {
+        kode: `1.2.1`,
+        uraian_subunsur: `Komitmen terhadap Kompetensi`,
+        no: ``,
+        uraian_parameter: `Tugas dan jabatan dalam organisasi dilaksanakan dan diisi oleh SDM yang kompeten`,
+        kode_parameter: `1.2.1`,
+        grades: [
+          { grade: 'A',
+            kriteria: `Pengelolaan kompetensi SDM telah diperbaiki secara berkelanjutan dan secara optimal mampu mendukung pencapaian tujuan organisasi`,
+            tooltip:`- Setiap posisi dalam organisasi telah diisi oleh SDM sesuai dengan standar kompetensinya \n- Penerapan standar kompetensi telah berhasil meningkatkan kinerja yang memberikan dampak bagi pencapaian tujuan organisasi\n- Keberhasilan pencapaian kinerja organisasi dapat dihubungkan dengan kompetensi SDM-nya` },
+          { grade: 'B',
+            kriteria: `Standar kompetensi organisasi dan implementasi/pemanfaatannya telah dievaluasi untuk mengetahui efektivitasnya`,
+            tooltip:`Standar kompetensi dan implementasi/pemanfaatannya telah dievaluasi dengan ketentuan:\n- Berkala\n- Terdokumentasi\n- Dilakukan untuk menangani residual risk\n- Hasil evaluasi telah ditindak lanjuti \n- Perbaikan telah menghasilkan kinerja yang lebih baik` },
+          { grade: 'C',
+            kriteria: `Standar kompetensi telah diimplementasikan/dimanfaatkan dalam pengelolaan/pembinaan SDM organisasi`,
+            tooltip:`- Standar kompetensi dimanfaatkan untuk menyusun analisis kompetensi SDM\n- Analisis kompetensi yang disusun berdasarkan standar kompetensi dimanfaatkan untuk perencanaan rekrutmen SDM\n- Analisis kompetensi yang disusun berdasarkan standar kompetensi dimanfaatkan untuk perencanaan pengembangan SDM\n- Standar kompetensi dimanfaatkan sebagai dasar pertimbangan pengisian jabatan (mutasi/ promosi/ seleksi)` },
+          { grade: 'D',
+            kriteria: `Standar kompetensi telah dikomunikasikan dan dipahami oleh seluruh pegawai organisasi`,
+            tooltip:`Standar kompetensi telah dikomunikasikan dan dipahami oleh:\n- Pimpinan (struktural)\n- Penanggungjawab pengelolaan SDM\n- Pegawai\nsesuai tusinya` },
+          { grade: 'E',
+            kriteria: `Terdapat standar kompetensi yang jelas untuk seluruh jabatan dan posisi dalam organisasi`,
+            tooltip:`Terdapat standar kompetensi yang mengatur:\n- Standar kompetensi SDM struktural\n- Standar kompetensi SDM fungsional\n- Standar kompetensi manajerial\n- Standar kompetensi sosio kultural\n- Standar kompetensi teknis` }
+        ]
+      },
+      {
+        kode: `1.3.1`,
+        uraian_subunsur: `Kepemimpinan yang Kondusif`,
+        no: ``,
+        uraian_parameter: `Pimpinan K/L/D menciptakan lingkungan kerja yang kondusif untuk pencapaian tujuan organisasi`,
+        kode_parameter: `1.3.1`,
+        grades: [
+          { grade: 'A',
+            kriteria: `Penerapan manajemen kinerja, pengelolaan keuangan, manajemen SDM, serta manajemen risiko dapat meningkatkan efektivitas dan efisiensi kinerja seluruh level pimpinan dan pegawai`,
+            tooltip: `Sudah Jelas` },
+          { grade: 'B',
+            kriteria: `Pimpinan organisasi melaksanakan evaluasi berkala atas kebijakan pengendalian intern dan berupaya mengatasi permasalahan yang berkaitan dengan lingkungan pengendalian yang kondusif`,
+            tooltip:`a. K/L/D melakukan evaluasi untuk meninjau kembali relevansi kebijakan beserta implementasinya dengan ketentuan sebagai berikut:\n1. Telah dilaksanakan evaluasi berkala; \n2. Evaluasi dilaksanakan untuk menangani residual risk;\n3. Tindak lanjut atas hasil evaluasi  telah dilaksanakan;\nb. Pimpinan organisasi terbuka atas masukan dari pegawai dan adaptif terhadap perubahan.\nc. Keluhan dari pegawai atas keterbatasan/masalah sumberdaya dukungan pelaksanaan pekerjaan dapat diatasi.` },
+          { grade: 'C',
+            kriteria: `Pimpinan organisasi melaksanakan kebijakan dan didukung dengan SDM yang bekerja sesuai dengan kebijakan yang ditetapkan`,
+            tooltip:`a. Pimpinan organisasi menerapkan manajemen berbasis kinerja dan mempertimbangkan risiko dalam pengambilan keputusan.\nb. Pimpinan organisasi memberikan keteladanan dalam beretika, berintegritas, ketaatan terhadap perundang-undangan, dan berkinerja secara efektif dan efisien.\nc. Pegawai mendukung pimpinan organisasi dengan hadir dan bekerja sesuai dengan ketentuan.` },
+          { grade: 'D',
+            kriteria: `Pimpinan organisasi terlibat dalam penyusunan dan penetapkan kebijakan yang mendukung penciptaan lingkungan kerja yang kondusif untuk pencapaian tujuan organisasi serta memahami substansi kebijakan pengendalian intern dan mendorong penerapan kebijakan dalam berbagai interaksi kepada jajaran di bawahnya`,
+            tooltip:`a. Pimpinan organisasi telah memahami substansi dari kebijakan yang telah ditetapkan.\nb. Pimpinan organisasi mengarahkan pegawai agar dapat bekerja selaras dengan kebijakan, melalui:\n1. Rapat internal.\n2. Upacara/apel pagi.\n3. Forum diskusi/jam pimpinan.\n4. Interaksi informal.` },
+          { grade: 'E',
+            kriteria: `Pimpinan organisasi terlibat dalam penyusunan dan penetapkan kebijakan yang mendukung penciptaan lingkungan kerja yang kondusif untuk pencapaian tujuan organisasi`,
+            tooltip:`Pimpinan organisasi terlibat dalam penyusunan kebijakan yang mendukung penciptaan lingkungan kerja yang kondusif untuk pencapaian tujuan organisasi, antara lain kebijakan terkait manajemen kinerja, manajemen keuangan dan aset, manajemen SDM, serta manajemen risiko.` }
+         }
+    ]
+  }
+];
+
+// Map KK → struktur penilaian
+const ASSESSMENT_BY_KK = {
+    '3.1': ASSESSMENT_STRUCTURE_KK31,
+    '3.2': ASSESSMENT_STRUCTURE_KK32,
+    '3.3': ASSESSMENT_STRUCTURE_KK33,
+    '3.4': ASSESSMENT_STRUCTURE_KK34
+};
+
+// KK aktif dari localStorage (default 3.1)
+let CURRENT_KK = localStorage.getItem('spip.currentKK') || '3.1';
+
+// Struktur yang dipakai saat ini
+let ASSESSMENT_STRUCTURE = ASSESSMENT_BY_KK[CURRENT_KK] || ASSESSMENT_STRUCTURE_KK31;
 window.ASSESSMENT_STRUCTURE = ASSESSMENT_STRUCTURE;
 
 const App = {
     db, auth,
     currentSatker: localStorage.getItem('spip.currentSatker') || SATKER_LIST[0],
+    currentKK: CURRENT_KK,
     assessmentData:{}, unsubscribe:null, bootstrapModal:null,
     currentGrade:'A', sestamaCache:new Map(), driveFetchCtrl:null,
     
     initAfterAuth(){
-        this.populateSatkerSelect();
-        this.setupEventListeners();
-        this.bootstrapModal = new bootstrap.Modal($('#assessment-modal'));
-        const pm = new bootstrap.Modal(document.getElementById('preview-modal'));
-        document.getElementById('preview-modal').addEventListener('hidden.bs.modal', ()=>{
-            document.getElementById('preview-iframe').src = '';
-        });
-        this.listenForDataChanges();
-    },
+    this.populateSatkerSelect();
+    this.populateKKSelect();
+    this.updateKKSubtitle();
+    this.setupEventListeners();
+    this.bootstrapModal = new bootstrap.Modal($('#assessment-modal'));
+    const pm = new bootstrap.Modal(document.getElementById('preview-modal'));
+    document.getElementById('preview-modal').addEventListener('hidden.bs.modal', ()=>{
+        document.getElementById('preview-iframe').src = '';
+    });
+    this.listenForDataChanges();
+},
     populateSatkerSelect(){
         const select=$('#satker-select'); select.innerHTML='';
         SATKER_LIST.forEach(s=>{
             const opt=new Option(s,s); if(s===this.currentSatker) opt.selected=true; select.add(opt);
         });
     },
+    populateKKSelect(){
+    const select = document.getElementById('kk-select');
+    if (!select) return;
+    select.innerHTML = '';
+    KK_LIST.forEach(k => {
+        const opt = new Option(k.label, k.value);
+        if (k.value === this.currentKK) opt.selected = true;
+        select.add(opt);
+    });
+},
+
+updateKKSubtitle(){
+    const meta = getKKMeta(this.currentKK);
+    const el = document.getElementById('kk-subtitle');
+    if (el && meta) el.textContent = meta.subtitle;
+},
+
+changeKK(newKK){
+    if (!newKK || newKK === this.currentKK) return;
+
+    this.currentKK = newKK;
+    localStorage.setItem('spip.currentKK', newKK);
+
+    // Ganti struktur yang digunakan
+    ASSESSMENT_STRUCTURE = ASSESSMENT_BY_KK[newKK] || ASSESSMENT_BY_KK['3.1'];
+    window.ASSESSMENT_STRUCTURE = ASSESSMENT_STRUCTURE;
+
+    // Reset data lokal & tampilan
+    this.assessmentData = {};
+    this.renderTable();
+    this.updateProgress();
+    this.updateKKSubtitle();
+
+    // Dengarkan data dari koleksi / dokumen yang sesuai KK
+    this.listenForDataChanges();
+},
     listenForDataChanges(){
         if(this.unsubscribe) this.unsubscribe();
-        const docRef=doc(this.db,'assessments',this.currentSatker);
+        const colName = collectionNameForKK(this.currentKK);
+        const docRef = doc(this.db, colName, this.currentSatker);
         this.unsubscribe = onSnapshot(docRef,(snap)=>{
             $('#loader').style.display='none';
             $('#main-content').classList.remove('d-none');
@@ -2410,12 +2740,23 @@ const App = {
         });
     },
     setupEventListeners(){
-        $('#satker-select').addEventListener('change',(e)=>{
-            this.currentSatker=e.target.value; localStorage.setItem('spip.currentSatker',this.currentSatker);
-            this.listenForDataChanges();
+    $('#satker-select').addEventListener('change',(e)=>{
+        this.currentSatker = e.target.value;
+        localStorage.setItem('spip.currentSatker', this.currentSatker);
+        this.listenForDataChanges();
+        setTimeout(() => window.collectDashboardData(), 1000);
+    });
+
+    const kkSelect = document.getElementById('kk-select');
+    if (kkSelect) {
+        kkSelect.addEventListener('change', (e)=>{
+            this.changeKK(e.target.value);
             setTimeout(() => window.collectDashboardData(), 1000);
         });
-        document.addEventListener('click', (e)=>{
+    }
+
+    document.addEventListener('click', (e)=>{
+        // ...
             const btn=e.target.closest('[data-action="open-modal"]');
             if(btn) { e.preventDefault(); this.openModal(btn.getAttribute('data-param-code')); }
         });
@@ -2514,8 +2855,21 @@ const App = {
             payload.simpulan_sestama = document.getElementById('simpulan-sestama').value || '';
             payload.hasil_pengujian_sestama = document.getElementById('hasil-pengujian-sestama').value.trim();
         }
-        const docRef=doc(this.db,'assessments',this.currentSatker);
-        await setDoc(docRef, { parameters:{ [paramCode]: { ...(this.assessmentData[paramCode]||{}), ...payload } }, updated_at:new Date().toISOString() }, { merge:true });
+        const colName = collectionNameForKK(this.currentKK);
+        const docRef  = doc(this.db, colName, this.currentSatker);
+await setDoc(
+    docRef,
+    {
+        parameters: {
+            [paramCode]: {
+                ...(this.assessmentData[paramCode] || {}),
+                ...payload
+            }
+        },
+        updated_at: new Date().toISOString()
+    },
+    { merge: true }
+);
         if (this.bootstrapModal) this.bootstrapModal.hide();
     },
     resetGradeTabs(active){
