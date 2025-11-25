@@ -2711,7 +2711,6 @@ changeKK(newKK){
 },
     listenForDataChanges(){
         if(this.unsubscribe) this.unsubscribe();
-        const colName = collectionNameForKK(this.currentKK);
         const docRef = doc(this.db, colName, this.currentSatker);
         this.unsubscribe = onSnapshot(docRef,(snap)=>{
             $('#loader').style.display='none';
